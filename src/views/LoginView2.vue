@@ -112,16 +112,10 @@ const handleLogin = async () => {
       // 로그인 성공 처리
       console.log('로그인 성공:', result.message)
 
-      // 자동 로그인 옵션에 따라 스토리지에 저장
-      if (autoLogin.value) {
-        localStorage.setItem('isLoggedIn', 'true')
-        // 필요한 경우 토큰 저장
-        localStorage.setItem('accessToken', result.token)
-      } else {
-        sessionStorage.setItem('isLoggedIn', 'true')
-        // 필요한 경우 토큰 저장
-        sessionStorage.setItem('accessToken', result.token)
-      }
+      // 로컬 스토리지에 토큰 저장
+      localStorage.setItem('isLoggedIn', 'true')
+      // 필요한 경우 토큰 저장
+      localStorage.setItem('accessToken', result.token)
 
       // 홈 페이지 또는 이전 페이지로 리다이렉트
       router.push('/')
