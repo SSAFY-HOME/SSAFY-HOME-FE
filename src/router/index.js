@@ -31,15 +31,15 @@ const router = createRouter({
       component: () => import('../views/NoticeView.vue'),
     },
     {
+      path: '/notice/write',
+      name: 'WriteNotice',
+      component: () => import('../views/NoticeWriteView.vue'),
+    },
+    {
       path: '/notice/:id',
       name: 'NoticeDetail',
       component: NoticeDetail,
       props: true, // route.params를 컴포넌트 props로 전달
-    },
-    {
-      path: '/notice/write',
-      name: 'WriteNotice',
-      component: () => import('../views/NoticeWriteView.vue'),
     },
   ],
 })
