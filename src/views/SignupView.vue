@@ -79,7 +79,9 @@
           <span v-else>회원가입</span>
         </button>
 
-        <div class="form-footer">이미 계정이 있으신가요? <a href="#">로그인하기</a></div>
+        <div class="form-footer">
+          이미 계정이 있으신가요? <router-link to="/login">로그인하기</router-link>
+        </div>
       </form>
     </div>
   </div>
