@@ -88,6 +88,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import AppHeader from '@/components/common/Header.vue'
+import { memberAPI } from '@/api/member' // memberAPI 가져오기
 
 // 사용자 입력 데이터
 const user = reactive({
@@ -110,7 +111,7 @@ const errors = reactive({
 const isSubmitting = ref(false)
 const registrationComplete = ref(false)
 
-// 유효성 검사 함수
+// 유효성 검사 함수들 (기존 코드와 동일)
 const validateName = () => {
   if (!user.name) {
     errors.name = '이름을 입력해주세요'
@@ -166,7 +167,7 @@ const validateTerms = () => {
   return true
 }
 
-// 양식 제출 처리
+// 양식 제출 처리 - memberAPI 사용하도록 수정
 const submitForm = async () => {
   // 모든 필드 유효성 검사
   const isNameValid = validateName()
@@ -180,33 +181,47 @@ const submitForm = async () => {
     try {
       isSubmitting.value = true
 
-      // 여기에 실제 API 호출 코드를 추가할 수 있습니다
-      // 예: const response = await axios.post('/api/register', user)
+      // 서버로 전송할 데이터 준비 (필요한 필드만 포함)
+      const userData = {
+        username: user.name, // API에 맞게 필드명 변경
+        email: user.email,
+        password: user.password,
+      }
 
-      // 성공적인 등록을 시뮬레이션하기 위한 임시 지연
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // memberAPI를 사용하여 회원가입 요청 전송
+      const result = await memberAPI.signUp(userData)
 
-      // 성공 메시지 표시
-      alert('회원가입이 완료되었습니다!')
+      // 응답 결과에 따른 처리
+      if (result.status == 200) {
+        // 성공 메시지 표시
+        alert('회원가입이 완료되었습니다!')
 
-      // 폼 초기화
-      user.name = ''
-      user.email = ''
-      user.password = ''
-      user.passwordConfirm = ''
-      user.termsAgreed = false
+        // 폼 초기화
+        user.name = ''
+        user.email = ''
+        user.password = ''
+        user.passwordConfirm = ''
+        user.termsAgreed = false
 
-      registrationComplete.value = true
+        registrationComplete.value = true
+
+        // 필요시 로그인 페이지로 리다이렉트
+        // router.push('/login')
+      } else {
+        // API에서 실패 응답을 반환한 경우
+        throw new Error(result.message || '회원가입에 실패했습니다.')
+      }
     } catch (error) {
       console.error('회원가입 처리 중 오류가 발생했습니다:', error)
-      alert('회원가입 처리 중 오류가 발생했습니다. 다시 시도해주세요.')
+
+      // 오류 메시지 표시
+      alert(error.message || '회원가입 처리 중 오류가 발생했습니다. 다시 시도해주세요.')
     } finally {
       isSubmitting.value = false
     }
   }
 }
 </script>
-
 <style scoped>
 /* 전역 스타일 */
 * {

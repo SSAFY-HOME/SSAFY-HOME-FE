@@ -29,7 +29,7 @@
       <!-- 메인 내비게이션 -->
       <nav class="main-nav">
         <div class="nav-item active">
-          <a href="#">부동산 실거래 조회</a>
+          <a href="/main">부동산 실거래 조회</a>
           <div class="underline"></div>
         </div>
         <div class="nav-item">
@@ -40,7 +40,7 @@
 
       <!-- 보조 내비게이션 -->
       <div class="sub-nav">
-        <a href="#" class="sub-nav-item">공지사항</a>
+        <a href="/notice" class="sub-nav-item">공지사항</a>
         <a href="/login" class="sub-nav-item login">로그인</a>
         <a href="/signup" class="sub-nav-item signup">회원가입</a>
         <a href="#" class="sub-nav-item">동네 커뮤니티</a>
