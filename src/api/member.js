@@ -37,11 +37,11 @@ export const memberAPI = {
     try {
       const response = await api.post('/member/login', userData)
 
-      if (response) {
+      if (response.data) {
         return {
           status: 200,
           message: '로그인이 성공적으로 완료되었습니다.',
-          token: response.accessToken,
+          token: response.data.accessToken,
         }
       }
     } catch (error) {
