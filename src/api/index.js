@@ -37,7 +37,7 @@ api.interceptors.response.use(
       if (response.data.status === 200) {
         return response.data
       }
-      // 그렇지 않으면 오류로 처리
+      // 그렇지 않으면 오류=
       else {
         return Promise.reject(
           new Error(response.data.message || '요청 처리 중 오류가 발생했습니다.'),

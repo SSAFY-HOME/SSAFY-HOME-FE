@@ -333,7 +333,7 @@ import { ref, shallowRef, onMounted, onUnmounted } from 'vue'
 // 동적으로 로드할 컴포넌트들
 import HomePanel from '@/components/panel/HomePanel.vue'
 // import SearchPanel from './panels/SearchPanel.vue'
-// import PropertyPanel from './panels/PropertyPanel.vue'
+import PropertySearchPanel from '@/components/panel/PropertySearchPanel.vue'
 // import CommunityPanel from './panels/CommunityPanel.vue'
 // import ChatbotPanel from './panels/ChatbotPanel.vue'
 // import MenuPanel from './panels/MenuPanel.vue'
@@ -366,9 +366,9 @@ const activateMenu = (menuName) => {
     // case 'search':
     //   currentComponent.value = SearchPanel
     //   break
-    // case 'property':
-    //   currentComponent.value = PropertyPanel
-    //   break
+    case 'property':
+      currentComponent.value = PropertySearchPanel
+      break
     // case 'community':
     //   currentComponent.value = CommunityPanel
     //   break

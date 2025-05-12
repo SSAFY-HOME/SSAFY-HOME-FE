@@ -41,6 +41,11 @@ const router = createRouter({
       component: NoticeDetail,
       props: true, // route.params를 컴포넌트 props로 전달
     },
+    {
+      path: '/main/search',
+      name: 'SearchApartment',
+      component: () => import('../components/panel/PropertySearchPanel.vue'),
+    },
   ],
 })
 
