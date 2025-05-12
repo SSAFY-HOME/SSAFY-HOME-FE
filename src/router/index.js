@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/LoginView.vue'
+import NoticeDetail from '../views/NoticeDetailView.vue'
+import MainView from '../views/MainView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,7 +8,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      component: MainView,
     },
     {
       path: '/login',
@@ -22,7 +23,23 @@ const router = createRouter({
     {
       path: '/main',
       name: 'main',
-      component: () => import('../views/MapView.vue'),
+      component: () => import('../views/MainView.vue'),
+    },
+    {
+      path: '/notice',
+      name: 'notice',
+      component: () => import('../views/NoticeView.vue'),
+    },
+    {
+      path: '/notice/:id',
+      name: 'NoticeDetail',
+      component: NoticeDetail,
+      props: true, // route.params를 컴포넌트 props로 전달
+    },
+    {
+      path: '/notice/write',
+      name: 'WriteNotice',
+      component: () => import('../views/NoticeWriteView.vue'),
     },
   ],
 })
