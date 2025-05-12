@@ -35,4 +35,25 @@ export const memberAPI = {
       }
     }
   },
+
+  logIn: async (userData) => {
+    try {
+      const response = await api.post('/member/login', userData)
+
+      if (response) {
+        return {
+          status: 200,
+          message: '로그인이 성공적으로 완료되었습니다.',
+          token: response.accessToken,
+        }
+      }
+    } catch (error) {
+      console.error('로그인 실패:', error)
+      return {
+        status: 500,
+        message: error.response?.data?.message || '로그인 중 오류가 발생했습니다.',
+        error: error,
+      }
+    }
+  },
 }
