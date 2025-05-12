@@ -16,14 +16,11 @@ export const memberAPI = {
   signUp: async (userData) => {
     try {
       // API 요청
-      const response = await api.post('/member/regist', userData)
+      await api.post('/member/regist', userData)
 
-      // 서버 응답 구조
-      if (response) {
-        return {
-          status: 200,
-          message: '회원가입이 성공적으로 완료되었습니다.',
-        }
+      return {
+        status: 200,
+        message: '회원가입이 성공적으로 완료되었습니다.',
       }
     } catch (error) {
       console.error('회원가입 실패:', error)

@@ -89,6 +89,7 @@
 import { ref, reactive } from 'vue'
 import AppHeader from '@/components/common/Header.vue'
 import { memberAPI } from '@/api/member' // memberAPI 가져오기
+import { useRouter } from 'vue-router'
 
 // 사용자 입력 데이터
 const user = reactive({
@@ -110,6 +111,7 @@ const errors = reactive({
 
 const isSubmitting = ref(false)
 const registrationComplete = ref(false)
+const router = useRouter()
 
 // 유효성 검사 함수들 (기존 코드와 동일)
 const validateName = () => {
@@ -183,16 +185,16 @@ const submitForm = async () => {
 
       // 서버로 전송할 데이터 준비 (필요한 필드만 포함)
       const userData = {
-        username: user.name, // API에 맞게 필드명 변경
+        name: user.name, // API에 맞게 필드명 변경
         email: user.email,
         password: user.password,
       }
 
       // memberAPI를 사용하여 회원가입 요청 전송
       const result = await memberAPI.signUp(userData)
-
+      console.log(result)
       // 응답 결과에 따른 처리
-      if (result.status == 200) {
+      if (result.status === 200) {
         // 성공 메시지 표시
         alert('회원가입이 완료되었습니다!')
 
@@ -206,7 +208,7 @@ const submitForm = async () => {
         registrationComplete.value = true
 
         // 필요시 로그인 페이지로 리다이렉트
-        // router.push('/login')
+        router.push('/login')
       } else {
         // API에서 실패 응답을 반환한 경우
         throw new Error(result.message || '회원가입에 실패했습니다.')
@@ -244,10 +246,11 @@ const submitForm = async () => {
   width: 100%;
   max-width: 450px;
   background-color: white;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 8px; /* 16px에서 8px로 낮춤 */
+  box-shadow: none; /* drop shadow 제거 */
   padding: 40px;
   animation: fadeIn 0.5s ease;
+  border: 1px solid #e0e0e0; /* 그림자 대신 테두리 추가 (선택사항) */
 }
 
 /* 로고 및 제목 스타일 */
@@ -291,7 +294,7 @@ input[type='password'] {
   width: 100%;
   padding: 15px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 4px; /* 8px에서 4px로 낮춤 */
   font-size: 16px;
   transition: all 0.3s;
 }
@@ -353,7 +356,7 @@ input::placeholder {
   background-color: #4caf50;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px; /* 8px에서 4px로 낮춤 */
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
