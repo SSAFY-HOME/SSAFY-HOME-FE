@@ -32,10 +32,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     // 응답이 있고 status 값이 있는 경우
-    if (response.data && response.data.status) {
+    if (response.data.status) {
       // status가 200이면 성공으로 간주하고 data 필드 반환
       if (response.data.status === 200) {
-        return response.data.data
+        return response.data
       }
       // 그렇지 않으면 오류로 처리
       else {
@@ -45,6 +45,9 @@ api.interceptors.response.use(
       }
     }
     // 표준 응답 형식이 아닌 경우
+    if (response.data.status === 500) {
+      return Promise.reject(new Error(response.data.message || '서버에 오류가 발생했습니다.'))
+    }
     return response.data
   },
   (error) => {
