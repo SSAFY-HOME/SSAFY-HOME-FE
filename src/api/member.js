@@ -54,9 +54,9 @@ export const memberAPI = {
       }
     }
   },
-  registHome: async () => {
+  registHome: async (aptData) => {
     try {
-      const response = await api.post('/member/home')
+      const response = await api.post('/member/home', aptData)
       // 서버 응답에서 오류 확인
       if (response === undefined || response === null) {
         throw new Error('서버 응답이 없습니다.')
