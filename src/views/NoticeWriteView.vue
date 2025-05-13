@@ -98,6 +98,9 @@ const submitNotice = async () => {
     if (firstErrorElement) {
       firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
+    if (localStorage.getItem('isAdmin') === 'false') {
+      alert('관리자만 공지사항을 등록할 수 있습니다.')
+    }
     return
   }
 

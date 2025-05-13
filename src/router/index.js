@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import NoticeDetail from '../views/NoticeDetailView.vue'
 import MainView from '../views/MainView.vue'
+import NoticeEdit from '../views/NoticeEditView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,6 +40,12 @@ const router = createRouter({
       path: '/notice/:id',
       name: 'NoticeDetail',
       component: NoticeDetail,
+      props: true, // route.params를 컴포넌트 props로 전달
+    },
+    {
+      path: '/notice/edit/:id',
+      name: 'NoticeEdit',
+      component: NoticeEdit,
       props: true, // route.params를 컴포넌트 props로 전달
     },
     {
