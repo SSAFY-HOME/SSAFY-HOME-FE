@@ -53,7 +53,7 @@ export const apartmentAPI = {
   },
   getDistricts: async (gunguId) => {
     try {
-      const response = await api.get(`apartment?gungu=${gunguId}`)
+      const response = await api.get(`/apartment?gungu=${gunguId}`)
       return {
         status: 200,
         data: response.data,
