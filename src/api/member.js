@@ -42,6 +42,7 @@ export const memberAPI = {
           status: 200,
           message: '로그인이 성공적으로 완료되었습니다.',
           token: response.data.accessToken,
+          isAdmin: response.data.admin,
         }
       }
     } catch (error) {
