@@ -51,6 +51,11 @@ export const apartmentAPI = {
       }
     }
   },
+  /**
+   * 동 목록을 가져오는 함수
+   * @param {number} gunguId - 군구 ID
+   * @returns {Promise<Object>} 동 목록 또는 에러 정보
+   */
   getDistricts: async (gunguId) => {
     try {
       const response = await api.get(`/apartment?gungu=${gunguId}`)
@@ -68,6 +73,11 @@ export const apartmentAPI = {
       }
     }
   },
+  /**
+   * 아파트 목록을 가져오는 함수
+   * @param {number} dongId - 동 ID
+   * @returns {Promise<Object>} 아파트 목록 또는 에러 정보
+   */
   getApartments: async (dongId) => {
     try {
       const response = await api.get(`apartment/list?dong=${dongId}`)
