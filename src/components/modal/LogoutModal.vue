@@ -64,12 +64,13 @@ const handleClose = () => {
 
 .logout-modal-content h3 {
   margin-top: 0;
+  margin-bottom: 10px;
   font-weight: 600;
   color: #333;
 }
 
 .logout-modal-content button {
-  margin-top: 15px;
+  margin-top: 10px;
   padding: 8px 16px;
   background-color: #4caf50;
   color: white;
