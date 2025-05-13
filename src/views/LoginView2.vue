@@ -43,7 +43,7 @@
             <div>
               <span style="font-size: 14px; color: #666">아직 회원이 아니신가요?</span>
               <router-link
-                to="/register"
+                to="/signup"
                 style="font-size: 14px; color: #4caf50; font-weight: 600; margin-left: 5px"
                 >회원가입</router-link
               >
@@ -113,7 +113,7 @@ const handleLogin = async () => {
       console.log('로그인 성공:', result.message)
 
       // 로컬 스토리지에 토큰 저장
-      localStorage.setItem('isLoggedIn', 'true')
+      localStorage.setItem('isAdmin', result.isAdmin)
       // 필요한 경우 토큰 저장
       localStorage.setItem('accessToken', result.token)
 

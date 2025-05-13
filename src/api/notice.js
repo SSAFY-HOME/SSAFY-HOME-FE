@@ -98,5 +98,91 @@ export const noticeAPI = {
       console.error('공지사항 등록 실패:', error)
       throw error
     }
+  } /**
+   * 공지사항 수정
+   *
+   * @param {string} noticeId - 수정할 공지사항 ID
+   * @param {Object} noticeData - 공지사항 데이터
+   * @param {string} noticeData.title - 공지사항 제목
+   * @param {string} noticeData.content - 공지사항 내용
+   * @returns {Promise<Object>} 수정된 공지사항 정보
+   * @throws {Error} 수정 실패시 오류
+   */,
+  updateNotice: async (noticeId, noticeData) => {
+    try {
+      // 유효성 검사
+      if (!noticeId) {
+        throw new Error('공지사항 ID가 필요합니다.')
+      }
+
+      if (!noticeData.title || !noticeData.content) {
+        throw new Error('제목과 내용을 모두 입력해주세요.')
+      }
+
+      // 요청 본문에 title과 content만 포함하도록
+      const requestBody = {
+        title: noticeData.title,
+        content: noticeData.content,
+      }
+
+      // API 요청
+      const response = await api.put(`/notice/${noticeId}`, requestBody)
+
+      // 서버 응답에서 오류 확인
+      if (response === undefined || response === null) {
+        throw new Error('서버 응답이 없습니다.')
+      }
+
+      if (response && response.status != 200) {
+        throw new Error(response.message || '공지사항 수정에 실패했습니다.')
+      }
+
+      // 성공 시 수정된 공지사항 데이터 반환
+      return {
+        success: true,
+        message: '공지사항이 성공적으로 수정되었습니다.',
+        data: response,
+      }
+    } catch (error) {
+      console.error('공지사항 수정 실패:', error)
+      throw error
+    }
+  },
+
+  /**
+   * 공지사항 삭제
+   *
+   * @param {string} noticeId - 삭제할 공지사항 ID
+   * @returns {Promise<Object>} 삭제 결과
+   * @throws {Error} 삭제 실패시 오류
+   */ deleteNotice: async (noticeId) => {
+    try {
+      // 유효성 검사
+      if (!noticeId) {
+        throw new Error('공지사항 ID가 필요합니다.')
+      }
+
+      // API 요청
+      const response = await api.delete(`/notice/${noticeId}`)
+
+      // 서버 응답에서 오류 확인
+      if (response === undefined || response === null) {
+        throw new Error('서버 응답이 없습니다.')
+      }
+
+      if (response && response.status != 200) {
+        throw new Error(response.message || '공지사항 삭제에 실패했습니다.')
+      }
+
+      // 성공 시 결과 반환
+      return {
+        success: true,
+        message: '공지사항이 성공적으로 삭제되었습니다.',
+        data: response,
+      }
+    } catch (error) {
+      console.error('공지사항 삭제 실패:', error)
+      throw error
+    }
   },
 }

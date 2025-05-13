@@ -411,6 +411,7 @@ const login = () => {
 //로그아웃
 const logout = () => {
   localStorage.removeItem('accessToken')
+  localStorage.removeItem('isAdmin')
   logoutMessage.value = '로그아웃이 완료되었습니다'
   isLogoutModalVisible.value = true
   isLoggedIn.value = false

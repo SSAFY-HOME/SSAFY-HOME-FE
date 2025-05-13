@@ -32,31 +32,22 @@
         <p v-else class="no-content">내용이 없습니다.</p>
       </div>
 
-      <!-- 첨부파일 영역 (있을 경우) -->
-      <div v-if="notice.attachments && notice.attachments.length > 0" class="attachment-area">
-        <h3>첨부파일</h3>
-        <ul class="attachment-list">
-          <li v-for="(file, index) in notice.attachments" :key="index" class="attachment-item">
-            <a :href="file.url" download>
-              <span class="file-icon">📎</span>
-              <span class="file-name">{{ file.name }}</span>
-              <span class="file-size">({{ formatFileSize(file.size) }})</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-
       <!-- 버튼 영역 -->
       <div class="button-group">
         <button type="button" class="btn btn-cancel" @click="goBack">이전</button>
         <button type="button" class="btn btn-list" @click="goToList">목록</button>
+        <!-- 관리자만 볼 수 있는 수정 및 삭제 버튼 -->
+        <template v-if="isAdmin">
+          <button type="button" class="btn btn-edit" @click="goToEdit">수정</button>
+          <button type="button" class="btn btn-delete" @click="deleteNotice">삭제</button>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { noticeAPI } from '@/api/notice'
 import AppHeader from '@/components/common/Header.vue'
@@ -66,6 +57,11 @@ const router = useRouter()
 const notice = ref({})
 const isLoading = ref(true)
 const error = ref(null)
+
+// localStorage에서 관리자 여부 확인
+const isAdmin = computed(() => {
+  return localStorage.getItem('isAdmin') === 'true'
+})
 
 // 공지사항 상세 정보 가져오기
 const fetchNoticeDetail = async () => {
@@ -87,15 +83,6 @@ const fetchNoticeDetail = async () => {
   }
 }
 
-// 파일 크기 포맷팅 (KB, MB 단위 변환)
-const formatFileSize = (bytes) => {
-  if (!bytes) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
 // 뒤로 가기
 const goBack = () => {
   router.go(-1)
@@ -104,6 +91,30 @@ const goBack = () => {
 // 목록으로 이동
 const goToList = () => {
   router.push('/notice')
+}
+
+// 수정 페이지로 이동
+const goToEdit = () => {
+  router.push(`/notice/edit/${route.params.id}`)
+}
+
+// 공지사항 삭제
+const deleteNotice = async () => {
+  // 삭제 확인
+  if (!confirm('정말 이 공지사항을 삭제하시겠습니까?')) {
+    return
+  }
+
+  try {
+    // 삭제 API 호출
+    await noticeAPI.deleteNotice(route.params.id)
+    alert('공지사항이 삭제되었습니다.')
+    // 목록 페이지로 이동
+    router.push('/notice')
+  } catch (err) {
+    alert('공지사항 삭제 중 오류가 발생했습니다.')
+    console.error(err)
+  }
 }
 
 // 페이지 로드 시 데이터 가져오기
@@ -196,56 +207,6 @@ onMounted(() => {
   font-style: italic;
 }
 
-/* 첨부파일 영역 */
-.attachment-area {
-  background-color: #f9f9f9;
-  padding: 15px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-}
-
-.attachment-area h3 {
-  font-size: 16px;
-  margin-bottom: 10px;
-  color: #444;
-}
-
-.attachment-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.attachment-item {
-  padding: 8px 0;
-  border-bottom: 1px dashed #eee;
-}
-
-.attachment-item:last-child {
-  border-bottom: none;
-}
-
-.attachment-item a {
-  display: flex;
-  align-items: center;
-  color: #0066cc;
-  text-decoration: none;
-}
-
-.attachment-item a:hover {
-  text-decoration: underline;
-}
-
-.file-icon {
-  margin-right: 8px;
-}
-
-.file-size {
-  color: #888;
-  margin-left: 5px;
-  font-size: 12px;
-}
-
 /* 버튼 영역 */
 .button-group {
   display: flex;
@@ -279,6 +240,25 @@ onMounted(() => {
 
 .btn-list:hover {
   background-color: #3d9140;
+}
+
+/* 수정 버튼 스타일 */
+.btn-edit {
+  background-color: #2196f3;
+  color: white;
+}
+
+.btn-edit:hover {
+  background-color: #0b7dda;
+}
+
+.btn-delete {
+  background-color: #eb4250;
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: #eb4250;
 }
 
 /* 로딩 및 에러 상태 */

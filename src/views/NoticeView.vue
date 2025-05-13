@@ -171,6 +171,14 @@ const fetchNotices = async () => {
   }
 }
 
+const checkIsAdmin = () => {
+  const adminValue = localStorage.getItem('isAdmin')
+  // adminValue가 "true"인 경우에만 관리자로 설정
+  isAdmin.value = adminValue === 'true'
+  console.log(isAdmin.value)
+  return isAdmin.value
+}
+
 // 페이지 변경
 const changePage = (page) => {
   if (currentPage.value !== page) {
@@ -205,6 +213,7 @@ const writeNotice = () => {
 
 // 컴포넌트 마운트시 공지사항 로드
 onMounted(() => {
+  checkIsAdmin()
   fetchNotices()
 })
 </script>

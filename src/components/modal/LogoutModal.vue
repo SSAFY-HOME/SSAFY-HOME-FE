@@ -9,6 +9,8 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const props = defineProps({
   isVisible: {
     type: Boolean,
@@ -33,6 +35,7 @@ watch(
 
 const handleClose = () => {
   emit('close')
+  router.push('/login')
 }
 </script>
 
@@ -61,6 +64,7 @@ const handleClose = () => {
 
 .logout-modal-content h3 {
   margin-top: 0;
+  font-weight: 600;
   color: #333;
 }
 
