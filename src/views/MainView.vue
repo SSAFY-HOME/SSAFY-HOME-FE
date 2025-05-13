@@ -244,11 +244,8 @@
           </div>
 
           <!-- 로그아웃 -->
-          <div
-            class="menu-item"
-            :class="{ active: activeMenu === 'logout' }"
-            @click="activateMenu('logout')"
-          >
+          <!-- 로그인/로그아웃 -->
+          <div class="menu-item" @click="isLoggedIn ? logout() : login()">
             <div class="menu-icon">
               <svg
                 width="24"
@@ -257,6 +254,7 @@
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
+                <!-- SVG 패스는 동일하게 유지 -->
                 <path
                   d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"
                   stroke="currentColor"
@@ -280,9 +278,14 @@
                 />
               </svg>
             </div>
-            <span class="menu-text">로그아웃</span>
+            <span class="menu-text">{{ isLoggedIn ? '로그아웃' : '로그인' }}</span>
           </div>
         </div>
+        <LogoutModal
+          :is-visible="isLogoutModalVisible"
+          :message="logoutMessage"
+          @close="closeLogout"
+        />
       </div>
 
       <!-- 지도 영역 -->
@@ -329,7 +332,15 @@
 
 <script setup>
 import { ref, shallowRef, onMounted, onUnmounted } from 'vue'
+import LogoutModal from '@/components/modal/LogoutModal.vue'
+// 로그인 상태 관리
+const isLoggedIn = ref(false)
 
+// 로컬 스토리지에서 accessToken을 확인하는 함수
+const checkLoginStatus = () => {
+  const token = localStorage.getItem('accessToken')
+  isLoggedIn.value = !!token // token이 존재하면 true, 아니면 false
+}
 // 동적으로 로드할 컴포넌트들
 import HomePanel from '@/components/panel/HomePanel.vue'
 // import SearchPanel from './panels/SearchPanel.vue'
@@ -387,6 +398,28 @@ const activateMenu = (menuName) => {
     default:
       currentComponent.value = null
   }
+}
+const isLogoutModalVisible = ref(false)
+const logoutMessage = ref('')
+import { useRouter } from 'vue-router'
+const router = useRouter()
+// 로그인 함수
+const login = () => {
+  router.push('/login')
+}
+
+//로그아웃
+const logout = () => {
+  localStorage.removeItem('accessToken')
+  logoutMessage.value = '로그아웃이 완료되었습니다'
+  isLogoutModalVisible.value = true
+  isLoggedIn.value = false
+}
+
+//closeLogoutModal 함수 정의
+const closeLogout = () => {
+  console.log('모달닫기')
+  isLogoutModalVisible.value = false
 }
 
 // 패널 닫기
@@ -464,6 +497,7 @@ const loadKakaoMapScript = () => {
 // 컴포넌트 마운트 시 지도 초기화
 onMounted(async () => {
   try {
+    checkLoginStatus()
     await loadKakaoMapScript()
     initializeMap()
 
