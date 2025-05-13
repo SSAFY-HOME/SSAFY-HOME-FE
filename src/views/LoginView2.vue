@@ -150,7 +150,7 @@ const kakaoLogin = () => {
 <style scoped>
 .con {
   display: flex;
-  height: 100%;
+  height: 90%;
   justify-content: center;
   align-items: center;
 }
@@ -164,7 +164,7 @@ const kakaoLogin = () => {
 }
 
 .left-panel {
-  width: 40%;
+  width: 45%;
   background: #000000;
   color: white;
   padding: 60px 40px;
