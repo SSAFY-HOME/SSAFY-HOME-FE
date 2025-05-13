@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/common/Header.vue'
 import { noticeAPI } from '@/api/notice'
@@ -98,9 +98,6 @@ const submitNotice = async () => {
     if (firstErrorElement) {
       firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
-    if (localStorage.getItem('isAdmin') === 'false') {
-      alert('관리자만 공지사항을 등록할 수 있습니다.')
-    }
     return
   }
 
@@ -131,6 +128,13 @@ const submitNotice = async () => {
 const goBack = () => {
   router.push('/notice')
 }
+
+onMounted(() => {
+  if (localStorage.getItem('isAdmin') !== 'true') {
+    alert('관리자만 공지사항을 작성할 수 있습니다.')
+    router.push('/notice')
+  }
+})
 </script>
 
 <style scoped>
