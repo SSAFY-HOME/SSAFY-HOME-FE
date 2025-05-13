@@ -6,21 +6,7 @@
         <a href="/" class="logo-link">
           <div class="logo">
             <div class="logo-icon">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 32 32"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M16 2L2 10V30H30V10L16 2Z" stroke="#4CAF50" stroke-width="2" fill="none" />
-                <path d="M16 8L8 13V25H24V13L16 8Z" fill="#4CAF50" />
-                <rect x="14" y="18" width="4" height="7" rx="1" fill="white" />
-              </svg>
-            </div>
-            <div class="logo-text">
-              <span>ZIP</span>
-              <span>ZIP</span>
+              <img src="@/assets/logo.png" alt="Logo" class="home-icon" />
             </div>
           </div>
         </a>
@@ -169,8 +155,11 @@ onMounted(() => {
   align-items: center;
 }
 
-.logo-icon {
-  margin-right: 8px;
+.logo-icon .home-icon {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-right: 0.5rem;
 }
 
 .logo-text {
