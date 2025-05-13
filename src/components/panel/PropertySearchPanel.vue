@@ -110,14 +110,14 @@
           </div>
         </div>
 
-        <div class="filter-group">
+        <!-- <div class="filter-group">
           <label>평수</label>
           <div class="range-selector">
             <input type="text" placeholder="최소" v-model="areaMin" />
             <span class="range-divider">~</span>
             <input type="text" placeholder="최대" v-model="areaMax" />
           </div>
-        </div>
+        </div> -->
       </div>
 
       <div class="filter-row">
@@ -173,10 +173,10 @@
           </div>
           <div class="apartment-info">
             <h3 class="apartment-name">{{ apartment.name }}</h3>
-            <p class="apartment-address">{{ apartment.address }}</p>
+            <p class="apartment-address">{{ apartment.addr }}</p>
             <div class="apartment-details">
               <span class="detail-item">{{ apartment.buildYear }}년 준공</span>
-              <span class="detail-item">{{ apartment.totalUnits }}세대</span>
+              <span class="detail-item">도로명 주소: {{ apartment.roadNmSggCd }}</span>
             </div>
             <div class="apartment-price">
               <span class="price-value">{{ formatPrice(apartment.price) }}</span>
@@ -218,8 +218,6 @@ const searchPerformed = ref(false)
 // 필터 상태
 const priceMin = ref('')
 const priceMax = ref('')
-const areaMin = ref('')
-const areaMax = ref('')
 const yearMin = ref('')
 const yearMax = ref('')
 const sortOption = ref('price_asc')
@@ -245,7 +243,7 @@ const fetchCities = async (provinceId) => {
 
   isLoadingCities.value = true
   try {
-    const result = await apartmentAPI.getDistricts(provinceId)
+    const result = await apartmentAPI.getCities(provinceId)
     cities.value = result.data
   } catch (error) {
     console.error('시/군/구 데이터를 불러오는 중 오류가 발생했습니다:', error)
@@ -264,31 +262,11 @@ const fetchDistricts = async (cityId) => {
   isLoadingDistricts.value = true
   try {
     // 실제 API 엔드포인트로 교체 필요
-    const response = await fetch(`https://api.example.com/districts?cityId=${cityId}`)
-    const data = await response.json()
-    districts.value = data
+    const result = await apartmentAPI.getDistricts(cityId)
+    districts.value = result.data
   } catch (error) {
     console.error('동 데이터를 불러오는 중 오류가 발생했습니다:', error)
-    // 개발용 샘플 데이터
-    if (cityId === 101) {
-      // 강남구
-      districts.value = [
-        { id: 1001, name: '역삼동', cityId: 101 },
-        { id: 1002, name: '삼성동', cityId: 101 },
-        { id: 1003, name: '청담동', cityId: 101 },
-        { id: 1004, name: '신사동', cityId: 101 },
-      ]
-    } else if (cityId === 201) {
-      // 수원시
-      districts.value = [
-        { id: 2001, name: '영통동', cityId: 201 },
-        { id: 2002, name: '인계동', cityId: 201 },
-        { id: 2003, name: '매탄동', cityId: 201 },
-        { id: 2004, name: '원천동', cityId: 201 },
-      ]
-    } else {
-      districts.value = []
-    }
+    districts.value = []
   } finally {
     isLoadingDistricts.value = false
   }
@@ -300,83 +278,11 @@ const fetchApartments = async (districtId) => {
   isLoadingApartments.value = true
   try {
     // 실제 API 엔드포인트로 교체 필요
-    const response = await fetch(`https://api.example.com/apartments?districtId=${districtId}`)
-    const data = await response.json()
-    apartments.value = data
+    const result = await apartmentAPI.getApartments(districtId)
+    apartments.value = result.data
   } catch (error) {
     console.error('아파트 데이터를 불러오는 중 오류가 발생했습니다:', error)
-    // 개발용 샘플 데이터
-    if (districtId === 1001) {
-      // 역삼동
-      apartments.value = [
-        {
-          id: 10001,
-          name: '래미안 역삼',
-          address: '서울특별시 강남구 역삼동 123-45',
-          buildYear: 2018,
-          totalUnits: 523,
-          price: 850000000,
-          area: 84,
-          lat: 37.501,
-          lng: 127.039,
-          image: 'https://via.placeholder.com/300x200?text=래미안+역삼',
-        },
-        {
-          id: 10002,
-          name: '힐스테이트 역삼',
-          address: '서울특별시 강남구 역삼동 234-56',
-          buildYear: 2020,
-          totalUnits: 432,
-          price: 920000000,
-          area: 109,
-          lat: 37.503,
-          lng: 127.042,
-          image: 'https://via.placeholder.com/300x200?text=힐스테이트+역삼',
-        },
-        {
-          id: 10003,
-          name: '역삼 푸르지오',
-          address: '서울특별시 강남구 역삼동 345-67',
-          buildYear: 2017,
-          totalUnits: 384,
-          price: 780000000,
-          area: 76,
-          lat: 37.499,
-          lng: 127.036,
-          image: 'https://via.placeholder.com/300x200?text=역삼+푸르지오',
-        },
-      ]
-    } else if (districtId === 2001) {
-      // 영통동
-      apartments.value = [
-        {
-          id: 20001,
-          name: '영통 래미안',
-          address: '경기도 수원시 영통구 영통동 123-45',
-          buildYear: 2016,
-          totalUnits: 612,
-          price: 550000000,
-          area: 84,
-          lat: 37.248,
-          lng: 127.073,
-          image: 'https://via.placeholder.com/300x200?text=영통+래미안',
-        },
-        {
-          id: 20002,
-          name: '영통 아이파크',
-          address: '경기도 수원시 영통구 영통동 234-56',
-          buildYear: 2019,
-          totalUnits: 534,
-          price: 620000000,
-          area: 106,
-          lat: 37.251,
-          lng: 127.071,
-          image: 'https://via.placeholder.com/300x200?text=영통+아이파크',
-        },
-      ]
-    } else {
-      apartments.value = []
-    }
+    apartments.value = []
   } finally {
     isLoadingApartments.value = false
   }
@@ -445,7 +351,6 @@ const applyFilters = () => {
   // 새로운 API 호출이나 기존 데이터 필터링
   console.log('필터 적용:', {
     가격: `${priceMin.value || '최소'} ~ ${priceMax.value || '최대'}`,
-    평수: `${areaMin.value || '최소'} ~ ${areaMax.value || '최대'}`,
     건축년도: `${yearMin.value || '최소'} ~ ${yearMax.value || '최대'}`,
     정렬: sortOption.value,
   })
@@ -716,6 +621,7 @@ label {
 .range-selector input {
   flex: 1;
   padding: 8px 10px;
+  width: 60px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 13px;
