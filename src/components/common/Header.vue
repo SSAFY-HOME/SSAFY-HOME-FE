@@ -38,11 +38,22 @@
         </div>
       </nav>
 
-      <!-- 보조 내비게이션 -->
+      <!-- 보조 내비게이션 - 로그인 상태에 따라 변경 -->
       <div class="sub-nav">
         <RouterLink to="/notice" class="sub-nav-item">공지사항</RouterLink>
-        <RouterLink to="/login" class="sub-nav-item login">로그인</RouterLink>
-        <RouterLink to="/signup" class="sub-nav-item signup">회원가입</RouterLink>
+
+        <!-- 로그인 상태가 아닐 때 표시 -->
+        <template v-if="!isLoggedIn">
+          <RouterLink to="/login" class="sub-nav-item login">로그인</RouterLink>
+          <RouterLink to="/signup" class="sub-nav-item signup">회원가입</RouterLink>
+        </template>
+
+        <!-- 로그인 상태일 때 표시 -->
+        <template v-else>
+          <a @click="handleLogout" class="sub-nav-item logout">로그아웃</a>
+          <RouterLink to="/mypage" class="sub-nav-item mypage">마이페이지</RouterLink>
+        </template>
+
         <RouterLink to="#" class="sub-nav-item">동네 커뮤니티</RouterLink>
       </div>
 
@@ -71,14 +82,47 @@
           />
         </svg>
       </div>
+      <LogoutModal
+        :is-visible="isLogoutModalVisible"
+        :message="logoutMessage"
+        @close="closeLogout"
+      />
     </div>
   </header>
 </template>
 
-<script>
-export default {
-  name: 'HeaderComponent',
+<script setup>
+import { ref, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
+
+// 로그인 상태 관리
+const isLoggedIn = ref(false)
+const isLogoutModalVisible = ref(false)
+const logoutMessage = ref('')
+
+// 로컬 스토리지에서 토큰 확인하여 로그인 상태 설정
+const checkLoginStatus = () => {
+  const token = localStorage.getItem('accessToken')
+  isLoggedIn.value = !!token
 }
+
+// 로그아웃 처리
+const handleLogout = () => {
+  localStorage.removeItem('accessToken')
+  isLoggedIn.value = false
+  logoutMessage.value = '로그아웃이 완료되었습니다'
+  isLogoutModalVisible.value = true
+}
+
+// 로그아웃 모달 닫기
+const closeLogout = () => {
+  isLogoutModalVisible.value = false
+}
+
+// 컴포넌트 마운트 시 로그인 상태 확인
+onMounted(() => {
+  checkLoginStatus()
+})
 </script>
 
 <style scoped>
@@ -191,7 +235,7 @@ export default {
 }
 
 .sub-nav-item {
-  color: #666;
+  color: #666666;
   text-decoration: none;
   font-size: 14px;
   margin-left: 20px;
@@ -203,13 +247,11 @@ export default {
 }
 
 .sub-nav-item.login {
-  color: #000000;
-  font-weight: 600;
+  color: #666666;
 }
 
 .sub-nav-item.signup {
-  color: #000000;
-  font-weight: 600;
+  color: #666666;
 }
 
 /* 검색 버튼 */
