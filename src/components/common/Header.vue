@@ -93,12 +93,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+import LogoutModal from '@/components/modal/LogoutModal.vue'
 
 // 로그인 상태 관리
 const isLoggedIn = ref(false)
 const isLogoutModalVisible = ref(false)
 const logoutMessage = ref('')
+const router = useRouter()
 
 // 로컬 스토리지에서 토큰 확인하여 로그인 상태 설정
 const checkLoginStatus = () => {
@@ -109,14 +111,16 @@ const checkLoginStatus = () => {
 // 로그아웃 처리
 const handleLogout = () => {
   localStorage.removeItem('accessToken')
-  isLoggedIn.value = false
+  localStorage.removeItem('isAdmin')
   logoutMessage.value = '로그아웃이 완료되었습니다'
+  isLoggedIn.value = false
   isLogoutModalVisible.value = true
 }
 
 // 로그아웃 모달 닫기
 const closeLogout = () => {
   isLogoutModalVisible.value = false
+  router.push('/login')
 }
 
 // 컴포넌트 마운트 시 로그인 상태 확인
