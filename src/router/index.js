@@ -53,6 +53,11 @@ const router = createRouter({
       name: 'SearchApartment',
       component: () => import('../components/panel/PropertySearchPanel.vue'),
     },
+    {
+      path: '/regist/home',
+      name: 'RegistHome',
+      component: () => import('../views/RegistHomeView.vue'),
+    },
   ],
 })
 

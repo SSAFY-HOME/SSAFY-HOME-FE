@@ -323,7 +323,12 @@
 
         <div class="panel-content">
           <!-- 동적으로 컴포넌트 로드 -->
-          <component :is="currentComponent" v-if="currentComponent"></component>
+          <component
+            :is="currentComponent"
+            v-if="currentComponent"
+            @showOnMap="handleShowOnMap"
+            @showAllOnMap="handleShowAllOnMap"
+          ></component>
         </div>
       </div>
     </div>
@@ -349,7 +354,6 @@ import PropertySearchPanel from '@/components/panel/PropertySearchPanel.vue'
 // import ChatbotPanel from './panels/ChatbotPanel.vue'
 // import MenuPanel from './panels/MenuPanel.vue'
 // import ProfilePanel from './panels/ProfilePanel.vue'
-// import LogoutPanel from './panels/LogoutPanel.vue'
 
 // 현재 선택된 메뉴 상태 관리
 const activeMenu = ref('')
@@ -493,6 +497,111 @@ const loadKakaoMapScript = () => {
     }
     document.head.appendChild(script)
   })
+}
+
+const showApartmentOnMap = (apartmentInfo) => {
+  if (!kakaoMap) return
+
+  // 기존 마커들 제거 (선택사항)
+  if (markers) {
+    markers.forEach((marker) => marker.setMap(null))
+  }
+  markers = []
+
+  // 마커 이미지 설정
+  const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png'
+  const imageSize = new window.kakao.maps.Size(64, 69)
+  const imageOption = { offset: new window.kakao.maps.Point(27, 69) }
+  const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imageOption)
+
+  // 새 마커 생성
+  const position = new window.kakao.maps.LatLng(apartmentInfo.latitude, apartmentInfo.longitude)
+  console.log(apartmentInfo.latitude, apartmentInfo.longitude)
+  const marker = new window.kakao.maps.Marker({
+    position: position,
+    image: markerImage,
+    map: kakaoMap,
+  })
+
+  markers.push(marker)
+
+  // 인포윈도우 생성 (선택사항)
+  // const infoContent = `
+  //   <div style="padding:5px;width:220px;">
+  //     <h3 style="margin-bottom:5px;">${apartmentInfo.name}</h3>
+  //   </div>
+  // `
+
+  // const infoWindow = new window.kakao.maps.InfoWindow({
+  //   content: infoContent,
+  // })
+
+  // infoWindow.open(kakaoMap, marker)
+
+  // 지도 중심 이동
+  kakaoMap.setCenter(position)
+  kakaoMap.setLevel(3) // 확대 수준 설정
+}
+
+// 여러 아파트를 지도에 표시하는 함수
+const showMultipleApartmentsOnMap = (apartments) => {
+  if (!kakaoMap || !apartments || apartments.length === 0) return
+
+  // 기존 마커들 제거
+  if (markers) {
+    markers.forEach((marker) => marker.setMap(null))
+  }
+  markers = []
+
+  // 모든 마커의 위치를 포함할 범위 객체
+  const bounds = new window.kakao.maps.LatLngBounds()
+
+  // 마커 이미지 설정
+  const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png'
+  const imageSize = new window.kakao.maps.Size(64, 69)
+  const imageOption = { offset: new window.kakao.maps.Point(27, 69) }
+  const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imageOption)
+
+  // 각 아파트마다 마커 생성
+  apartments.forEach((apt) => {
+    if (!apt.latitude || !apt.longitude) return
+
+    const position = new window.kakao.maps.LatLng(apt.latitude, apt.longitude)
+    const marker = new window.kakao.maps.Marker({
+      position: position,
+      image: markerImage,
+      map: kakaoMap,
+    })
+
+    markers.push(marker)
+
+    // 마커 클릭 이벤트 추가
+    window.kakao.maps.event.addListener(marker, 'click', () => {
+      console.log(apt)
+      showApartmentOnMap(apt)
+    })
+
+    // bounds에 마커 위치 추가
+    bounds.extend(position)
+  })
+
+  // 모든 마커를 포함하도록 지도 범위 조정
+  kakaoMap.setBounds(bounds)
+}
+
+// 열린 인포윈도우 참조 저장
+//let openInfoWindow = null
+
+// 마커 배열 선언
+let markers = []
+
+// PropertySearchPanel에서 showOnMap 이벤트를 수신
+const handleShowOnMap = (apartmentInfo) => {
+  showApartmentOnMap(apartmentInfo)
+}
+
+const handleShowAllOnMap = (apartments) => {
+  showMultipleApartmentsOnMap(apartments)
 }
 
 // 컴포넌트 마운트 시 지도 초기화

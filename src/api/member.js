@@ -54,4 +54,27 @@ export const memberAPI = {
       }
     }
   },
+  registHome: async (aptData) => {
+    try {
+      const response = await api.post('/member/home', aptData)
+      // 서버 응답에서 오류 확인
+      if (response === undefined || response === null) {
+        throw new Error('서버 응답이 없습니다.')
+      }
+
+      if (response && response.status != 200) {
+        throw new Error(response.message || '아파트 등록에 실패했습니다.')
+      }
+
+      // 성공 시 결과 반환
+      return {
+        success: true,
+        message: '아파트 등록이 성공적으로 되었습니다.',
+        data: response,
+      }
+    } catch (error) {
+      console.error('아파트 등록 실패:', error)
+      throw error
+    }
+  },
 }
