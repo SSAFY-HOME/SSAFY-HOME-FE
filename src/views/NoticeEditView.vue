@@ -109,6 +109,11 @@ const saveNotice = async () => {
     return
   }
 
+  if (!notice.value.content.trim()) {
+    alert('내용을 입력해주세요.')
+    return
+  }
+
   try {
     // 수정 API 호출
     await noticeAPI.updateNotice(route.params.id, notice.value)
