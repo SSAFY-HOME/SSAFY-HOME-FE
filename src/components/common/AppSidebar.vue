@@ -4,33 +4,12 @@
       <!-- 페이지 로고 - 클릭 시 홈으로 이동 -->
       <div class="logo-container" @click="goToHome">
         <div class="logo-icon">
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z"
-              stroke="#4caf50"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M9 22V12H15V22"
-              stroke="#4caf50"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+          <img src="@/assets/logogreen.png" alt="ZIPZIP" class="logo-img" />
         </div>
-        <div class="logo-text">
+        <!-- <div class="logo-text">
           <span>ZIP</span>
           <span>ZIP</span>
-        </div>
+        </div> -->
       </div>
 
       <!-- 내 ZIP -->
@@ -322,12 +301,12 @@ const handleNotice = () => {
   height: 100%;
 }
 
-/* 로고 스타일 */
+/* 로고 스타일 수정 */
 .logo-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 0 20px 0;
+  padding: 12px 0 0px 0;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -340,21 +319,25 @@ const handleNotice = () => {
   margin-bottom: 8px;
 }
 
+.logo-img {
+  height: 80px; /* 로고 이미지 높이 조정 */
+  width: auto;
+}
+
 .logo-text {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-weight: 1000; /* 최대한 두껍게 */
-  font-size: 17px; /* 글자 크기 키움 */
-  color: #000000; /* 검은색 */
+  font-weight: 1000;
+  font-size: 17px;
+  color: #000000;
   letter-spacing: 1px;
 }
 
 .logo-text span {
   line-height: 1.2;
-  font-weight: 600; /* 최대한 두껍게 */
+  font-weight: 600;
 }
-
 /* 메뉴 아이템 스타일 */
 .menu-item {
   display: flex;
