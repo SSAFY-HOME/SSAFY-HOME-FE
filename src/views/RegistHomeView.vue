@@ -370,7 +370,7 @@ const confirmRegistration = async () => {
     await memberAPI.registHome(aptData)
     showConfirmModal.value = false
     registrationComplete.value = true
-    router.push('/')
+    router.push('/main')
   } catch (err) {
     alert('홈 등록 중 오류가 발생했습니다.')
     console.error(err)
