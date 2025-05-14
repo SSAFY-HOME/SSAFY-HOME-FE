@@ -172,7 +172,7 @@ export default {
 .main-content {
   color: white;
   padding: 5rem 0rem;
-  width: 42%;
+  width: 45%;
   position: absolute;
   right: 0;
   top: 0;
@@ -298,7 +298,7 @@ export default {
     .card {
       background: rgba(0, 0, 0, 0.3);
       flex: 1;
-      padding: 1rem;
+      padding: 2rem;
       border-radius: 12px;
       stroke-width: 1px;
       stroke: #a3a3a3;
