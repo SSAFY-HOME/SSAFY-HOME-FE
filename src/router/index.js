@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import NoticeDetail from '../views/NoticeDetailView.vue'
 import MainView from '../views/Home.vue'
+
 import NoticeEdit from '../views/NoticeEditView.vue'
 
 const router = createRouter({
@@ -24,7 +25,7 @@ const router = createRouter({
     {
       path: '/main',
       name: 'main',
-      component: () => import('../views/MainView.vue'),
+      component: () => import('../views/MainLayout.vue'),
     },
     {
       path: '/notice',
@@ -49,9 +50,9 @@ const router = createRouter({
       props: true, // route.params를 컴포넌트 props로 전달
     },
     {
-      path: '/main/search',
-      name: 'SearchApartment',
-      component: () => import('../components/panel/PropertySearchPanel.vue'),
+      path: '/regist/home',
+      name: 'RegistHome',
+      component: () => import('../views/RegistHomeView.vue'),
     },
   ],
 })

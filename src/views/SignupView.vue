@@ -236,7 +236,7 @@ const submitForm = async () => {
 
 /* 컨테이너 스타일 */
 .signup-container {
-  min-height: 100vh;
+  min-height: 90vh;
   display: flex;
   justify-content: center;
   align-items: center;

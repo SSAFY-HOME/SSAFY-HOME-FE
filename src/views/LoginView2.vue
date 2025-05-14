@@ -118,7 +118,12 @@ const handleLogin = async () => {
       localStorage.setItem('accessToken', result.token)
 
       // 홈 페이지 또는 이전 페이지로 리다이렉트
-      router.push('/')
+      console.log(result.hasHome)
+      if (result.hasHome === false) {
+        router.push('/regist/home')
+      } else {
+        router.push('/')
+      }
     } else {
       // 오류 메시지 표시
       errorMessage.value = result.message || '로그인에 실패했습니다.'
@@ -150,7 +155,7 @@ const kakaoLogin = () => {
 <style scoped>
 .con {
   display: flex;
-  height: 100%;
+  height: 90%;
   justify-content: center;
   align-items: center;
 }
@@ -164,7 +169,7 @@ const kakaoLogin = () => {
 }
 
 .left-panel {
-  width: 40%;
+  width: 45%;
   background: #000000;
   color: white;
   padding: 60px 40px;

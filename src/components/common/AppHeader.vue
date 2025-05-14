@@ -145,7 +145,7 @@ export default {
 
           &:hover,
           &.router-link-active {
-            color: #ffd700;
+            color: #82b06d;
           }
         }
       }
@@ -163,7 +163,7 @@ export default {
 
           &:hover,
           &.router-link-active {
-            color: #ffd700;
+            color: #82b06d;
           }
         }
       }
