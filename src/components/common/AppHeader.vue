@@ -5,7 +5,7 @@
       <div class="left-section">
         <div class="logo-container">
           <RouterLink to="/" class="logo">
-            <img src="@/assets/logogreen.png" alt="ZIPZIP" class="logo-img" />
+            <img src="@/assets/logowhite.png" alt="ZIPZIP" class="logo-img" />
           </RouterLink>
         </div>
 
@@ -94,13 +94,10 @@ export default {
 
 <style lang="scss" scoped>
 .header {
-  position: sticky;
+  position: fixed;
   top: 15px;
   left: 0;
   width: 100%;
-  background-color: white;
-  border-bottom: 1px solid #f0f0f0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   z-index: 1000;
   backdrop-filter: blur(1px);
   transition: all 0.3s ease;
@@ -140,7 +137,7 @@ export default {
         margin-bottom: 0.3rem;
 
         .main-nav-link {
-          color: #000000;
+          color: #fff;
           text-decoration: none;
           font-size: 1.4rem;
           font-weight: 600;
@@ -159,7 +156,7 @@ export default {
         margin-left: 5px;
 
         .sub-nav-link {
-          color: #464343;
+          color: #ccc;
           text-decoration: none;
           font-size: 0.9rem;
           transition: color 0.3s;
@@ -179,13 +176,13 @@ export default {
       gap: 2rem;
 
       .user-menu-link {
-        color: #464343;
+        color: #ccc;
         text-decoration: none;
         font-size: 1rem;
         transition: color 0.3s;
 
         &:hover {
-          color: #82b06d;
+          color: #fff;
         }
       }
     }

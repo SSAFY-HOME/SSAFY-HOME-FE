@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import NoticeDetail from '../views/NoticeDetailView.vue'
-import MainView from '../views/MainLayout.vue'
+import MainView from '../views/Home.vue'
+
 import NoticeEdit from '../views/NoticeEditView.vue'
 
 const router = createRouter({
