@@ -50,6 +50,8 @@ const loadKakaoMapScript = () => {
   })
 }
 
+import apartmentImg from '@/assets/apartmentImg.svg'
+
 // 단일 아파트를 지도에 표시하는 함수
 const showApartmentOnMap = (apartmentInfo) => {
   if (!kakaoMap) return
@@ -58,8 +60,8 @@ const showApartmentOnMap = (apartmentInfo) => {
   clearMarkers()
 
   // 마커 이미지 설정
-  const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png'
-  const imageSize = new window.kakao.maps.Size(64, 69)
+  const imageSrc = apartmentImg
+  const imageSize = new window.kakao.maps.Size(45, 50)
   const imageOption = { offset: new window.kakao.maps.Point(27, 69) }
   const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imageOption)
 
@@ -74,7 +76,12 @@ const showApartmentOnMap = (apartmentInfo) => {
   markers.push(marker)
 
   // 지도 중심 이동
-  kakaoMap.setCenter(position)
+  const offsetX = -210 // 왼쪽 패널 너비 + 여유 공간
+  const proj = kakaoMap.getProjection()
+  const screenPoint = proj.containerPointFromCoords(position)
+  screenPoint.x += offsetX
+  const newPosition = proj.coordsFromContainerPoint(screenPoint)
+  kakaoMap.setCenter(newPosition)
   kakaoMap.setLevel(3) // 확대 수준 설정
 }
 
@@ -89,8 +96,8 @@ const showMultipleApartmentsOnMap = (apartments) => {
   const bounds = new window.kakao.maps.LatLngBounds()
 
   // 마커 이미지 설정
-  const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png'
-  const imageSize = new window.kakao.maps.Size(64, 69)
+  const imageSrc = apartmentImg
+  const imageSize = new window.kakao.maps.Size(40, 45)
   const imageOption = { offset: new window.kakao.maps.Point(27, 69) }
   const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imageOption)
 
@@ -163,7 +170,7 @@ defineExpose({
 <style scoped>
 /* 지도 컨테이너 */
 .map-container {
-  flex: 1;
+  flex: 1; /* 남은 공간 모두 차지 */
   height: 100%;
   background-color: #f8f8f8;
 }
