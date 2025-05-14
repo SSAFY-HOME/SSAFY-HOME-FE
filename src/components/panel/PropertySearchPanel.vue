@@ -1,4 +1,4 @@
-<!-- PropertyPanel.vue -->
+<!-- PropertyPanel.vue의 수정된 부분 -->
 <template>
   <div class="property-panel">
     <h3 class="section-title">아파트 검색</h3>
@@ -178,8 +178,10 @@
               <span class="detail-item">{{ apartment.buildYear }}년 준공</span>
               <span class="detail-item">도로명 주소: {{ apartment.roadNmSggCd }}</span>
             </div>
-            <div class="apartment-price">
-              <span class="price-value">{{ formatPrice(apartment.price) }}</span>
+            <div class="apartment-actions">
+              <button class="listing-button" @click.stop="viewListings(apartment)">
+                <span class="button-icon">📋</span> 매물 리스트 보기
+              </button>
             </div>
           </div>
         </div>
@@ -193,7 +195,7 @@ import { ref, onMounted, watch } from 'vue'
 import { apartmentAPI } from '@/api/apartment'
 
 // emit 정의 업데이트
-const emit = defineEmits(['showOnMap', 'showAllOnMap'])
+const emit = defineEmits(['showOnMap', 'showAllOnMap', 'view-listings'])
 
 // 상태 관리
 const provinces = ref([])
@@ -369,23 +371,15 @@ const showOnMap = (apartment) => {
   })
 }
 
-// 가격 포맷팅 함수
-const formatPrice = (price) => {
-  if (!price) return '정보 없음'
+import { useRoute } from 'vue-router'
+const router = useRoute()
 
-  // 억 단위와 천만 단위로 분리
-  const billion = Math.floor(price / 100000000)
-  const million = Math.floor((price % 100000000) / 10000000)
+// 매물 리스트 보기 함수 수정
+const viewListings = (apartment) => {
+  console.log(`${apartment.name}의 매물 리스트 보기 클릭됨`, apartment)
 
-  if (billion > 0 && million > 0) {
-    return `${billion}억 ${million}천만원`
-  } else if (billion > 0) {
-    return `${billion}억원`
-  } else if (million > 0) {
-    return `${million}천만원`
-  } else {
-    return `${price.toLocaleString()}원`
-  }
+  // 부모 컴포넌트로 선택된 아파트 정보 전달
+  emit('view-listings', apartment)
 }
 
 // 클릭 외부 감지 (드롭다운 닫기)
@@ -800,14 +794,35 @@ label {
   color: #555;
 }
 
-.apartment-price {
+/* 매물 리스트 버튼 스타일 (새로 추가) */
+.apartment-actions {
   margin-top: auto;
 }
 
-.price-value {
+.listing-button {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #e8f5e9; /* 연한 초록색 배경 */
+  color: #4c4e4c; /* 초록색 텍스트 */
+  border: 1px solid #4caf50; /* 초록색 테두리 */
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.listing-button:hover {
+  background-color: #c8e6c9; /* 호버 시 약간 더 진한 초록색 */
+  /* 그림자 효과 제거됨 */
+}
+
+.button-icon {
+  margin-right: 6px;
   font-size: 16px;
-  font-weight: 700;
-  color: #4caf50;
 }
 
 /* 모바일 반응형 스타일 */
