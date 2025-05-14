@@ -1,6 +1,38 @@
 <template>
   <div class="sidebar">
     <div class="sidebar-content">
+      <!-- 페이지 로고 - 클릭 시 홈으로 이동 -->
+      <div class="logo-container" @click="goToHome">
+        <div class="logo-icon">
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z"
+              stroke="#4caf50"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M9 22V12H15V22"
+              stroke="#4caf50"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span>ZIP</span>
+          <span>ZIP</span>
+        </div>
+      </div>
+
       <!-- 내 ZIP -->
       <div
         class="menu-item"
@@ -32,39 +64,6 @@
           </svg>
         </div>
         <span class="menu-text">내 ZIP</span>
-      </div>
-
-      <!-- 메뉴 찾기 -->
-      <div
-        class="menu-item"
-        :class="{ active: activeMenu === 'search' }"
-        @click="activateMenu('search')"
-      >
-        <div class="menu-icon">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M21 21L16.65 16.65"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </div>
-        <span class="menu-text">메뉴 찾기</span>
       </div>
 
       <!-- 매물 찾기 -->
@@ -164,11 +163,11 @@
         <span class="menu-text">AI 챗봇</span>
       </div>
 
-      <!-- 메뉴 -->
+      <!-- 공지사항 -->
       <div
         class="menu-item"
-        :class="{ active: activeMenu === 'menu' }"
-        @click="activateMenu('menu')"
+        :class="{ active: activeMenu === 'notice' }"
+        @click="activateMenu('notice')"
       >
         <div class="menu-icon">
           <svg
@@ -179,21 +178,7 @@
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M3 12H21"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M3 6H21"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M3 18H21"
+              d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
               stroke="currentColor"
               stroke-width="2"
               stroke-linecap="round"
@@ -201,7 +186,7 @@
             />
           </svg>
         </div>
-        <span class="menu-text">메뉴</span>
+        <span class="menu-text">공지사항</span>
       </div>
 
       <div class="menu-divider"></div>
@@ -279,6 +264,11 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
+
+// 라우터 가져오기
+const router = useRouter()
+
 // props 및 emit 정의
 const props = defineProps({
   activeMenu: {
@@ -292,6 +282,11 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['activate-menu', 'login', 'logout'])
+
+// 홈으로 이동 함수
+const goToHome = () => {
+  router.push('/')
+}
 
 // 메뉴 활성화 메소드
 const activateMenu = (menuName) => {
@@ -327,6 +322,40 @@ const handleAuth = () => {
   height: 100%;
 }
 
+/* 로고 스타일 */
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0 20px 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.05);
+}
+
+.logo-icon {
+  margin-bottom: 8px;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 1000; /* 최대한 두껍게 */
+  font-size: 17px; /* 글자 크기 키움 */
+  color: #000000; /* 검은색 */
+  letter-spacing: 1px;
+}
+
+.logo-text span {
+  line-height: 1.2;
+  font-weight: 600; /* 최대한 두껍게 */
+}
+
+/* 메뉴 아이템 스타일 */
 .menu-item {
   display: flex;
   flex-direction: column;
