@@ -157,8 +157,7 @@ const datePeriods = [
 
 // 매물 데이터 가져오기
 const fetchDealHistory = async () => {
-  if (!props.apartment || !props.apartment.id) return
-
+  if (!props.apartment || !props.apartment.aptSeq) return
   isLoading.value = true
 
   try {
