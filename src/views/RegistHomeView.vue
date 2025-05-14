@@ -168,14 +168,6 @@
           </div>
         </div>
       </div>
-
-      <!-- 등록 완료 알림 -->
-      <div class="registration-complete" v-if="registrationComplete">
-        <div class="alert success">
-          <span class="success-icon">✓</span>
-          아파트 등록이 완료되었습니다!
-        </div>
-      </div>
       <RegistHomeModal
         :show="showConfirmModal"
         :apartment="selectedApartment"
@@ -202,7 +194,7 @@ const apartments = ref([])
 const selectedProvince = ref('')
 const selectedCity = ref('')
 const selectedDistrict = ref('')
-const selectedApartment = ref('')
+const selectedApartment = ref(null)
 
 const provinceDropdownOpen = ref(false)
 const cityDropdownOpen = ref(false)
@@ -352,10 +344,10 @@ const searchApartments = () => {
 
 // 아파트 선택 및 등록 함수
 const selectApartment = (apartment) => {
-  selectedApartment.value = apartment.aptSeq
+  selectedApartment.value = apartment
   // 등록 섹션으로 스크롤
   setTimeout(() => {
-    const registrationSection = document.querySelector('.registration-section')
+    const registrationSection = document.querySelector('.search-section')
     if (registrationSection) {
       registrationSection.scrollIntoView({ behavior: 'smooth' })
     }
@@ -367,16 +359,18 @@ const registerApartment = () => {
 }
 
 import { memberAPI } from '@/api/member'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const confirmRegistration = async () => {
   const aptData = {
-    aptSeq: selectedApartment.value,
+    aptSeq: selectedApartment.value.aptSeq,
   }
   try {
-    console.log(aptData.aptSeq)
     await memberAPI.registHome(aptData)
     showConfirmModal.value = false
     registrationComplete.value = true
+    router.push('/')
   } catch (err) {
     alert('홈 등록 중 오류가 발생했습니다.')
     console.error(err)

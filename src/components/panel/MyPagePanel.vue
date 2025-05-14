@@ -60,7 +60,7 @@
       <div class="apartment-info">
         <h3 class="section-title">나의 아파트 정보</h3>
         <div v-if="user.apartment" class="apartment-details">
-          <p class="apartment-name">{{ user.apartment.name }}</p>
+          <p class="apartment-name">{{ user.apartment.apartmentName }}</p>
           <p class="apartment-address">{{ user.apartment.address }}</p>
           <p class="apartment-year">{{ user.apartment.buildYear }}년 준공</p>
         </div>
@@ -80,6 +80,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { memberAPI } from '@/api/member'
 
 const router = useRouter()
 const isLoggedIn = ref(false)
@@ -88,45 +89,40 @@ const profileImage = ref(null)
 // 이벤트 emit 정의
 const emit = defineEmits(['showOnMap'])
 
-// 사용자 정보 (예시 데이터)
-const user = ref({
-  name: '홍길동',
-  email: 'hong@example.com',
-  apartment: {
-    name: '푸른 아파트',
-    address: '서울시 강남구 테헤란로 123',
-    buildYear: '2015',
-    // 지도에 표시하기 위한 좌표 정보
-    latitude: 37.5037,
-    longitude: 127.0448,
-  },
-})
-
 // 로그인 상태 확인 및 사용자 정보 가져오기
 const checkLoginStatus = () => {
   const token = localStorage.getItem('accessToken')
   isLoggedIn.value = !!token
 
   if (isLoggedIn.value) {
-    // 실제 구현에서는 토큰을 통해 사용자 정보를 API에서 가져와야 합니다
-    // fetchUserProfile()
+    fetchUserProfile()
   }
 }
 
-// 실제 환경에서는 API를 통해 사용자 프로필 정보를 가져오는 함수
+const user = ref({}) // 상단에 user ref 정의 추가
+
 const fetchUserProfile = async () => {
   try {
-    // 실제 API 호출 예시
-    // const response = await fetch('/api/user/profile', {
-    //   headers: {
-    //     'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-    //   }
-    // })
-    // const data = await response.json()
-    // user.value = data
-    // profileImage.value = data.profileImageUrl || null
+    const response = await memberAPI.getProfile()
+
+    if (response && response.data) {
+      // 응답으로 받은 데이터로 user 업데이트
+      user.value = response.data
+
+      // 프로필 이미지 처리가 필요한 경우
+      if (response.data.image) {
+        profileImage.value = response.data.image
+      }
+    } else {
+      console.warn('프로필 응답이 비어있거나 유효하지 않습니다')
+    }
   } catch (error) {
     console.error('프로필 정보를 가져오는 중 오류가 발생했습니다:', error)
+    //인증되지 않은 경우 로그인 페이지로 리디렉션
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('accessToken')
+      router.push('/login')
+    }
   }
 }
 
