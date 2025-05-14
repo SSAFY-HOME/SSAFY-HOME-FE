@@ -101,14 +101,14 @@
               class="listing-row"
             >
               <td class="date-cell">
-                <span class="date-value"
-                  >{{ listing.year }}.{{ formatNumber(listing.month) }}.{{
-                    formatNumber(listing.day)
-                  }}</span
-                >
+                <span class="date-value">
+                  {{ listing.dealYear }}.{{ formatNumber(listing.dealMonth) }}.{{
+                    formatNumber(listing.dealDay)
+                  }}
+                </span>
               </td>
               <td class="price-cell">
-                <span class="price-value">{{ formatPrice(listing.price) }}</span>
+                <span class="price-value">{{ formatDealAmount(listing.dealAmount) }}</span>
               </td>
               <td class="floor-cell">
                 <span class="floor-value">{{ listing.floor }}층</span>
@@ -123,6 +123,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import { dealAPI } from '@/api/deal'
 
 // Props 정의
 const props = defineProps({
@@ -154,65 +155,38 @@ const datePeriods = [
   { value: '1y', label: '1년' },
 ]
 
-// 매물 데이터 가져오기 (실제 구현에서는 API 호출)
-const fetchListings = async () => {
+// 매물 데이터 가져오기
+const fetchDealHistory = async () => {
+  if (!props.apartment || !props.apartment.aptSeq) return
   isLoading.value = true
 
   try {
-    // 실제 구현에서는 API 호출
-    // const response = await fetch(`/api/apartments/${props.apartment.id}/listings`);
-    // listings.value = await response.json();
+    const result = await dealAPI.getDealHistory(props.apartment.aptSeq)
 
-    // 샘플 데이터
-    setTimeout(() => {
-      listings.value = generateSampleListings()
-      isLoading.value = false
-    }, 800)
+    if (result.success) {
+      listings.value = result.data
+    } else {
+      console.error('거래 내역 조회 실패:', result.message)
+    }
   } catch (error) {
-    console.error('매물 정보를 불러오는 중 오류가 발생했습니다:', error)
+    console.error('거래 내역 조회 오류:', error)
     listings.value = []
   } finally {
     isLoading.value = false
   }
 }
 
-// 샘플 데이터 생성 함수 (실제 구현에서는 제거)
-// const generateSampleListings = () => {
-//   const result = []
-//   const currentDate = new Date()
-//   const currentYear = currentDate.getFullYear()
-//   const currentMonth = currentDate.getMonth() + 1
+// apartment prop이 변경될 때 데이터 다시 가져오기
+watch(
+  () => props.apartment,
+  (newValue) => {
+    if (newValue && props.isVisible) {
+      fetchDealHistory()
+    }
+  },
+)
 
-//   // 랜덤 매물 20개 생성
-//   for (let i = 0; i < 20; i++) {
-//     // 랜덤 날짜 (최근 2년 이내)
-//     const monthsAgo = Math.floor(Math.random() * 24)
-//     const date = new Date()
-//     date.setMonth(date.getMonth() - monthsAgo)
-
-//     const year = date.getFullYear()
-//     const month = date.getMonth() + 1
-//     const day = Math.floor(Math.random() * 28) + 1
-
-//     // 랜덤 가격 (5억~15억)
-//     const price = Math.floor(Math.random() * 1000000000) + 500000000
-
-//     // 랜덤 층수 (1~20층)
-//     const floor = Math.floor(Math.random() * 20) + 1
-
-//     result.push({
-//       year,
-//       month,
-//       day,
-//       price,
-//       floor,
-//     })
-//   }
-
-//   return result
-// }
-
-// 날짜 필터링
+// 날짜 필터링 함수 수정
 const getFilteredByDate = (items) => {
   if (selectedPeriod.value === 'all') return items
 
@@ -235,29 +209,57 @@ const getFilteredByDate = (items) => {
   }
 
   return items.filter((item) => {
-    const itemDate = new Date(item.year, item.month - 1, item.day)
+    // dealYear, dealMonth, dealDay 속성 사용
+    const itemDate = new Date(
+      parseInt(item.dealYear, 10),
+      parseInt(item.dealMonth, 10) - 1,
+      parseInt(item.dealDay, 10),
+    )
     return itemDate >= threshold
   })
 }
 
-// 정렬된 & 필터링된 매물 목록
+// 정렬된 & 필터링된 매물 목록 수정
 const filteredListings = computed(() => {
   const filtered = getFilteredByDate([...listings.value])
 
   return filtered.sort((a, b) => {
     switch (sortOption.value) {
       case 'date_desc':
-        return new Date(b.year, b.month - 1, b.day) - new Date(a.year, a.month - 1, a.day)
+        // dealYear, dealMonth, dealDay 속성 사용
+        return (
+          new Date(
+            parseInt(b.dealYear, 10),
+            parseInt(b.dealMonth, 10) - 1,
+            parseInt(b.dealDay, 10),
+          ) -
+          new Date(parseInt(a.dealYear, 10), parseInt(a.dealMonth, 10) - 1, parseInt(a.dealDay, 10))
+        )
       case 'date_asc':
-        return new Date(a.year, a.month - 1, a.day) - new Date(b.year, b.month - 1, b.day)
+        return (
+          new Date(
+            parseInt(a.dealYear, 10),
+            parseInt(a.dealMonth, 10) - 1,
+            parseInt(a.dealDay, 10),
+          ) -
+          new Date(parseInt(b.dealYear, 10), parseInt(b.dealMonth, 10) - 1, parseInt(b.dealDay, 10))
+        )
       case 'price_desc':
-        return b.price - a.price
+        // dealAmount 문자열을 숫자로 변환하여 비교
+        return (
+          parseInt(b.dealAmount.replace(/,/g, ''), 10) -
+          parseInt(a.dealAmount.replace(/,/g, ''), 10)
+        )
       case 'price_asc':
-        return a.price - b.price
+        return (
+          parseInt(a.dealAmount.replace(/,/g, ''), 10) -
+          parseInt(b.dealAmount.replace(/,/g, ''), 10)
+        )
       case 'floor_desc':
-        return b.floor - a.floor
+        // floor 속성이 문자열일 수 있으므로 parseInt 사용
+        return parseInt(b.floor, 10) - parseInt(a.floor, 10)
       case 'floor_asc':
-        return a.floor - b.floor
+        return parseInt(a.floor, 10) - parseInt(b.floor, 10)
       default:
         return 0
     }
@@ -271,25 +273,48 @@ const closePanel = () => {
 
 // 숫자 포맷팅 (한 자리 숫자 앞에 0 추가)
 const formatNumber = (number) => {
+  if (!number) return '00'
   return number < 10 ? `0${number}` : number
 }
 
-// 가격 포맷팅
-const formatPrice = (price) => {
-  if (!price) return '정보 없음'
+// 부동산 거래 금액 포맷팅 함수
+const formatDealAmount = (dealAmount) => {
+  if (!dealAmount) return '정보 없음'
 
-  // 억 단위와 천만 단위로 분리
-  const billion = Math.floor(price / 100000000)
-  const million = Math.floor((price % 100000000) / 10000000)
+  // 문자열이 들어온 경우 (예: "17,900")
+  if (typeof dealAmount === 'string') {
+    // 콤마 제거 후 숫자로 변환
+    const numericPrice = parseInt(dealAmount.replace(/,/g, ''), 10)
+
+    // 변환 실패 시
+    if (isNaN(numericPrice)) {
+      return dealAmount // 원본 그대로 반환
+    }
+
+    // 부동산 거래 금액 포맷팅 (만원 단위 적용)
+    const billion = Math.floor(numericPrice / 10000) // 억 단위 (만원 단위이므로 10000으로 나눔)
+    const million = numericPrice % 10000 // 만원 단위 나머지
+
+    if (billion > 0 && million > 0) {
+      return `${billion}억 ${million}만원`
+    } else if (billion > 0) {
+      return `${billion}억원`
+    } else {
+      return `${numericPrice}만원`
+    }
+  }
+
+  // 숫자가 들어온 경우
+  const numericPrice = dealAmount
+  const billion = Math.floor(numericPrice / 10000) // 억 단위
+  const million = numericPrice % 10000 // 만원 단위 나머지
 
   if (billion > 0 && million > 0) {
-    return `${billion}억 ${million}천만원`
+    return `${billion}억 ${million}만원`
   } else if (billion > 0) {
     return `${billion}억원`
-  } else if (million > 0) {
-    return `${million}천만원`
   } else {
-    return `${price.toLocaleString()}원`
+    return `${numericPrice}만원`
   }
 }
 
@@ -298,7 +323,7 @@ watch(
   () => props.apartment,
   (newApartment) => {
     if (newApartment) {
-      fetchListings()
+      fetchDealHistory()
     }
   },
   { immediate: true },
@@ -306,7 +331,7 @@ watch(
 
 onMounted(() => {
   if (props.apartment) {
-    fetchListings()
+    fetchDealHistory()
   }
 })
 </script>

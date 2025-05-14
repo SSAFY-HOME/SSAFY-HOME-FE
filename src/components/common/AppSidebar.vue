@@ -164,11 +164,7 @@
       </div>
 
       <!-- 공지사항 -->
-      <div
-        class="menu-item"
-        :class="{ active: activeMenu === 'notice' }"
-        @click="activateMenu('notice')"
-      >
+      <div class="menu-item" @click="handleNotice">
         <div class="menu-icon">
           <svg
             width="24"
@@ -300,6 +296,10 @@ const handleAuth = () => {
   } else {
     emit('login')
   }
+}
+
+const handleNotice = () => {
+  router.push('/notice')
 }
 </script>
 
