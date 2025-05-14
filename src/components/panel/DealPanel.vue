@@ -96,8 +96,8 @@
           </thead>
           <tbody>
             <tr
-              v-for="listing in filteredListings"
-              :key="`${listing.year}-${listing.month}-${listing.day}-${listing.floor}`"
+              v-for="(listing, index) in filteredListings"
+              :key="listing.dealId || `item-${index}`"
               class="listing-row"
             >
               <td class="date-cell">
