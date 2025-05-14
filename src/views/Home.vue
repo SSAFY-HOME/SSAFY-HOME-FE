@@ -25,7 +25,7 @@
           <h2 class="question">어떤 집을 찾고 계세요?</h2>
           <div class="search-bar">
             <div class="input-container">
-              <!-- <img src="@/assets/search-icon.png" alt="Search" class="search-input-icon" /> -->
+              <img src="@/assets/search-icon.png" alt="Search" class="search-input-icon" />
               <input
                 type="text"
                 placeholder="지역, 지하철, 대학, 단지명 또는 매물번호를 입력해주세요."
@@ -82,7 +82,7 @@
   </div>
 </template>
 <script setup>
-import AppHeader from '@/components/common/Header.vue'
+import AppHeader from '@/components/common/AppHeader.vue'
 </script>
 <script>
 export default {
@@ -105,7 +105,7 @@ export default {
   width: 50%;
   position: relative;
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('@/assets/building.jpg'); // 고급스러운 인테리어나 건물 이미지
+    linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('@/assets/building.jpg'); //left panel background image를 넣어줘야함!!
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -171,7 +171,7 @@ export default {
 /* 메인 콘텐츠 섹션 스타일 */
 .main-content {
   color: white;
-  padding: 5rem 2rem;
+  padding: 5rem 0rem;
   width: 42%;
   position: absolute;
   right: 0;
@@ -182,12 +182,13 @@ export default {
   justify-content: center;
 
   .right-panel {
+    margin-top: 5rem;
     background: #212026;
     width: 90%;
-    max-width: 800px;
+    max-width: 100%;
     height: 80vh;
     border-radius: 15px;
-    padding: 3rem;
+    padding: 5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -200,7 +201,7 @@ export default {
     .question {
       font-size: 2.3rem;
       font-weight: bold;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .search-bar {
@@ -213,6 +214,7 @@ export default {
       .input-container {
         position: relative;
         width: 100%;
+        margin-bottom: 1rem;
 
         .search-input-icon {
           position: absolute;
@@ -227,7 +229,7 @@ export default {
           width: 100%;
           padding: 0.75rem 1rem 0.75rem 2.5rem;
           font-size: 0.9rem;
-          border-radius: 30px;
+          border-radius: 5px;
           border: none;
           outline: none;
         }
@@ -238,13 +240,16 @@ export default {
         color: white;
         font-weight: 600;
         padding: 0.6rem 1.5rem;
-        border-radius: 30px;
+        border-radius: 15px;
         border: none;
         cursor: pointer;
-        font-size: 0.9rem;
+        font-size: 1.2rem;
         display: flex;
         align-items: center;
         justify-content: center;
+        stroke-width: 1px;
+        stroke: #a3a3a3;
+        filter: drop-shadow(0px 4px 4px rgba(255, 239, 239, 0.2));
 
         .arrow {
           margin-left: 0.5rem;
@@ -255,23 +260,32 @@ export default {
 
   .service-intro {
     text-align: right;
-    margin-bottom: 2rem;
 
     h1 {
-      font-size: 2.5rem;
-      color: white;
+      color: #e3e3e6;
+
+      font-family: Inter;
+      font-size: 36px;
+      font-style: normal;
+      font-weight: 800;
+      line-height: normal;
       margin-bottom: 0.5rem;
-      font-weight: 600;
     }
 
     p {
+      text-align: right;
+      font-family: Inter;
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 800;
+      line-height: normal;
       font-size: 1.5rem;
       color: #aaa;
       line-height: 1.5;
     }
 
     .highlight {
-      color: #98e0c3;
+      color: #5ea658;
       font-weight: bold;
     }
   }
@@ -286,7 +300,10 @@ export default {
       flex: 1;
       padding: 1rem;
       border-radius: 12px;
-      transition: all 0.3s ease;
+      stroke-width: 1px;
+      stroke: #a3a3a3;
+      filter: drop-shadow(0px 4px 4px rgba(255, 239, 239, 0.25));
+      border: 1px solid #a3a3a3;
 
       &:hover {
         background: rgba(0, 0, 0, 0.5);
@@ -300,7 +317,7 @@ export default {
       }
 
       .card-title {
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         font-weight: bold;
         margin-bottom: 1rem;
       }
@@ -309,7 +326,7 @@ export default {
         margin-bottom: 1rem;
 
         .card-icon-circle {
-          background: #4a80b5;
+          background: #82b06d;
           width: 50px;
           height: 50px;
           border-radius: 50%;
