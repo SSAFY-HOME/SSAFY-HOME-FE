@@ -168,9 +168,9 @@
           :key="apartment.id"
           @click="showOnMap(apartment)"
         >
-          <div class="apartment-image">
+          <!-- <div class="apartment-image">
             <img :src="apartment.image || 'https://via.placeholder.com/150'" alt="아파트 이미지" />
-          </div>
+          </div> -->
           <div class="apartment-info">
             <h3 class="apartment-name">{{ apartment.name }}</h3>
             <p class="apartment-address">{{ apartment.addr }}</p>
@@ -192,8 +192,8 @@
 import { ref, onMounted, watch } from 'vue'
 import { apartmentAPI } from '@/api/apartment'
 
-// 부모 컴포넌트와 통신하기 위한 emit 정의
-const emit = defineEmits(['showOnMap'])
+// emit 정의 업데이트
+const emit = defineEmits(['showOnMap', 'showAllOnMap'])
 
 // 상태 관리
 const provinces = ref([])
@@ -280,6 +280,7 @@ const fetchApartments = async (districtId) => {
     // 실제 API 엔드포인트로 교체 필요
     const result = await apartmentAPI.getApartments(districtId)
     apartments.value = result.data
+    emit('showAllOnMap', apartments.value)
   } catch (error) {
     console.error('아파트 데이터를 불러오는 중 오류가 발생했습니다:', error)
     apartments.value = []
@@ -360,8 +361,8 @@ const applyFilters = () => {
 const showOnMap = (apartment) => {
   // 부모 컴포넌트로 아파트 위치 데이터 전달
   emit('showOnMap', {
-    lat: apartment.lat,
-    lng: apartment.lng,
+    latitude: apartment.latitude,
+    longitude: apartment.longitude,
     name: apartment.name,
     price: apartment.price,
     id: apartment.id,

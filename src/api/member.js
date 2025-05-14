@@ -43,6 +43,7 @@ export const memberAPI = {
           message: '로그인이 성공적으로 완료되었습니다.',
           token: response.data.accessToken,
           isAdmin: response.data.admin ?? false,
+          hasHome: response.data.hasHomeInfo ?? false,
         }
       }
     } catch (error) {
@@ -52,6 +53,48 @@ export const memberAPI = {
         message: error.response?.data?.message || '로그인 중 오류가 발생했습니다.',
         error: error,
       }
+    }
+  },
+  registHome: async (aptData) => {
+    try {
+      const response = await api.post('/member/home', aptData)
+      // 서버 응답에서 오류 확인
+      if (response === undefined || response === null) {
+        throw new Error('서버 응답이 없습니다.')
+      }
+
+      if (response && response.status != 200) {
+        throw new Error(response.message || '아파트 등록에 실패했습니다.')
+      }
+
+      // 성공 시 결과 반환
+      return {
+        success: true,
+        message: '아파트 등록이 성공적으로 되었습니다.',
+        data: response,
+      }
+    } catch (error) {
+      console.error('아파트 등록 실패:', error)
+      throw error
+    }
+  },
+  getProfile: async () => {
+    try {
+      const response = await api.get('/member/info')
+      if (response === undefined || response == null) {
+        throw new Error('서버 응답이 없습니다.')
+      }
+      if (response && response.status != 200) {
+        throw new Error(response.message || '마이페이지 조회에 실패했습니다.')
+      }
+      return {
+        success: true,
+        message: '마이페이지 조회가 성공적으로 되었습니다.',
+        data: response.data,
+      }
+    } catch (error) {
+      console.error('프로필 조회 실패', error)
+      throw error
     }
   },
 }
