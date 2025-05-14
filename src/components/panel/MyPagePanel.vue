@@ -199,7 +199,7 @@ onMounted(() => {
 
 .login-button {
   padding: 12px 30px;
-  background-color: #4caf50;
+  background-color: #82b06d;
   color: white;
   border: none;
   border-radius: 3px;
