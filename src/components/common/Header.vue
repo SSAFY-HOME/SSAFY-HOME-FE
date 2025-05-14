@@ -77,7 +77,7 @@ const handleLogout = () => {
 // 로그아웃 모달 닫기
 const closeLogout = () => {
   isLogoutModalVisible.value = false
-  router.push('/login')
+  router.push('/')
 }
 
 // 컴포넌트 마운트 시 로그인 상태 확인
