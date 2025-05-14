@@ -5,7 +5,7 @@
       <div class="left-section">
         <div class="logo-container">
           <RouterLink to="/" class="logo">
-            <img src="@/assets/logogreen.png" alt="ZIPZIP" class="logo-img" />
+            <img src="@/assets/logobright_green.png" alt="ZIPZIP" class="logo-img" />
           </RouterLink>
         </div>
 
