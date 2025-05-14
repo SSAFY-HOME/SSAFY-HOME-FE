@@ -168,9 +168,9 @@
           :key="apartment.id"
           @click="showOnMap(apartment)"
         >
-          <div class="apartment-image">
+          <!-- <div class="apartment-image">
             <img :src="apartment.image || 'https://via.placeholder.com/150'" alt="아파트 이미지" />
-          </div>
+          </div> -->
           <div class="apartment-info">
             <h3 class="apartment-name">{{ apartment.name }}</h3>
             <p class="apartment-address">{{ apartment.addr }}</p>

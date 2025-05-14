@@ -118,7 +118,12 @@ const handleLogin = async () => {
       localStorage.setItem('accessToken', result.token)
 
       // 홈 페이지 또는 이전 페이지로 리다이렉트
-      router.push('/')
+      console.log(result.hasHome)
+      if (result.hasHome === false) {
+        router.push('/regist/home')
+      } else {
+        router.push('/')
+      }
     } else {
       // 오류 메시지 표시
       errorMessage.value = result.message || '로그인에 실패했습니다.'
