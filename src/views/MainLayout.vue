@@ -85,12 +85,15 @@ const activateMenu = (menuName) => {
     }
     activeMenu.value = ''
     currentComponent.value = null
+
     return
   }
 
   // 다른 메뉴로 전환할 때 기존 마커 제거
   if (activeMenu.value !== '' && kakaoMapRef.value) {
     kakaoMapRef.value.clearMarkers()
+    // ListingPanel도 함께 닫기
+    isListingPanelVisible.value = false
   }
 
   activeMenu.value = menuName
@@ -161,6 +164,7 @@ const handleViewListings = (apartment) => {
       name: apartment.name,
       id: apartment.id,
       price: apartment.price,
+      aptSeq: apartment.aptSeq,
       highlight: true, // 강조 표시 옵션 추가
     })
   }
