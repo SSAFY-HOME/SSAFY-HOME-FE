@@ -12,9 +12,6 @@
         @logout="logout"
       />
 
-      <!-- 지도 컴포넌트 -->
-      <KakaoMap ref="kakaoMapRef" />
-
       <!-- 컨텐츠 패널 컴포넌트 -->
       <ContentPanel
         :active-menu="activeMenu"
@@ -22,7 +19,18 @@
         @close-panel="closePanel"
         @show-on-map="handleShowOnMap"
         @show-all-on-map="handleShowAllOnMap"
+        @view-listings="handleViewListings"
       />
+
+      <!-- ListingPanel 추가 -->
+      <ListingPanel
+        :isVisible="isListingPanelVisible"
+        :apartment="selectedApartment"
+        @close="closeListingPanel"
+      />
+
+      <!-- 지도 컴포넌트 -->
+      <KakaoMap ref="kakaoMapRef" />
     </div>
 
     <!-- 로그아웃 모달 -->
@@ -39,11 +47,11 @@ import Sidebar from '@/components/common/AppSidebar.vue'
 import KakaoMap from '@/components/common/KakaoMap.vue'
 import ContentPanel from '@/components/common/ContentPanel.vue'
 import LogoutModal from '@/components/modal/LogoutModal.vue'
+import ListingPanel from '@/components/panel/DealPanel.vue'
 
 // 패널 컴포넌트 임포트
 import HomePanel from '@/components/panel/HomePanel.vue'
 import PropertySearchPanel from '@/components/panel/PropertySearchPanel.vue'
-// 필요에 따라 다른 패널 컴포넌트 임포트
 // import SearchPanel from '@/components/panel/SearchPanel.vue'
 // import CommunityPanel from '@/components/panel/CommunityPanel.vue'
 // import ChatbotPanel from '@/components/panel/ChatbotPanel.vue'
@@ -133,6 +141,33 @@ const logout = () => {
 // 로그아웃 모달 닫기
 const closeLogout = () => {
   isLogoutModalVisible.value = false
+}
+
+// Listing Panel 관련 상태 관리
+const isListingPanelVisible = ref(false)
+const selectedApartment = ref(null)
+
+// ListingPanel 관련 함수 추가
+const handleViewListings = (apartment) => {
+  console.log('매물 리스트 보기 요청:', apartment)
+  selectedApartment.value = apartment
+  isListingPanelVisible.value = true
+
+  // 선택된 아파트를 지도에서 강조 표시 (선택사항)
+  if (kakaoMapRef.value) {
+    handleShowOnMap({
+      latitude: apartment.latitude,
+      longitude: apartment.longitude,
+      name: apartment.name,
+      id: apartment.id,
+      price: apartment.price,
+      highlight: true, // 강조 표시 옵션 추가
+    })
+  }
+}
+
+const closeListingPanel = () => {
+  isListingPanelVisible.value = false
 }
 
 // 패널 닫기

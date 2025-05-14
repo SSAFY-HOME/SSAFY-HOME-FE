@@ -1,47 +1,29 @@
+<!-- ContentPanel.vue -->
 <template>
   <div class="content-panel" :class="{ active: activeMenu !== '' }">
     <div class="panel-header">
       <button class="close-button" @click="closePanel">
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M18 6L6 18"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <path
-            d="M6 6L18 18"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <span class="close-icon">×</span>
       </button>
-      <h2>{{ getPanelTitle() }}</h2>
+      <h2 class="panel-title">{{ getPanelTitle(activeMenu) }}</h2>
     </div>
 
     <div class="panel-content">
-      <!-- 동적으로 컴포넌트 로드 -->
+      <!-- 동적 컴포넌트 렌더링 -->
       <component
         :is="currentComponent"
-        v-if="currentComponent"
-        @showOnMap="handleShowOnMap"
-        @showAllOnMap="handleShowAllOnMap"
-      ></component>
+        @show-on-map="$emit('show-on-map', $event)"
+        @show-all-on-map="$emit('show-all-on-map', $event)"
+        @view-listings="$emit('view-listings', $event)"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-// Props 정의
+import { watch } from 'vue'
+
+// 프롭스 정의
 const props = defineProps({
   activeMenu: {
     type: String,
@@ -53,65 +35,63 @@ const props = defineProps({
   },
 })
 
-// Emits 정의
-const emit = defineEmits(['close-panel', 'show-on-map', 'show-all-on-map'])
+// 이벤트 정의 - view-listings 이벤트 추가
+const emit = defineEmits(['close-panel', 'show-on-map', 'show-all-on-map', 'view-listings'])
 
-// 패널 닫기
+// 패널 닫기 함수
 const closePanel = () => {
   emit('close-panel')
 }
 
-// 패널 제목 가져오기
-const getPanelTitle = () => {
-  switch (props.activeMenu) {
+// 메뉴에 따른 패널 제목 반환
+const getPanelTitle = (menu) => {
+  switch (menu) {
     case 'home':
-      return '내 ZIP'
-    case 'search':
-      return '메뉴 찾기'
+      return '홈'
     case 'property':
-      return '매물 찾기'
+      return '부동산 검색'
+    case 'search':
+      return '검색'
     case 'community':
       return '커뮤니티'
     case 'chatbot':
-      return 'AI 챗봇'
+      return '챗봇'
     case 'menu':
       return '메뉴'
     case 'profile':
-      return '내 프로필'
+      return '마이페이지'
     default:
       return ''
   }
 }
 
-// 지도 이벤트 핸들러
-const handleShowOnMap = (apartmentInfo) => {
-  emit('show-on-map', apartmentInfo)
-}
-
-const handleShowAllOnMap = (apartments) => {
-  emit('show-all-on-map', apartments)
-}
+// 패널이 활성화되거나 비활성화될 때 추가 동작이 필요하면 watch 사용
+watch(
+  () => props.activeMenu,
+  (newValue) => {
+    // 메뉴가 변경될 때 수행할 작업
+    // 예: 특정 메뉴 선택 시 추가 데이터 로드 등
+  },
+)
 </script>
 
 <style scoped>
-/* 콘텐츠 패널 */
 .content-panel {
   position: absolute;
   top: 0;
-  right: 0;
-  width: 420px;
+  left: 80px; /* 사이드바 너비에 맞춤 */
   height: 100%;
+  width: 0;
   background-color: white;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-  transform: translateX(100%);
-  transition: transform 0.3s ease;
+  transition: width 0.3s ease;
   z-index: 90;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
 .content-panel.active {
-  transform: translateX(0);
+  width: 410px; /* 패널 활성화 시 너비 */
 }
 
 .panel-header {
@@ -119,19 +99,19 @@ const handleShowAllOnMap = (apartments) => {
   align-items: center;
   padding: 16px;
   border-bottom: 1px solid #eee;
+  height: 60px;
 }
 
 .close-button {
   background: none;
   border: none;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 12px;
   cursor: pointer;
-  color: #666;
   border-radius: 50%;
   transition: background-color 0.2s ease;
 }
@@ -140,7 +120,13 @@ const handleShowAllOnMap = (apartments) => {
   background-color: #f5f5f5;
 }
 
-.panel-header h2 {
+.close-icon {
+  font-size: 24px;
+  line-height: 1;
+  color: #666;
+}
+
+.panel-title {
   font-size: 18px;
   font-weight: 600;
   color: #333;
@@ -148,14 +134,19 @@ const handleShowAllOnMap = (apartments) => {
 
 .panel-content {
   flex: 1;
-  padding: 16px;
   overflow-y: auto;
+  padding: 16px;
+}
+
+/* 매물 리스트 패널이 활성화되었을 때 조정 */
+.content-panel.active.listing-active {
+  width: 420px; /* 매물 리스트 패널이 표시될 때 너비 조정 */
 }
 
 /* 반응형 스타일 */
 @media (max-width: 768px) {
-  .content-panel {
-    width: calc(100% - 80px);
+  .content-panel.active {
+    width: calc(100% - 60px); /* 모바일에서는 거의 전체 화면 */
   }
 }
 </style>
