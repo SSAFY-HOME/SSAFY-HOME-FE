@@ -371,9 +371,6 @@ const showOnMap = (apartment) => {
   })
 }
 
-import { useRoute } from 'vue-router'
-const router = useRoute()
-
 // 매물 리스트 보기 함수 수정
 const viewListings = (apartment) => {
   console.log(`${apartment.name}의 매물 리스트 보기 클릭됨`, apartment)
