@@ -167,11 +167,7 @@
       <div class="menu-divider"></div>
 
       <!-- 내 프로필 -->
-      <div
-        class="menu-item"
-        :class="{ active: activeMenu === 'profile' }"
-        @click="activateMenu('profile')"
-      >
+      <div class="menu-item" @click="goToMyPage">
         <div class="menu-icon">
           <svg
             width="24"
@@ -279,6 +275,9 @@ const handleAuth = () => {
 
 const handleNotice = () => {
   router.push('/notice')
+}
+const goToMyPage = () => {
+  router.push('/mypage')
 }
 </script>
 

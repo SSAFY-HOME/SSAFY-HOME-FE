@@ -72,7 +72,6 @@ import PropertySearchPanel from '@/components/panel/PropertySearchPanel.vue'
 import CommunityPanel from '@/components/panel/CommunityPanel.vue'
 // import ChatbotPanel from '@/components/panel/ChatbotPanel.vue'
 // import MenuPanel from '@/components/panel/MenuPanel.vue'
-import MyPagePanel from '@/components/panel/MyPagePanel.vue'
 
 // 라우터 설정
 const router = useRouter()

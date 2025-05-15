@@ -1,17 +1,15 @@
 <template>
-  <div v-if="isVisible" class="logout-modal-overlay">
+  <div v-if="isVisible" class="logout-modal-overlay" @click.self="handleOverlayClick">
     <div class="logout-modal-content">
       <h3>로그아웃</h3>
       <p>{{ message }}</p>
-      <button @click="handleClose">확인</button>
+      <button @click="handleClose" class="confirm-button">확인</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-const router = useRouter()
-const props = defineProps({
+defineProps({
   isVisible: {
     type: Boolean,
     required: true,
@@ -23,19 +21,15 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close'])
-import { watch } from 'vue'
 
-// isVisible prop 변화 감지
-watch(
-  () => props.isVisible,
-  (newValue) => {
-    console.log('isVisible prop changed:', newValue)
-  },
-)
-
+// Close when clicking the confirmation button
 const handleClose = () => {
   emit('close')
-  router.push('/login')
+}
+
+// Allow closing by clicking outside the modal
+const handleOverlayClick = () => {
+  emit('close')
 }
 </script>
 
@@ -50,7 +44,7 @@ const handleClose = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000; /* Higher than header z-index */
 }
 
 .logout-modal-content {
@@ -60,6 +54,7 @@ const handleClose = () => {
   max-width: 400px;
   width: 100%;
   text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .logout-modal-content h3 {
@@ -69,17 +64,25 @@ const handleClose = () => {
   color: #333;
 }
 
-.logout-modal-content button {
+.logout-modal-content p {
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.confirm-button {
   margin-top: 10px;
-  padding: 8px 16px;
-  background-color: #4caf50;
+  padding: 8px 20px;
+  background-color: #82b06d;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
-.logout-modal-content button:hover {
-  background-color: #45a049;
+.confirm-button:hover {
+  background-color: #6e9459;
 }
 </style>

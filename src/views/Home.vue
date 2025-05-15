@@ -48,7 +48,7 @@
               <h4 class="card-title">동네 탐방하기</h4>
               <div class="card-icon-container">
                 <div class="card-icon-circle">
-                  <!-- <img src="@/assets/neighborhood-icon.png" alt="Neighborhood Icon" class="card-icon" /> -->
+                  <img src="@/assets/communityIcon.png" alt="Neighborhood Icon" class="card-icon" />
                 </div>
               </div>
               <p class="card-desc">우리 동네 리뷰 쓰고<br />다른 동네 탐방 하기</p>
@@ -59,7 +59,7 @@
               <h4 class="card-title">AI 부동산 중개사</h4>
               <div class="card-icon-container">
                 <div class="card-icon-circle">
-                  <!-- <img src="@/assets/ai-icon.png" alt="AI Icon" class="card-icon" /> -->
+                  <img src="@/assets/chatbotIcon.png" alt="AI Icon" class="chat-card-icon" />
                 </div>
               </div>
               <p class="card-desc">AI 챗봇과 함께 자신에게<br />맞는 매물을 탐색해보세요</p>
@@ -70,7 +70,7 @@
               <h4 class="card-title">부동산 기사</h4>
               <div class="card-icon-container">
                 <div class="card-icon-circle">
-                  <!-- <img src="@/assets/news-icon.png" alt="News Icon" class="card-icon" /> -->
+                  <img src="@/assets/newsIcon.png" alt="News Icon" class="news-card-icon" />
                 </div>
               </div>
               <p class="card-desc">AI 요약과 함께 원하는<br />동네의 최신 소식을 살펴보세요</p>
@@ -172,7 +172,7 @@ export default {
 .main-content {
   color: white;
   padding: 5rem 0rem;
-  width: 42%;
+  width: 45%;
   position: absolute;
   right: 0;
   top: 0;
@@ -298,7 +298,7 @@ export default {
     .card {
       background: rgba(0, 0, 0, 0.3);
       flex: 1;
-      padding: 1rem;
+      padding: 2rem;
       border-radius: 12px;
       stroke-width: 1px;
       stroke: #a3a3a3;
@@ -326,7 +326,7 @@ export default {
         margin-bottom: 1rem;
 
         .card-icon-circle {
-          background: #82b06d;
+          background: rgb(199, 199, 199);
           width: 50px;
           height: 50px;
           border-radius: 50%;
@@ -335,8 +335,15 @@ export default {
           justify-content: center;
 
           .card-icon {
-            width: 24px;
-            height: 24px;
+            width: 80px;
+            height: 80px;
+          }
+          .chat-card-icon {
+            width: 45px;
+            height: 45px;
+          }
+          .news-card-icon {
+            width: 30px;
           }
         }
 
