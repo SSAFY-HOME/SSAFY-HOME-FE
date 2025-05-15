@@ -547,10 +547,7 @@ const updatePassword = async () => {
         return
       }
 
-      await memberAPI.updatePassword({
-        currentPassword: user.value.currentPassword,
-        newPassword: user.value.password,
-      })
+      await memberAPI.updatePassword(user.value.currentPassword, user.value.password)
 
       alert('비밀번호가 성공적으로 변경되었습니다.')
       user.value.currentPassword = ''
