@@ -39,11 +39,15 @@
             <img src="@/assets/search-icon-white.png" alt="Search" class="search-input-icon" />
           </button>
         </div>
-        <LogoutModal
-          :is-visible="isLogoutModalVisible"
-          :message="logoutMessage"
-          @close="closeLogout"
-        />
+        <!-- 로그아웃 모달 -->
+        <teleport to="body">
+          <!--teleport로 감싸줘야지 header내가 아닌 body에서 동작-->
+          <LogoutModal
+            :is-visible="isLogoutModalVisible"
+            :message="logoutMessage"
+            @close="closeLogout"
+          />
+        </teleport>
       </div>
     </div>
   </header>

@@ -98,9 +98,12 @@ export const memberAPI = {
     }
   },
 
-  updatePassword: async (newPassword) => {
+  updatePassword: async (currentPassword, newPassword) => {
     try {
-      await api.patch('/member/password', { password: newPassword })
+      await api.put('/member/password', {
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      })
     } catch (error) {
       console.error('비밀번호 수정 실패', error)
       throw error
@@ -109,7 +112,7 @@ export const memberAPI = {
 
   deleteMember: async (password) => {
     try {
-      await api.post('/member/delete', { password })
+      await api.delete('/member', { password })
     } catch (error) {
       console.error('회원 탈퇴 실패', error)
       throw error

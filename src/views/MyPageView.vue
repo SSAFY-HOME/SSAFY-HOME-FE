@@ -30,20 +30,6 @@
           </div>
           <h2 class="profile-name">{{ user.name }}</h2>
           <p class="profile-email">{{ user.email }}</p>
-          <div class="profile-stats">
-            <div class="stat">
-              <span class="stat-number">{{ userStats.posts || 0 }}</span>
-              <span class="stat-label">게시글</span>
-            </div>
-            <div class="stat">
-              <span class="stat-number">{{ userStats.comments || 0 }}</span>
-              <span class="stat-label">댓글</span>
-            </div>
-            <div class="stat">
-              <span class="stat-number">{{ userStats.likes || 0 }}</span>
-              <span class="stat-label">좋아요</span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -61,7 +47,7 @@
           :class="{ active: activeTab === 'security' }"
           @click="activeTab = 'security'"
         >
-          <i class="fas fa-lock"></i> 보안 설정
+          <i class="fas fa-lock"></i> 비밀번호 변경 및 탈퇴
         </button>
         <button
           class="tab-button"
@@ -81,15 +67,10 @@
           </div>
           <div class="card-content">
             <div class="form-group">
-              <label for="nickname">이름</label>
-              <input type="text" id="nickname" v-model="user.nickname" placeholder="김안녕" />
+              <label for="name">이름</label>
+              <input type="text" id="name" v-model="user.name" />
               <label for="nickname">이메일</label>
-              <input
-                type="text"
-                id="nickname"
-                v-model="user.nickname"
-                placeholder="ssafy@gmail.com"
-              />
+              <input type="text" id="nickname" v-model="user.email" />
             </div>
           </div>
         </div>
@@ -103,12 +84,6 @@
           </div>
           <div class="card-content">
             <div v-if="user.apartment" class="apartment-details">
-              <div class="apartment-image">
-                <img
-                  :src="user.apartment.image || '/api/placeholder/200/150'"
-                  alt="아파트 이미지"
-                />
-              </div>
               <div class="apartment-text">
                 <p class="apartment-name">{{ user.apartment.apartmentName }}</p>
                 <p class="apartment-address">
@@ -135,11 +110,6 @@
           <div class="card-content">
             <div v-if="favoriteApartments.length > 0" class="favorites-list">
               <div v-for="apt in favoriteApartments" :key="apt.id" class="favorite-item">
-                <img
-                  :src="apt.image || '/api/placeholder/60/60'"
-                  alt="아파트 이미지"
-                  class="favorite-image"
-                />
                 <div class="favorite-info">
                   <p class="favorite-name">{{ apt.name }}</p>
                   <p class="favorite-address">{{ apt.address }}</p>
@@ -157,7 +127,7 @@
         </div>
       </div>
 
-      <!-- 보안 설정 탭 -->
+      <!-- 비밀번호 수정& 탈퇴 탭 -->
       <div v-if="activeTab === 'security'" class="tab-content">
         <div class="info-card">
           <div class="card-header">
@@ -354,9 +324,7 @@ const profileImage = ref(null)
 const confirmPassword = ref('')
 const errors = ref({})
 const user = ref({
-  nickname: '',
-  phone: '',
-  bio: '',
+  name: '',
   currentPassword: '',
   password: '',
   passwordConfirm: '',
@@ -565,6 +533,8 @@ const validatePasswordConfirm = () => {
     errors.value.passwordConfirm = ''
   }
 }
+
+console.log(user.value.currentPassword, user.value.password)
 
 const updatePassword = async () => {
   validatePassword()

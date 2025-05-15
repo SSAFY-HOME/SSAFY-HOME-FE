@@ -1,4 +1,3 @@
-<!-- Header.vue -->
 <template>
   <header class="header">
     <div class="header-container">
@@ -39,15 +38,14 @@
             <img src="@/assets/search-icon-white.png" alt="Search" class="search-input-icon" />
           </button>
         </div>
-        <LogoutModal
-          :is-visible="isLogoutModalVisible"
-          :message="logoutMessage"
-          @close="closeLogout"
-        />
       </div>
     </div>
   </header>
+
+  <!-- 로그아웃 모달 -->
+  <LogoutModal :is-visible="isLogoutModalVisible" :message="logoutMessage" @close="closeLogout" />
 </template>
+
 <script setup>
 import { ref, onMounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
@@ -71,13 +69,13 @@ const handleLogout = () => {
   localStorage.removeItem('isAdmin')
   logoutMessage.value = '로그아웃이 완료되었습니다'
   isLoggedIn.value = false
-  isLogoutModalVisible.value = true
+  isLogoutModalVisible.value = true // 모달 표시
 }
 
 // 로그아웃 모달 닫기
 const closeLogout = () => {
-  isLogoutModalVisible.value = false
-  router.push('/')
+  isLogoutModalVisible.value = false // 모달 숨기기
+  router.push('/') // 홈페이지로 리다이렉트
 }
 
 // 컴포넌트 마운트 시 로그인 상태 확인
@@ -180,6 +178,7 @@ export default {
         text-decoration: none;
         font-size: 1rem;
         transition: color 0.3s;
+        cursor: pointer;
 
         &:hover {
           color: #fff;
