@@ -23,6 +23,8 @@
         @view-commerces="handleViewCommerces"
       />
 
+      <CommunityPanel v-if="activeMenu === 'community'" @view-post-detail="handleViewPostDetail" />
+
       <!-- DealPanel 추가 -->
       <DealPanel
         :isVisible="isListingPanelVisible"
@@ -38,8 +40,8 @@
         :district="selectedLocation.district"
         :district-id="selectedLocation.districtId"
         @close="closeCommercePanel"
-        @show-on-map="handleShowOnMap"
-        @show-all-on-map="handleShowCommercesOnMap"
+        @showOnMap="handleShowOnMap"
+        @showAllOnMap="handleShowCommercesOnMap"
       />
 
       <!-- 지도 컴포넌트 -->
@@ -67,7 +69,7 @@ import CommercePanel from '@/components/panel/CommercePanel.vue'
 import HomePanel from '@/components/panel/HomePanel.vue'
 import PropertySearchPanel from '@/components/panel/PropertySearchPanel.vue'
 // import SearchPanel from '@/components/panel/SearchPanel.vue'
-// import CommunityPanel from '@/components/panel/CommunityPanel.vue'
+import CommunityPanel from '@/components/panel/CommunityPanel.vue'
 // import ChatbotPanel from '@/components/panel/ChatbotPanel.vue'
 // import MenuPanel from '@/components/panel/MenuPanel.vue'
 import MyPagePanel from '@/components/panel/MyPagePanel.vue'
@@ -112,6 +114,7 @@ const activateMenu = (menuName) => {
   }
 
   activeMenu.value = menuName
+  console.log('활성화된 메뉴:', menuName)
 
   // 메뉴에 따른 컴포넌트 선택
   switch (menuName) {
@@ -122,12 +125,9 @@ const activateMenu = (menuName) => {
       currentComponent.value = PropertySearchPanel
       break
     // 필요에 따라 다른 케이스 추가
-    // case 'search':
-    //   currentComponent.value = SearchPanel
-    //   break
-    // case 'community':
-    //   currentComponent.value = CommunityPanel
-    //   break
+    case 'community':
+      currentComponent.value = CommunityPanel
+      break
     // case 'chatbot':
     //   currentComponent.value = ChatbotPanel
     //   break

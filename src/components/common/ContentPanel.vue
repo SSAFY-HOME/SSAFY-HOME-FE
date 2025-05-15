@@ -72,7 +72,7 @@ const getPanelTitle = (menu) => {
   }
 }
 
-// 패널이 활성화되거나 비활성화될 때 추가 동작이 필요하면 watch 사용
+//패널이 활성화되거나 비활성화될 때 추가 동작이 필요하면 watch 사용
 watch(
   () => props.activeMenu,
   (newValue) => {
