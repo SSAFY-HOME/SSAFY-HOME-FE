@@ -201,7 +201,7 @@ const fetchNearbyCommerces = async (keyword, category) => {
       emit('showAllOnMap', commerces.value)
     } else {
       console.error('주변 상권 검색 중 오류:', result.message)
-      commerces.value.data = []
+      commerces.value = []
     }
   } catch (error) {
     console.error('주변 상권 데이터를 불러오는 중 오류가 발생했습니다:', error)
