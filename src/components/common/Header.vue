@@ -5,7 +5,7 @@
       <div class="left-section">
         <div class="logo-container">
           <RouterLink to="/" class="logo">
-            <img src="@/assets/logogreen.png" alt="ZIPZIP" class="logo-img" />
+            <img src="@/assets/logobright_green.png" alt="ZIPZIP" class="logo-img" />
           </RouterLink>
         </div>
 
@@ -39,11 +39,15 @@
             <img src="@/assets/search-icon-white.png" alt="Search" class="search-input-icon" />
           </button>
         </div>
-        <LogoutModal
-          :is-visible="isLogoutModalVisible"
-          :message="logoutMessage"
-          @close="closeLogout"
-        />
+        <!-- 로그아웃 모달 -->
+        <teleport to="body">
+          <!--teleport로 감싸줘야지 header내가 아닌 body에서 동작-->
+          <LogoutModal
+            :is-visible="isLogoutModalVisible"
+            :message="logoutMessage"
+            @close="closeLogout"
+          />
+        </teleport>
       </div>
     </div>
   </header>
@@ -77,7 +81,7 @@ const handleLogout = () => {
 // 로그아웃 모달 닫기
 const closeLogout = () => {
   isLogoutModalVisible.value = false
-  router.push('/login')
+  router.push('/')
 }
 
 // 컴포넌트 마운트 시 로그인 상태 확인

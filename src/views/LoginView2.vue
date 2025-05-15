@@ -122,7 +122,7 @@ const handleLogin = async () => {
       if (result.hasHome === false) {
         router.push('/regist/home')
       } else {
-        router.push('/main')
+        router.push('/')
       }
     } else {
       // 오류 메시지 표시
