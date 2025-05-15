@@ -15,6 +15,7 @@
         @show-on-map="$emit('show-on-map', $event)"
         @show-all-on-map="$emit('show-all-on-map', $event)"
         @view-listings="$emit('view-listings', $event)"
+        @view-commerces="emit('view-commerces', $event)"
       />
     </div>
   </div>
@@ -36,7 +37,13 @@ const props = defineProps({
 })
 
 // 이벤트 정의 - view-listings 이벤트 추가
-const emit = defineEmits(['close-panel', 'show-on-map', 'show-all-on-map', 'view-listings'])
+const emit = defineEmits([
+  'close-panel',
+  'show-on-map',
+  'show-all-on-map',
+  'view-listings',
+  'view-commerces',
+])
 
 // 패널 닫기 함수
 const closePanel = () => {

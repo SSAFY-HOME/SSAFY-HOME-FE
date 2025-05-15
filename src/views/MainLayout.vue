@@ -20,13 +20,26 @@
         @show-on-map="handleShowOnMap"
         @show-all-on-map="handleShowAllOnMap"
         @view-listings="handleViewListings"
+        @view-commerces="handleViewCommerces"
       />
 
-      <!-- ListingPanel 추가 -->
-      <ListingPanel
+      <!-- DealPanel 추가 -->
+      <DealPanel
         :isVisible="isListingPanelVisible"
         :apartment="selectedApartment"
         @close="closeListingPanel"
+      />
+
+      <!-- CommercePanel 추가 -->
+      <CommercePanel
+        :is-visible="isCommercePanelVisible"
+        :province="selectedLocation.province"
+        :city="selectedLocation.city"
+        :district="selectedLocation.district"
+        :district-id="selectedLocation.districtId"
+        @close="closeCommercePanel"
+        @show-on-map="handleShowOnMap"
+        @show-all-on-map="handleShowCommercesOnMap"
       />
 
       <!-- 지도 컴포넌트 -->
@@ -39,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, shallowRef, onMounted } from 'vue'
+import { ref, shallowRef, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 // 컴포넌트 임포트
@@ -47,7 +60,8 @@ import Sidebar from '@/components/common/AppSidebar.vue'
 import KakaoMap from '@/components/common/KakaoMap.vue'
 import ContentPanel from '@/components/common/ContentPanel.vue'
 import LogoutModal from '@/components/modal/LogoutModal.vue'
-import ListingPanel from '@/components/panel/DealPanel.vue'
+import DealPanel from '@/components/panel/DealPanel.vue'
+import CommercePanel from '@/components/panel/CommercePanel.vue'
 
 // 패널 컴포넌트 임포트
 import HomePanel from '@/components/panel/HomePanel.vue'
@@ -93,6 +107,7 @@ const activateMenu = (menuName) => {
     kakaoMapRef.value.clearMarkers()
     // ListingPanel도 함께 닫기
     isListingPanelVisible.value = false
+    isCommercePanelVisible.value = false
   }
 
   activeMenu.value = menuName
@@ -145,16 +160,19 @@ const closeLogout = () => {
   isLogoutModalVisible.value = false
 }
 
-// Listing Panel 관련 상태 관리
+// DealPanel 관련 상태 관리
 const isListingPanelVisible = ref(false)
 const selectedApartment = ref(null)
 
-// ListingPanel 관련 함수 추가
+// DealPanel 관련 함수
 const handleViewListings = (apartment) => {
   console.log('매물 리스트 보기 요청:', apartment)
   selectedApartment.value = apartment
   isListingPanelVisible.value = true
 
+  if (isCommercePanelVisible.value) {
+    isCommercePanelVisible.value = false
+  }
   // 선택된 아파트를 지도에서 강조 표시 (선택사항)
   if (kakaoMapRef.value) {
     handleShowOnMap({
@@ -169,8 +187,32 @@ const handleViewListings = (apartment) => {
   }
 }
 
+// 상권 정보를 지도에 표시하는 핸들러
+const handleShowCommercesOnMap = (commerces) => {
+  if (kakaoMapRef.value) {
+    // 먼저 모든 기존 마커 제거
+    kakaoMapRef.value.clearMarkers()
+
+    // 상권 마커만 표시
+    kakaoMapRef.value.showMultipleCommercesOnMap(commerces)
+  }
+}
+
+// Commerce Panel 관련 상태 관리
+const isCommercePanelVisible = ref(false)
+const selectedLocation = ref({
+  province: '',
+  city: '',
+  district: '',
+  districtId: '',
+})
+
 const closeListingPanel = () => {
   isListingPanelVisible.value = false
+}
+
+const closeCommercePanel = () => {
+  isCommercePanelVisible.value = false
 }
 
 // 패널 닫기
@@ -181,6 +223,9 @@ const closePanel = () => {
   }
   activeMenu.value = ''
   currentComponent.value = null
+
+  isListingPanelVisible.value = false
+  isCommercePanelVisible.value = false
 }
 
 // 지도 관련 핸들러
@@ -191,6 +236,26 @@ const handleShowOnMap = (apartmentInfo) => {
 const handleShowAllOnMap = (apartments) => {
   kakaoMapRef.value.showMultipleApartmentsOnMap(apartments)
 }
+
+// CommercePanel 관련 함수
+const handleViewCommerces = (locationInfo) => {
+  console.log('주변 상권 보기 요청:', locationInfo)
+  selectedLocation.value = locationInfo
+  isCommercePanelVisible.value = true
+
+  // 매물 패널이 열려있으면 닫기
+  if (isListingPanelVisible.value) {
+    isListingPanelVisible.value = false
+  }
+}
+
+// PropertySearchPanel이 아파트가 선택 해제될 때 알 수 있도록 감시자 추가
+watch(isListingPanelVisible, (newValue) => {
+  // 매물 패널이 닫힐 때 선택된 아파트 정보 초기화
+  if (!newValue) {
+    selectedApartment.value = null
+  }
+})
 
 // 컴포넌트 마운트 시 실행
 onMounted(() => {

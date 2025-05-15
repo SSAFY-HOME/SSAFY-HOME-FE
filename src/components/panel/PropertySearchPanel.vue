@@ -95,45 +95,11 @@
       <button class="search-button" @click="searchApartments" :disabled="!selectedDistrict">
         <span class="button-text">검색</span>
       </button>
+      <button class="commerce-button" @click="openCommercePanel" :disabled="!selectedDistrict">
+        <span class="button-icon">🏪</span>
+        <span class="button-text">주변 상권보기</span>
+      </button>
     </div>
-
-    <!-- 필터 옵션 -->
-    <div class="filter-section" v-if="searchPerformed">
-      <h4 class="filter-title">필터</h4>
-      <div class="filter-row">
-        <div class="filter-group">
-          <label>가격 범위</label>
-          <div class="range-selector">
-            <input type="text" placeholder="최소" v-model="priceMin" />
-            <span class="range-divider">~</span>
-            <input type="text" placeholder="최대" v-model="priceMax" />
-          </div>
-        </div>
-
-        <!-- <div class="filter-group">
-          <label>평수</label>
-          <div class="range-selector">
-            <input type="text" placeholder="최소" v-model="areaMin" />
-            <span class="range-divider">~</span>
-            <input type="text" placeholder="최대" v-model="areaMax" />
-          </div>
-        </div> -->
-      </div>
-
-      <div class="filter-row">
-        <div class="filter-group">
-          <label>건축년도</label>
-          <div class="range-selector">
-            <input type="text" placeholder="최소" v-model="yearMin" />
-            <span class="range-divider">~</span>
-            <input type="text" placeholder="최대" v-model="yearMax" />
-          </div>
-        </div>
-
-        <button class="apply-filter-button" @click="applyFilters">필터 적용</button>
-      </div>
-    </div>
-
     <!-- 검색 결과 -->
     <div class="search-results" v-if="searchPerformed">
       <div class="results-header">
@@ -167,10 +133,8 @@
           v-for="apartment in apartments"
           :key="apartment.id"
           @click="showOnMap(apartment)"
+          :class="{ 'selected-apartment': selectedApartmentId === apartment.id }"
         >
-          <!-- <div class="apartment-image">
-            <img :src="apartment.image || 'https://via.placeholder.com/150'" alt="아파트 이미지" />
-          </div> -->
           <div class="apartment-info">
             <h3 class="apartment-name">{{ apartment.name }}</h3>
             <p class="apartment-address">{{ apartment.addr }}</p>
@@ -195,7 +159,7 @@ import { ref, onMounted, watch } from 'vue'
 import { apartmentAPI } from '@/api/apartment'
 
 // emit 정의 업데이트
-const emit = defineEmits(['showOnMap', 'showAllOnMap', 'view-listings'])
+const emit = defineEmits(['showOnMap', 'showAllOnMap', 'view-listings', 'view-commerces'])
 
 // 상태 관리
 const provinces = ref([])
@@ -216,12 +180,6 @@ const isLoadingCities = ref(false)
 const isLoadingDistricts = ref(false)
 const isLoadingApartments = ref(false)
 const searchPerformed = ref(false)
-
-// 필터 상태
-const priceMin = ref('')
-const priceMax = ref('')
-const yearMin = ref('')
-const yearMax = ref('')
 const sortOption = ref('price_asc')
 
 // Vue 컴포넌트 내부
@@ -349,19 +307,15 @@ const searchApartments = () => {
   }
 }
 
-const applyFilters = () => {
-  // 여기에 필터 적용 로직 구현
-  // 새로운 API 호출이나 기존 데이터 필터링
-  console.log('필터 적용:', {
-    가격: `${priceMin.value || '최소'} ~ ${priceMax.value || '최대'}`,
-    건축년도: `${yearMin.value || '최소'} ~ ${yearMax.value || '최대'}`,
-    정렬: sortOption.value,
-  })
-}
+// 추가: 선택된 아파트 ID를 저장할 상태 변수
+const selectedApartmentId = ref(null)
 
 // 지도에 표시 함수
 const showOnMap = (apartment) => {
   // 부모 컴포넌트로 아파트 위치 데이터 전달
+
+  // 선택된 아파트 ID 저장
+  selectedApartmentId.value = apartment.id
   emit('showOnMap', {
     latitude: apartment.latitude,
     longitude: apartment.longitude,
@@ -371,12 +325,32 @@ const showOnMap = (apartment) => {
   })
 }
 
-// 매물 리스트 보기 함수 수정
+// 매물 리스트 보기 함수
 const viewListings = (apartment) => {
   console.log(`${apartment.name}의 매물 리스트 보기 클릭됨`, apartment)
 
+  // 선택된 아파트 ID 저장
+  selectedApartmentId.value = apartment.id
+
   // 부모 컴포넌트로 선택된 아파트 정보 전달
   emit('view-listings', apartment)
+}
+
+// 주변 상권 패널 열기
+const openCommercePanel = () => {
+  if (!selectedDistrict.value) return
+
+  // districts 배열에서 선택된 동의 정보 찾기
+  const selectedDistrictObj = districts.value.find((d) => d.name === selectedDistrict.value)
+  if (!selectedDistrictObj) return
+
+  // 부모 컴포넌트로 상권 패널 열기 이벤트 발생
+  emit('view-commerces', {
+    province: selectedProvince.value,
+    city: selectedCity.value,
+    district: selectedDistrict.value,
+    districtId: selectedDistrictObj.id,
+  })
 }
 
 // 클릭 외부 감지 (드롭다운 닫기)
@@ -577,69 +551,24 @@ label {
   font-size: 14px;
 }
 
-/* 필터 섹션 */
-.filter-section {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-}
-
-.filter-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #555;
-}
-
-.filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.filter-group {
+/* 주변 상권보기 버튼 스타일 */
+.commerce-button {
   flex: 1;
-  min-width: 140px;
-}
-
-.range-selector {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.range-selector input {
-  flex: 1;
-  padding: 8px 10px;
-  width: 60px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 13px;
-}
-
-.range-divider {
-  color: #777;
-  font-size: 13px;
-}
-
-.apply-filter-button {
-  padding: 8px 16px;
-  background-color: #4caf50;
+  padding: 12px;
+  background-color: #485941;
   color: white;
   border: none;
-  border-radius: 4px;
-  font-weight: 500;
+  border-radius: 6px;
+  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  font-size: 13px;
-  margin-top: auto;
-  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.apply-filter-button:hover {
-  background-color: #388e3c;
+.commerce-button:hover {
+  background-color: #42523b;
 }
 
 /* 검색 결과 */
@@ -729,8 +658,10 @@ label {
   background-color: #fff;
   transition:
     transform 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    border-color 0.3s ease; /* 트랜지션에 border-color 추가 */
   cursor: pointer;
+  border: 2px solid transparent; /* 기본 border 설정 */
 }
 
 .apartment-card:hover {
@@ -738,21 +669,17 @@ label {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.apartment-image {
-  width: 120px;
-  height: 120px;
-  flex-shrink: 0;
+/* 선택된 아파트 카드 스타일 */
+.apartment-card.selected-apartment {
+  border-color: #4caf50; /* 선택된 아파트에 초록색 테두리 */
+  background-color: #f7fcf7; /* 배경색 살짝 변경 */
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2); /* 그림자 색상 변경 */
 }
 
-.apartment-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.apartment-card:hover .apartment-image img {
-  transform: scale(1.05);
+/* 선택된 상태에서 호버 효과 */
+.apartment-card.selected-apartment:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(76, 175, 80, 0.25);
 }
 
 .apartment-info {

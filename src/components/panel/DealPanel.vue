@@ -1,4 +1,4 @@
-// ListingPanel.vue - 매물 리스트 조회 패널
+// DealPanel.vue - 매물 리스트 조회 패널
 <template>
   <div class="listing-panel" :class="{ active: isVisible }">
     <div class="panel-header">
@@ -96,8 +96,8 @@
           </thead>
           <tbody>
             <tr
-              v-for="listing in filteredListings"
-              :key="`${listing.year}-${listing.month}-${listing.day}-${listing.floor}`"
+              v-for="(listing, index) in filteredListings"
+              :key="listing.dealId || `item-${index}`"
               class="listing-row"
             >
               <td class="date-cell">
@@ -612,7 +612,7 @@ onMounted(() => {
 @media (max-width: 768px) {
   .listing-panel.active {
     width: 100%;
-    left: 0;
+    left: 80px;
   }
 }
 </style>
