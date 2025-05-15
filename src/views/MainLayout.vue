@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref, shallowRef, onMounted } from 'vue'
+import { ref, shallowRef, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 // 컴포넌트 임포트
@@ -192,6 +192,14 @@ const handleShowOnMap = (apartmentInfo) => {
 const handleShowAllOnMap = (apartments) => {
   kakaoMapRef.value.showMultipleApartmentsOnMap(apartments)
 }
+
+// PropertySearchPanel이 아파트가 선택 해제될 때 알 수 있도록 감시자 추가
+watch(isListingPanelVisible, (newValue) => {
+  // 매물 패널이 닫힐 때 선택된 아파트 정보 초기화
+  if (!newValue) {
+    selectedApartment.value = null
+  }
+})
 
 // 컴포넌트 마운트 시 실행
 onMounted(() => {

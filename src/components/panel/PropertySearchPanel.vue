@@ -167,6 +167,7 @@
           v-for="apartment in apartments"
           :key="apartment.id"
           @click="showOnMap(apartment)"
+          :class="{ 'selected-apartment': selectedApartmentId === apartment.id }"
         >
           <!-- <div class="apartment-image">
             <img :src="apartment.image || 'https://via.placeholder.com/150'" alt="아파트 이미지" />
@@ -359,9 +360,15 @@ const applyFilters = () => {
   })
 }
 
+// 추가: 선택된 아파트 ID를 저장할 상태 변수
+const selectedApartmentId = ref(null)
+
 // 지도에 표시 함수
 const showOnMap = (apartment) => {
   // 부모 컴포넌트로 아파트 위치 데이터 전달
+
+  // 선택된 아파트 ID 저장
+  selectedApartmentId.value = apartment.id
   emit('showOnMap', {
     latitude: apartment.latitude,
     longitude: apartment.longitude,
@@ -374,6 +381,9 @@ const showOnMap = (apartment) => {
 // 매물 리스트 보기 함수 수정
 const viewListings = (apartment) => {
   console.log(`${apartment.name}의 매물 리스트 보기 클릭됨`, apartment)
+
+  // 선택된 아파트 ID 저장
+  selectedApartmentId.value = apartment.id
 
   // 부모 컴포넌트로 선택된 아파트 정보 전달
   emit('view-listings', apartment)
@@ -729,8 +739,10 @@ label {
   background-color: #fff;
   transition:
     transform 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    border-color 0.3s ease; /* 트랜지션에 border-color 추가 */
   cursor: pointer;
+  border: 2px solid transparent; /* 기본 border 설정 */
 }
 
 .apartment-card:hover {
@@ -738,21 +750,17 @@ label {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.apartment-image {
-  width: 120px;
-  height: 120px;
-  flex-shrink: 0;
+/* 선택된 아파트 카드 스타일 */
+.apartment-card.selected-apartment {
+  border-color: #4caf50; /* 선택된 아파트에 초록색 테두리 */
+  background-color: #f7fcf7; /* 배경색 살짝 변경 */
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2); /* 그림자 색상 변경 */
 }
 
-.apartment-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.apartment-card:hover .apartment-image img {
-  transform: scale(1.05);
+/* 선택된 상태에서 호버 효과 */
+.apartment-card.selected-apartment:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(76, 175, 80, 0.25);
 }
 
 .apartment-info {
