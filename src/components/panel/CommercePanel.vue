@@ -462,15 +462,15 @@ onMounted(() => {
 }
 
 .commerce-card.selected-commerce {
-  border-color: #2196f3;
-  background-color: #f0f8ff;
+  border-color: #4caf50;
+  background-color: #f0fff6;
   box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
 }
 
 .commerce-category {
   display: inline-block;
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: #caecbd;
+  color: #2a2a2a;
   font-size: 12px;
   padding: 3px 8px;
   border-radius: 4px;
