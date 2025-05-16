@@ -4,8 +4,8 @@
     <h3 class="section-title">아파트 커뮤니티</h3>
 
     <div class="community-form">
-      <!-- 내 아파트 표시 -->
-      <div class="apartment-info">
+      <!-- 내 아파트 표시 및 글쓰기 버튼 -->
+      <div class="apartment-header">
         <h4 class="apartment-name">
           {{ myApartmentName || '아파트 정보를 불러오는 중...' }}
         </h4>
@@ -13,9 +13,7 @@
         <div class="loading-info" v-if="isLoadingApartments">
           <div class="loading-spinner"></div>
         </div>
-      </div>
 
-      <div class="buttons-container">
         <button class="write-button" @click="openWriteForm" :disabled="!myApartmentName">
           <span class="button-icon">✏️</span>
           <span class="button-text">글쓰기</span>
@@ -84,15 +82,18 @@
         <div
           class="post-card"
           v-for="post in sortedPosts"
-          :key="post.id"
+          :key="post.communityId"
           @click="viewPostDetail(post)"
         >
           <div class="post-header">
             <div class="user-info">
               <div class="user-avatar">
-                <img :src="post.authorImage || '@/assets/default-avatar.png'" alt="프로필 이미지" />
+                <img
+                  :src="post.member.image || '@/assets/default-avatar.png'"
+                  alt="프로필 이미지"
+                />
               </div>
-              <span class="user-name">{{ post.authorName }}</span>
+              <span class="user-name">{{ post.member.name }}</span>
             </div>
             <div class="post-date">{{ formatDate(post.postDate) }}</div>
           </div>
@@ -105,12 +106,8 @@
           <div class="post-footer">
             <div class="post-actions">
               <button class="like-button" @click.stop="likePost(post)">
-                <span class="action-icon">❤️</span>
+                <span class="action-icon"> {{ post.liked ? '❤️' : '🤍' }}</span>
                 <span class="action-count">{{ post.like }}</span>
-              </button>
-              <button class="comment-button" @click.stop="viewPostDetail(post)">
-                <span class="action-icon">💬</span>
-                <span class="action-text">자세히 보기</span>
               </button>
             </div>
           </div>
@@ -126,44 +123,13 @@ import { ref, computed, onMounted, watch } from 'vue'
 // import { communityAPI } from '@/api/community'
 
 // emit 정의
-const emit = defineEmits(['view-post-detail'])
+const emit = defineEmits(['view-post-detail', 'show-on-map'])
 
 // 상태 관리
 const myApartmentName = ref('')
 const myApartmentId = ref(null)
-const posts = ref([
-  // 테스트 데이터
-  {
-    id: 1,
-    title: '주차장 이용에 관한 안내',
-    content:
-      '안녕하세요, 주차장 이용 시 방문객 주차 공간을 확보하기 위해 세대당 2대까지만 주차해주시기 바랍니다. 협조 부탁드립니다.',
-    authorName: '관리사무소',
-    authorImage: '',
-    likes: 15,
-    createdAt: new Date('2025-05-10'),
-  },
-  {
-    id: 2,
-    title: '분리수거 요일 변경 안내',
-    content:
-      '5월부터 분리수거 요일이 화요일에서 수요일로 변경됩니다. 변경된 일정에 맞춰 배출해주시기 바랍니다.',
-    authorName: '김주민',
-    authorImage: '',
-    likes: 8,
-    createdAt: new Date('2025-05-05'),
-  },
-  {
-    id: 3,
-    title: '놀이터 청소 봉사자 모집',
-    content:
-      '이번 주 토요일 오전 10시부터 단지 내 놀이터 청소 봉사를 진행합니다. 많은 참여 부탁드립니다.',
-    authorName: '박자원',
-    authorImage: '',
-    likes: 23,
-    createdAt: new Date('2025-05-12'),
-  },
-])
+const myApartmentLocation = ref(null)
+const posts = ref([])
 
 const isLoadingApartments = ref(false)
 const isLoadingPosts = ref(false)
@@ -179,16 +145,21 @@ const newPost = ref({
 // 정렬된 게시글 목록 (computed)
 const sortedPosts = computed(() => {
   if (sortOption.value === 'recent') {
-    return [...posts.value].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    return [...posts.value].sort((a, b) => {
+      const dateA = a?.postDate ? new Date(a.postDate) : new Date(0)
+      const dateB = b?.postDate ? new Date(b.postDate) : new Date(0)
+
+      return dateB - dateA
+    })
   } else if (sortOption.value === 'likes') {
-    return [...posts.value].sort((a, b) => b.likes - a.likes)
+    return [...posts.value].sort((a, b) => b.like - a.like)
   }
   return posts.value
 })
 
 import { memberAPI } from '@/api/member'
 
-// API 호출 함수
+// 아파트 가져오기 API 호출 함수
 const fetchMyApartment = async () => {
   isLoadingApartments.value = true
   try {
@@ -205,6 +176,7 @@ const fetchMyApartment = async () => {
     } else {
       myApartmentName.value = ''
       myApartmentId.value = null
+      myApartmentLocation.value = null
     }
   } catch (error) {
     console.error('내 아파트 데이터를 불러오는 중 오류가 발생했습니다:', error)
@@ -217,17 +189,14 @@ const fetchMyApartment = async () => {
 
 import { communityAPI } from '@/api/community'
 
+// 커뮤니티 글 목록 가져오기 API 호출 함수
 const fetchPosts = async () => {
   communityLoaded.value = true
   isLoadingPosts.value = true
 
   try {
-    // 실제 구현 시 API 호출로 변경
     const result = await communityAPI.getPosts()
     posts.value = result.data
-
-    // 데이터 로딩 시뮬레이션
-    //  await new Promise((resolve) => setTimeout(resolve, 800))
   } catch (error) {
     console.error('커뮤니티 글을 불러오는 중 오류가 발생했습니다:', error)
     posts.value = []
@@ -246,52 +215,80 @@ const cancelWrite = () => {
   showWriteForm.value = false
 }
 
+// 글 작성 API 호출
 const submitPost = async () => {
-  if (!newPost.value.title || !newPost.value.content || !myApartmentId.value) return
+  // 입력 검증
+  if (!newPost.value.title || !newPost.value.content) {
+    alert('제목, 내용을 모두 입력해주세요.')
+    return
+  }
 
   try {
-    // 실제 구현 시 API 호출로 변경
-    // await communityAPI.createPost({
-    //   apartmentId: myApartmentId.value,
-    //   title: newPost.value.title,
-    //   content: newPost.value.content
-    // })
-
-    // 임시로 게시글 추가 (실제 구현에서는 API 응답으로 대체)
-    const newPostObj = {
-      id: Date.now(), // 임시 ID
+    // API 요청 데이터 구성
+    const postData = {
       title: newPost.value.title,
       content: newPost.value.content,
-      authorName: '나', // 실제로는 로그인한 사용자 정보
-      authorImage: '',
-      likes: 0,
-      createdAt: new Date(),
     }
 
-    posts.value.unshift(newPostObj)
-    showWriteForm.value = false
-    newPost.value = { title: '', content: '' }
+    // API 호출
+    const result = await communityAPI.writePost(postData)
+
+    // 성공 시 처리
+    if (result.status === 200) {
+      // API 응답 데이터를 사용하여 게시글 목록에 추가
+      const newPostObj = result.data
+
+      // 목록의 맨 앞에 새 게시글 추가
+      posts.value.unshift(newPostObj)
+
+      // 폼 초기화 및 닫기
+      showWriteForm.value = false
+      newPost.value = { title: '', content: '' }
+
+      // 성공 알림
+      alert('게시글이 성공적으로 등록되었습니다.')
+    } else {
+      // 서버에서 오류 응답이 왔을 경우
+      throw new Error(result.message || '게시글 등록에 실패했습니다.')
+    }
   } catch (error) {
     console.error('게시글 등록 중 오류가 발생했습니다:', error)
-    alert('게시글 등록에 실패했습니다. 다시 시도해주세요.')
+    alert(error.message || '게시글 등록에 실패했습니다. 다시 시도해주세요.')
   }
 }
 
 const likePost = async (post) => {
   try {
-    // 실제 구현 시 API 호출로 변경
-    // await communityAPI.likePost(post.id)
+    // 이미 좋아요를 눌렀으면 함수 종료
+    if (post.liked) {
+      return
+    }
 
-    // 임시로 좋아요 증가 (실제 구현에서는 API 응답으로 갱신)
-    const postIndex = posts.value.findIndex((p) => p.id === post.id)
+    // 실제 API 호출
+    await communityAPI.likePost(post.communityId)
+
+    // 좋아요 상태와 카운트 업데이트
+    const postIndex = posts.value.findIndex((p) => p.communityId === post.communityId)
     if (postIndex !== -1) {
       posts.value[postIndex] = {
         ...posts.value[postIndex],
-        likes: posts.value[postIndex].likes + 1,
+        like: posts.value[postIndex].like + 1,
+        liked: true,
       }
     }
   } catch (error) {
     console.error('좋아요 처리 중 오류가 발생했습니다:', error)
+
+    // 오류가 "이미 좋아요를 누른 게시글입니다"와 같은 경우 처리
+    if (error.response && error.response.status === 400) {
+      alert('이미 좋아요를 누른 게시글입니다.')
+
+      // 백엔드와 상태 동기화 (이미 좋아요 상태로 설정)
+      const postIndex = posts.value.findIndex((p) => p.communityId === post.communityId)
+      if (postIndex !== -1) {
+        posts.value[postIndex].isLiked = true
+      }
+    }
   }
 }
 
@@ -354,16 +351,20 @@ const onUnmounted = () => {
   margin-bottom: 20px;
 }
 
-.apartment-info {
-  margin-bottom: 16px;
+/* 아파트 헤더와 글쓰기 버튼을 한 줄에 배치 */
+.apartment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
 }
 
 .apartment-name {
   font-size: 18px;
   font-weight: 600;
   color: #333;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
+  margin: 0;
 }
 
 .loading-info {
@@ -381,14 +382,9 @@ const onUnmounted = () => {
   animation: spin 1s linear infinite;
 }
 
-.buttons-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
-}
-
+/* 글쓰기 버튼 스타일 변경 - 초록색으로 */
 .write-button {
-  padding: 12px;
+  padding: 8px 16px;
   color: white;
   border: none;
   border-radius: 6px;
@@ -398,11 +394,11 @@ const onUnmounted = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #5c6bc0;
+  background-color: #4caf50; /* 초록색으로 변경 */
 }
 
 .write-button:hover {
-  background-color: #3f51b5;
+  background-color: #388e3c; /* 더 짙은 초록색으로 변경 */
 }
 
 .write-button:disabled {
@@ -579,9 +575,10 @@ const onUnmounted = () => {
 .post-card {
   display: flex;
   flex-direction: column;
-  border-radius: 8px;
+  border-radius: 5px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 200px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   background-color: #fff;
   transition:
     transform 0.2s ease,
@@ -662,6 +659,14 @@ const onUnmounted = () => {
   justify-content: space-between;
 }
 
+.like-button.liked {
+  color: #ff3366;
+}
+
+.like-button.liked .action-icon {
+  color: #ff3366;
+}
+
 .like-button,
 .comment-button {
   display: flex;
@@ -692,8 +697,14 @@ const onUnmounted = () => {
 
 /* 모바일 반응형 스타일 */
 @media (max-width: 480px) {
-  .buttons-container {
+  .apartment-header {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .write-button {
+    align-self: flex-end;
   }
 }
 </style>

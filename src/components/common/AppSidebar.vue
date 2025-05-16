@@ -4,7 +4,7 @@
       <!-- 페이지 로고 - 클릭 시 홈으로 이동 -->
       <div class="logo-container" @click="goToHome">
         <div class="logo-icon">
-          <img src="@/assets/logogreen.png" alt="ZIPZIP" class="logo-img" />
+          <img src="@/assets/logobright_green.png" alt="ZIPZIP" class="logo-img" />
         </div>
         <!-- <div class="logo-text">
           <span>ZIP</span>

@@ -27,4 +27,49 @@ export const communityAPI = {
       }
     }
   },
+  /**
+   *  커뮤니티 글 작성 함수
+   * @returns {Promise<Object>} 커뮤니티 작성 결과
+   */
+  writePost: async (postData) => {
+    try {
+      // API 요청
+      const response = await api.post(`/community`, postData)
+      return {
+        status: 200,
+        data: response.data,
+        message: '커뮤니티 글을 성공적으로 작성했습니다.',
+      }
+    } catch (error) {
+      console.error('커뮤니티 글 작성 중 오류가 발생했습니다:', error)
+      return {
+        status: error.response?.status || 500,
+        message: error.response?.data?.message || '커뮤니티 글 작성 중 오류가 발생했습니다.',
+        error: error,
+      }
+    }
+  },
+
+  /**
+   *  커뮤니티 글 좋아요 함수
+   * @returns {Promise<Object>} 커뮤니티 글 좋아요 결과
+   */
+  likePost: async (communityId) => {
+    try {
+      // API 요청
+      const response = await api.post(`/community/like/${communityId}`)
+      return {
+        status: 200,
+        data: response.data,
+        message: '좋아요를 성공적으로 등록했습니다.',
+      }
+    } catch (error) {
+      console.error('좋아요를 등록하는 중 오류가 발생했습니다:', error)
+      return {
+        status: error.response?.status || 500,
+        message: error.response?.data?.message || '두 번 좋아요를 누를 수 없습니다.',
+        error: error,
+      }
+    }
+  },
 }
