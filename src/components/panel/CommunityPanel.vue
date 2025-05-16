@@ -56,6 +56,41 @@
       </div>
     </div>
 
+    <!-- 수정 폼 (토글) -->
+    <div class="write-form" v-if="showEditForm && editingPost">
+      <h4 class="form-title">글 수정</h4>
+      <div class="form-group">
+        <label for="edit-post-title">제목</label>
+        <input
+          type="text"
+          id="edit-post-title"
+          v-model="editingPost.title"
+          placeholder="제목을 입력하세요"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="edit-post-content">내용</label>
+        <textarea
+          id="edit-post-content"
+          v-model="editingPost.content"
+          placeholder="내용을 입력하세요"
+          class="form-textarea"
+          rows="4"
+        ></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="cancel-button" @click="cancelEdit">취소</button>
+        <button
+          class="submit-button"
+          @click="updatePost"
+          :disabled="!editingPost.title || !editingPost.content"
+        >
+          수정하기
+        </button>
+      </div>
+    </div>
+
     <!-- 커뮤니티 글 목록 -->
     <div class="community-results" v-if="communityLoaded">
       <div class="results-header">
@@ -79,12 +114,7 @@
       </div>
 
       <div class="post-list" v-if="posts.length > 0">
-        <div
-          class="post-card"
-          v-for="post in sortedPosts"
-          :key="post.communityId"
-          @click="viewPostDetail(post)"
-        >
+        <div class="post-card" v-for="post in sortedPosts" :key="post.communityId">
           <div class="post-header">
             <div class="user-info">
               <div class="user-avatar">
@@ -98,7 +128,7 @@
             <div class="post-date">{{ formatDate(post.postDate) }}</div>
           </div>
 
-          <div class="post-content">
+          <div class="post-content" @click="viewPostDetail(post)">
             <h3 class="post-title">{{ post.title }}</h3>
             <p class="post-text">{{ truncateText(post.content) }}</p>
           </div>
@@ -109,6 +139,18 @@
                 <span class="action-icon"> {{ post.liked ? '❤️' : '🤍' }}</span>
                 <span class="action-count">{{ post.like }}</span>
               </button>
+
+              <!-- 내가 작성한 글인 경우에만 수정/삭제 버튼 표시 -->
+              <div class="my-post-actions" v-if="post.mine">
+                <button class="edit-button" @click.stop="openEditForm(post)">
+                  <span class="action-icon">✏️</span>
+                  <span class="action-text">수정</span>
+                </button>
+                <button class="delete-button" @click.stop="confirmDelete(post)">
+                  <span class="action-icon">🗑️</span>
+                  <span class="action-text">삭제</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -136,6 +178,8 @@ const isLoadingPosts = ref(false)
 const communityLoaded = ref(false)
 const sortOption = ref('recent')
 const showWriteForm = ref(false)
+const showEditForm = ref(false)
+const editingPost = ref(null)
 
 const newPost = ref({
   title: '',
@@ -146,8 +190,8 @@ const newPost = ref({
 const sortedPosts = computed(() => {
   if (sortOption.value === 'recent') {
     return [...posts.value].sort((a, b) => {
-      const dateA = a?.postDate ? new Date(a.postDate) : new Date(0)
-      const dateB = b?.postDate ? new Date(b.postDate) : new Date(0)
+      const dateA = a?.postDate ? new Date(a.updateDate) : new Date(0)
+      const dateB = b?.postDate ? new Date(b.updateDate) : new Date(0)
 
       return dateB - dateA
     })
@@ -208,11 +252,32 @@ const fetchPosts = async () => {
 // 이벤트 핸들러
 const openWriteForm = () => {
   showWriteForm.value = true
+  showEditForm.value = false
   newPost.value = { title: '', content: '' }
 }
 
 const cancelWrite = () => {
   showWriteForm.value = false
+}
+
+// 수정 폼 열기
+const openEditForm = (post) => {
+  editingPost.value = { ...post }
+  showEditForm.value = true
+  showWriteForm.value = false
+}
+
+// 수정 취소
+const cancelEdit = () => {
+  showEditForm.value = false
+  editingPost.value = null
+}
+
+// 삭제 확인
+const confirmDelete = (post) => {
+  if (confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+    deletePost(post)
+  }
 }
 
 // 글 작성 API 호출
@@ -254,6 +319,82 @@ const submitPost = async () => {
   } catch (error) {
     console.error('게시글 등록 중 오류가 발생했습니다:', error)
     alert(error.message || '게시글 등록에 실패했습니다. 다시 시도해주세요.')
+  }
+}
+
+// 글 수정 API 호출
+const updatePost = async () => {
+  // 입력 검증
+  if (!editingPost.value.title || !editingPost.value.content) {
+    alert('제목, 내용을 모두 입력해주세요.')
+    return
+  }
+  //  console.log(editingPost.value.communityId)
+
+  try {
+    // API 요청 데이터 구성
+    const result = await communityAPI.updatePost(
+      editingPost.value.communityId, // communityId를 첫 번째 인자로 전달
+      {
+        // 제목과 내용만 객체로 전달
+        title: editingPost.value.title,
+        content: editingPost.value.content,
+      },
+    )
+
+    // 성공 시 처리
+    if (result.status === 200) {
+      // 수정된 게시글 정보로 업데이트
+      const updatedPost = result.data
+      const postIndex = posts.value.findIndex(
+        (p) => p.communityId === editingPost.value.communityId,
+      )
+
+      if (postIndex !== -1) {
+        posts.value[postIndex] = {
+          ...posts.value[postIndex],
+          title: updatedPost.title,
+          content: updatedPost.content,
+          updateDate: updatedPost.updateDate,
+        }
+      }
+
+      // 폼 초기화 및 닫기
+      showEditForm.value = false
+      editingPost.value = null
+
+      // 성공 알림
+      alert('게시글이 성공적으로 수정되었습니다.')
+    } else {
+      // 서버에서 오류 응답이 왔을 경우
+      throw new Error(result.message || '게시글 수정에 실패했습니다.')
+    }
+  } catch (error) {
+    console.error('게시글 수정 중 오류가 발생했습니다:', error)
+    alert(error.message || '게시글 수정에 실패했습니다. 다시 시도해주세요.')
+  }
+}
+
+// 글 삭제 API 호출
+const deletePost = async (post) => {
+  try {
+    // API 호출
+    const result = await communityAPI.deletePost(post.communityId)
+
+    // 성공 시 처리
+    if (result.status === 200) {
+      // 삭제된 게시글을 목록에서 제거
+      posts.value = posts.value.filter((p) => p.communityId !== post.communityId)
+
+      // 성공 알림
+      alert('게시글이 성공적으로 삭제되었습니다.')
+    } else {
+      // 서버에서 오류 응답이 왔을 경우
+      throw new Error(result.message || '게시글 삭제에 실패했습니다.')
+    }
+  } catch (error) {
+    console.error('게시글 삭제 중 오류가 발생했습니다:', error)
+    alert(error.message || '게시글 삭제에 실패했습니다. 다시 시도해주세요.')
   }
 }
 
@@ -583,7 +724,6 @@ const onUnmounted = () => {
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
-  cursor: pointer;
 }
 
 .post-card:hover {
@@ -634,6 +774,7 @@ const onUnmounted = () => {
 .post-content {
   padding: 16px;
   flex-grow: 1;
+  cursor: pointer;
 }
 
 .post-title {
@@ -657,6 +798,7 @@ const onUnmounted = () => {
 .post-actions {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .like-button.liked {
@@ -668,23 +810,49 @@ const onUnmounted = () => {
 }
 
 .like-button,
-.comment-button {
+.comment-button,
+.edit-button,
+.delete-button {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 4px 8px;
   color: #555;
-  font-size: 14px;
+  font-size: 13px;
   border-radius: 4px;
   transition: background-color 0.2s ease;
 }
 
 .like-button:hover,
-.comment-button:hover {
+.comment-button:hover,
+.edit-button:hover,
+.delete-button:hover {
   background-color: #f5f5f5;
+}
+
+/* 내 글일 때 표시되는 수정/삭제 버튼 스타일 */
+.my-post-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.edit-button {
+  color: #2196f3;
+}
+
+.edit-button:hover {
+  background-color: rgba(33, 150, 243, 0.1);
+}
+
+.delete-button {
+  color: #f44336;
+}
+
+.delete-button:hover {
+  background-color: rgba(244, 67, 54, 0.1);
 }
 
 .action-icon {
@@ -692,6 +860,11 @@ const onUnmounted = () => {
 }
 
 .action-count {
+  font-weight: 500;
+}
+
+.action-text {
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -705,6 +878,16 @@ const onUnmounted = () => {
 
   .write-button {
     align-self: flex-end;
+  }
+
+  .post-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .my-post-actions {
+    margin-top: 4px;
   }
 }
 </style>

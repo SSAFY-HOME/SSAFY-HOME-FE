@@ -51,6 +51,57 @@ export const communityAPI = {
   },
 
   /**
+   * 커뮤니티 글 수정 함수
+   * @param {Number} communityId - 수정할 커뮤니티 글 ID
+   * @param {Object} data - 수정할 데이터 (title, content)
+   * @returns {Promise<Object>} 커뮤니티 수정 결과
+   */
+  updatePost: async (communityId, data) => {
+    try {
+      // API 요청 - pathVariable로 communityId 전달, body로는 title과 content만 전달
+      const response = await api.put(`/community/${communityId}`, {
+        title: data.title,
+        content: data.content,
+      })
+
+      return {
+        status: 200,
+        data: response.data,
+        message: '커뮤니티 글을 성공적으로 수정했습니다.',
+      }
+    } catch (error) {
+      console.error('커뮤니티 글 수정 중 오류가 발생했습니다:', error)
+      return {
+        status: error.response?.status || 500,
+        message: error.response?.data?.message || '커뮤니티 글 수정 중 오류가 발생했습니다.',
+        error: error,
+      }
+    }
+  },
+
+  /**
+   *  커뮤니티 글 삭제 함수
+   * @returns {Promise<Object>} 커뮤니티 삭제 결과
+   */
+  deletePost: async (communityId) => {
+    try {
+      // API 요청
+      const response = await api.delete(`/community/${communityId}`)
+      return {
+        status: 200,
+        data: response.data,
+        message: '커뮤니티 글을 성공적으로 삭제했습니다.',
+      }
+    } catch (error) {
+      console.error('커뮤니티 글 삭제 중 오류가 발생했습니다:', error)
+      return {
+        status: error.response?.status || 500,
+        message: error.response?.data?.message || '커뮤니티 글 삭제 중 오류가 발생했습니다.',
+        error: error,
+      }
+    }
+  },
+  /**
    *  커뮤니티 글 좋아요 함수
    * @returns {Promise<Object>} 커뮤니티 글 좋아요 결과
    */
