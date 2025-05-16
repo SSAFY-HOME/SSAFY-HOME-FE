@@ -1,7 +1,7 @@
 <!-- CommunityPanel.vue -->
 <template>
   <div class="community-panel">
-    <h3 class="section-title">아파트 커뮤니티</h3>
+    <h3 class="section-title">나의 아파트 커뮤니티</h3>
 
     <div class="community-form">
       <!-- 내 아파트 표시 및 글쓰기 버튼 -->
@@ -118,10 +118,7 @@
           <div class="post-header">
             <div class="user-info">
               <div class="user-avatar">
-                <img
-                  :src="post.member.image || '@/assets/default-avatar.png'"
-                  alt="프로필 이미지"
-                />
+                <img :src="post.member.image || defaultProfileImage" alt="프로필 이미지" />
               </div>
               <span class="user-name">{{ post.member.name }}</span>
             </div>
@@ -161,8 +158,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-// 실제 구현 시 API 임포트 추가
-// import { communityAPI } from '@/api/community'
+import defaultProfileImage from '@/assets/default_profile_img.png'
 
 // emit 정의
 const emit = defineEmits(['view-post-detail', 'show-on-map'])
