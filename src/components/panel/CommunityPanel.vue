@@ -1,6 +1,14 @@
 <!-- CommunityPanel.vue -->
 <template>
-  <div class="community-panel">
+  <div v-if="!isLoggedIn" class="login-required-container">
+    <div class="login-icon">
+      <img src="@/assets/toLogin-icon.png" alt="toLogin Icon" class="toLogin-icon" />
+    </div>
+    <h2 class="login-title">로그인이 필요합니다</h2>
+    <p class="login-message">프로필 정보를 확인하려면 로그인해주세요.</p>
+    <button class="login-button" @click="goToLogin">로그인 하기</button>
+  </div>
+  <div v-else>
     <h3 class="section-title">나의 아파트 커뮤니티</h3>
 
     <div class="community-form">
@@ -168,7 +176,7 @@ const myApartmentName = ref('')
 const myApartmentId = ref(null)
 const myApartmentLocation = ref(null)
 const posts = ref([])
-
+const isLoggedIn = ref(false)
 const isLoadingApartments = ref(false)
 const isLoadingPosts = ref(false)
 const communityLoaded = ref(false)
@@ -394,6 +402,7 @@ const deletePost = async (post) => {
   }
 }
 
+// 좋아요 API 호출
 const likePost = async (post) => {
   try {
     // 이미 좋아요를 눌렀으면 함수 종료
@@ -429,6 +438,10 @@ const likePost = async (post) => {
   }
 }
 
+import { useRouter } from 'vue-router'
+const router = useRouter()
+const goToLogin = () => router.push('/login')
+
 const viewPostDetail = (post) => {
   emit('view-post-detail', post)
 }
@@ -452,6 +465,19 @@ const truncateText = (text, maxLength = 100) => {
   return text.slice(0, maxLength) + '...'
 }
 
+const checkLoginStatus = () => {
+  const token = localStorage.getItem('accessToken')
+  isLoggedIn.value = !!token
+  if (isLoggedIn.value) {
+    // 로그인 상태일 때 아파트 정보 가져오기
+    fetchMyApartment()
+  } else {
+    // 로그아웃 상태일 때 아파트 정보 초기화
+    myApartmentName.value = ''
+    myApartmentId.value = null
+  }
+}
+
 // 클릭 외부 감지 (필요 없지만 혹시 남아있을 수 있는 드롭다운 관련 로직 지원)
 const handleClickOutside = (event) => {
   // 드롭다운 관련 코드가 더 이상 필요하지 않지만, 다른 곳에서 참조될 수 있어 빈 함수로 유지
@@ -459,7 +485,7 @@ const handleClickOutside = (event) => {
 
 // 컴포넌트 마운트 시 초기 데이터 로드
 onMounted(() => {
-  fetchMyApartment()
+  checkLoginStatus()
   document.addEventListener('click', handleClickOutside)
 })
 
@@ -486,6 +512,72 @@ const onUnmounted = () => {
   flex-direction: column;
   gap: 12px;
   margin-bottom: 20px;
+}
+
+/* 로그인이 필요한 경우 스타일 */
+.login-required-container {
+  background-color: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.5s ease;
+}
+
+.login-icon {
+  margin-bottom: 20px;
+  color: #888;
+}
+
+.toLogin-icon {
+  height: 200px;
+  width: 200px;
+  transition: transform 0.3s ease;
+}
+
+.login-icon:hover .toLogin-icon {
+  transform: scale(1.05);
+}
+
+.login-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.login-message {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.login-button {
+  padding: 14px 34px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.login-button:hover {
+  background-color: #388e3c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.login-button:active {
+  transform: translateY(0);
 }
 
 /* 아파트 헤더와 글쓰기 버튼을 한 줄에 배치 */
