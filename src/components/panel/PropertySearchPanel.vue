@@ -1,4 +1,4 @@
-<!-- PropertyPanel.vue의 수정된 부분 -->
+<!-- PropertySearchPanel.vue의 수정된 부분 -->
 <template>
   <div class="property-panel">
     <h3 class="section-title">아파트 검색</h3>

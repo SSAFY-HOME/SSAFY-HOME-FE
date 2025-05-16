@@ -173,11 +173,11 @@ const showCommerceOnMap = (commerceInfo) => {
 
   // 인포윈도우 내용 생성
   const iwContent = `
-    <div class="info-window commerce-info" style="padding: 10px; max-width: 250px; font-size: 13px;">
+    <div class="info-window commerce-info" style="padding: 10px 10px 21px 10px; max-width: 250px; font-size: 13px;">
       <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${commerceInfo.name || commerceInfo.place_name}</div>
       <div style="color: #2196f3; margin-bottom: 5px;">${commerceInfo.category || commerceInfo.category_name}</div>
-      <div style="color: #666; margin-bottom: 5px;">${commerceInfo.address || commerceInfo.address_name}</div>
-      ${commerceInfo.phone ? `<div style="color: #666;">☎️ ${commerceInfo.phone}</div>` : ''}
+      <div style="color: #666; margin-bottom: 5px;"></div>
+      <div style="color: #666;"></div>
       ${commerceInfo.place_url ? `<div style="margin-top: 8px;"><a href="${commerceInfo.place_url}" target="_blank" style="color: #2196f3; text-decoration: none;">상세정보 보기</a></div>` : ''}
     </div>
   `
@@ -343,8 +343,8 @@ const showMultipleCommercesOnMap = (commerces) => {
       <div class="info-window commerce-info" style="padding: 10px; max-width: 250px; font-size: 13px;">
         <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${commerce.place_name}</div>
         <div style="color: #2196f3; margin-bottom: 5px;">${commerce.category_name}</div>
-        <div style="color: #666; margin-bottom: 5px;">${commerce.address_name}</div>
-        ${commerce.phone ? `<div style="color: #666;">☎️ ${commerce.phone}</div>` : ''}
+        <div style="color: #666; margin-bottom: 5px;"></div>
+        <div style="color: #666;"></div>}
         ${commerce.place_url ? `<div style="margin-top: 8px;"><a href="${commerce.place_url}" target="_blank" style="color: #2196f3; text-decoration: none;">상세정보 보기</a></div>` : ''}
       </div>
     `

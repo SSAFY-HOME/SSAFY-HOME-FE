@@ -4,12 +4,8 @@
       <!-- 페이지 로고 - 클릭 시 홈으로 이동 -->
       <div class="logo-container" @click="goToHome">
         <div class="logo-icon">
-          <img src="@/assets/logogreen.png" alt="ZIPZIP" class="logo-img" />
+          <img src="@/assets/logobright_green.png" alt="ZIPZIP" class="logo-img" />
         </div>
-        <!-- <div class="logo-text">
-          <span>ZIP</span>
-          <span>ZIP</span>
-        </div> -->
       </div>
 
       <!-- 내 ZIP -->
@@ -277,7 +273,13 @@ const handleNotice = () => {
   router.push('/notice')
 }
 const goToMyPage = () => {
-  router.push('/mypage')
+  if (localStorage.getItem('accessToken') === null) {
+    alert('로그인 후 이용해주세요.')
+    router.push('/login')
+    return
+  } else {
+    router.push('/mypage')
+  }
 }
 </script>
 

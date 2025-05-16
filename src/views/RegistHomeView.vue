@@ -117,7 +117,7 @@
           <p class="apartment-address">{{ selectedApartment.addr }}</p>
           <div class="apartment-details">
             <span class="detail-item">{{ selectedApartment.buildYear }}년 준공</span>
-            <span class="detail-item">도로명: {{ selectedApartment.roadNmSggCd }}</span>
+            <span class="detail-item">도로명 {{ selectedApartment.roadNmSggCd }}</span>
           </div>
         </div>
         <button class="register-button" @click="registerApartment">이 아파트 등록하기</button>
@@ -156,7 +156,7 @@
               <p class="apartment-address">{{ apartment.addr }}</p>
               <div class="apartment-details">
                 <span class="detail-item">{{ apartment.buildYear }}년 준공</span>
-                <span class="detail-item">도로명 주소: {{ apartment.roadNmSggCd }}</span>
+                <span class="detail-item">도로명 {{ apartment.roadNmSggCd }}</span>
               </div>
             </div>
             <div
