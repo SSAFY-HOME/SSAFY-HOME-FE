@@ -118,4 +118,18 @@ export const memberAPI = {
       throw error
     }
   },
+  uploadProfileImage: async (formData) => {
+    try {
+      const response = await api.post('/member/profile/image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      return response.data
+    } catch (error) {
+      console.error('프로필 이미지 수정 실패', error)
+      throw error
+    }
+  },
+  
 }

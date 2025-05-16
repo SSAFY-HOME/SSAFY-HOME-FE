@@ -16,14 +16,14 @@
       <div class="profile-header">
         <div class="profile-cover-image"></div>
         <div class="profile-avatar-container">
-          <div class="profile-image-container">
+          <div class="profile-image-container" @click="openImageModal">
             <img
               :src="profileImage || '/api/placeholder/150/150'"
               alt="프로필 이미지"
               class="profile-image"
             />
             <div class="profile-image-overlay">
-              <button class="image-edit-button" @click="openImageModal">
+              <button class="image-edit-button">
                 <i class="fas fa-camera"></i>
               </button>
             </div>
@@ -42,12 +42,22 @@
         >
           <i class="fas fa-user"></i> 기본 정보
         </button>
+
         <button
           class="tab-button"
           :class="{ active: activeTab === 'security' }"
           @click="activeTab = 'security'"
+          v-if="!isKakaoUser"
         >
           <i class="fas fa-lock"></i> 비밀번호 변경 및 탈퇴
+        </button>
+        <button
+          class="tab-button"
+          :class="{ active: activeTab === 'security' }"
+          @click="activeTab = 'security'"
+          v-if="isKakaoUser"
+        >
+          <i class="fas fa-lock"></i> 탈퇴
         </button>
         <button
           class="tab-button"
@@ -129,7 +139,8 @@
 
       <!-- 비밀번호 수정& 탈퇴 탭 -->
       <div v-if="activeTab === 'security'" class="tab-content">
-        <div class="info-card">
+        <!-- 일반 사용자: 비밀번호 변경 폼 -->
+        <div class="info-card" v-if="!isKakaoUser">
           <div class="card-header">
             <h3 class="section-title"><i class="fas fa-key"></i> 비밀번호 변경</h3>
           </div>
@@ -188,8 +199,8 @@
           </div>
         </div>
 
-        <!-- 회원 탈퇴 섹션 -->
-        <div class="info-card danger-zone">
+        <!-- 회원 탈퇴 섹션 - 일반 사용자 -->
+        <div class="info-card danger-zone" v-if="!isKakaoUser">
           <div class="card-header danger">
             <h3 class="section-title"><i class="fas fa-exclamation-triangle"></i> 계정 관리</h3>
           </div>
@@ -208,6 +219,25 @@
             </div>
             <button class="delete-account-button" @click="deleteUser">
               <i class="fas fa-user-slash"></i> 회원 탈퇴
+            </button>
+          </div>
+        </div>
+
+        <!-- 회원 탈퇴 섹션 - 카카오 사용자 -->
+        <div class="info-card danger-zone" v-if="isKakaoUser">
+          <div class="card-header danger">
+            <h3 class="section-title"><i class="fas fa-exclamation-triangle"></i> 계정 관리</h3>
+          </div>
+          <div class="card-content">
+            <p class="warning-text">
+              계정을 삭제하면 모든 데이터가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+            </p>
+            <p class="kakao-notice">
+              <i class="fas fa-info-circle"></i> 카카오톡 계정으로 연결된 회원은 카카오 로그인 인증
+              후 탈퇴가 가능합니다.
+            </p>
+            <button class="kakao-login-button" @click="startKakaoWithdrawal">
+              <i class="fas fa-comment"></i> 카카오톡으로 인증하기
             </button>
           </div>
         </div>
@@ -329,20 +359,18 @@ const user = ref({
   password: '',
   passwordConfirm: '',
   apartment: null,
+  social: '',
 })
 
-// 추가된 상태 값들
 const activeTab = ref('info')
 const showImageModal = ref(false)
 const previewImage = ref(null)
-const userStats = ref({
-  posts: 0,
-  comments: 0,
-  likes: 0,
-})
 const favoriteApartments = ref([])
 const userPosts = ref([])
 const userComments = ref([])
+
+// 카카오 로그인 사용자 체크 (social 필드가 'true' 문자열인 경우)
+const isKakaoUser = computed(() => user.value.social === true || user.value.social === 'true')
 
 // 패스워드 강도 계산
 const passwordStrengthClass = computed(() => {
@@ -394,7 +422,6 @@ const checkLoginStatus = () => {
   isLoggedIn.value = !!token
   if (isLoggedIn.value) {
     fetchUserProfile()
-    fetchUserStats()
     fetchFavoriteApartments()
     fetchUserPosts()
     fetchUserComments()
@@ -410,6 +437,7 @@ const fetchUserProfile = async () => {
         currentPassword: '',
         password: '',
         passwordConfirm: '',
+        social: response.data.social,
       }
       if (response.data.image) {
         profileImage.value = response.data.image
@@ -420,16 +448,6 @@ const fetchUserProfile = async () => {
       localStorage.removeItem('accessToken')
       router.push('/login')
     }
-  }
-}
-
-// 임시 데이터 로딩 함수들 (실제 API 연동 시 수정 필요)
-const fetchUserStats = async () => {
-  // API 연동 시 실제 함수로 대체
-  userStats.value = {
-    posts: 15,
-    comments: 42,
-    likes: 73,
   }
 }
 
@@ -534,8 +552,6 @@ const validatePasswordConfirm = () => {
   }
 }
 
-console.log(user.value.currentPassword, user.value.password)
-
 const updatePassword = async () => {
   validatePassword()
   validatePasswordConfirm()
@@ -564,20 +580,58 @@ const updatePassword = async () => {
   }
 }
 
-const updateProfile = async () => {
+// 카카오 로그인 사용자 탈퇴 과정 시작
+const startKakaoWithdrawal = async () => {
   try {
-    await memberAPI.updateProfile({
-      nickname: user.value.nickname,
-      phone: user.value.phone,
-      bio: user.value.bio,
+    // 카카오 로그인 SDK가 초기화되어 있다고 가정
+    if (!window.Kakao || !window.Kakao.Auth) {
+      alert('카카오 로그인 서비스를 불러오는 중 오류가 발생했습니다.')
+      return
+    }
+
+    // 카카오 로그인 요청
+    window.Kakao.Auth.login({
+      success: function (authObj) {
+        // 로그인 성공 시 회원 탈퇴 진행
+        if (authObj.access_token) {
+          completeKakaoWithdrawal(authObj.access_token)
+        } else {
+          alert('카카오 인증에 실패했습니다. 다시 시도해주세요.')
+        }
+      },
+      fail: function (err) {
+        alert('카카오 로그인에 실패했습니다: ' + JSON.stringify(err))
+      },
     })
-    alert('프로필 정보가 성공적으로 변경되었습니다.')
   } catch (error) {
-    alert('프로필 정보 변경 중 오류가 발생했습니다.')
-    console.error('프로필 정보 변경 오류:', error)
+    console.error('카카오 로그인 오류:', error)
+    alert('카카오 인증 중 오류가 발생했습니다. 다시 시도해주세요.')
   }
 }
 
+// 카카오 인증 후 탈퇴 완료 처리
+const completeKakaoWithdrawal = async (kakaoToken) => {
+  if (!confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return
+
+  try {
+    // kakaoToken을 서버에 전달하여 회원 탈퇴 진행
+    await memberAPI.deleteKakaoMember(kakaoToken)
+
+    // 로그아웃 처리
+    localStorage.removeItem('accessToken')
+    alert('회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.')
+    router.push('/notice')
+  } catch (error) {
+    console.error('회원 탈퇴 오류:', error)
+    if (error.response && error.response.status === 401) {
+      alert('카카오 인증에 실패했습니다. 다시 시도해주세요.')
+    } else {
+      alert('회원 탈퇴 중 오류가 발생했습니다.')
+    }
+  }
+}
+
+// 일반 사용자 탈퇴
 const deleteUser = async () => {
   if (!confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return
 
@@ -603,6 +657,7 @@ const deleteUser = async () => {
 
 // 이미지 관련 함수들
 const openImageModal = () => {
+  console.log('모달 열기 호출됨')
   showImageModal.value = true
 }
 
@@ -625,25 +680,6 @@ const previewProfileImage = (event) => {
     previewImage.value = e.target.result
   }
   reader.readAsDataURL(file)
-}
-
-const saveProfileImage = async () => {
-  try {
-    const fileInput = document.getElementById('profile-image-upload')
-    if (fileInput.files.length > 0) {
-      const formData = new FormData()
-      formData.append('image', fileInput.files[0])
-
-      const response = await memberAPI.uploadProfileImage(formData)
-      profileImage.value = response.data.imageUrl
-    }
-
-    closeImageModal()
-    alert('프로필 이미지가 변경되었습니다.')
-  } catch (error) {
-    alert('이미지 업로드 중 오류가 발생했습니다.')
-    console.error('이미지 업로드 오류:', error)
-  }
 }
 
 const removeProfileImage = async () => {

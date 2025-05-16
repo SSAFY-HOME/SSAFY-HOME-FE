@@ -24,65 +24,109 @@
         <div class="searchHome">
           <h2 class="question">어떤 집을 찾고 계세요?</h2>
           <div class="search-bar">
-            <div class="input-container">
+            <!-- <div class="input-container">
               <img src="@/assets/search-icon.png" alt="Search" class="search-input-icon" />
               <input
                 type="text"
                 placeholder="지역, 지하철, 대학, 단지명 또는 매물번호를 입력해주세요."
               />
-            </div>
-            <button class="search-btn">집 찾으러 가기 <span class="arrow">→</span></button>
+            </div> -->
+            <button class="search-btn" @click="activateButton('main')">
+              집 찾으러 가기 <span class="arrow">→</span>
+            </button>
           </div>
         </div>
-        <div class="service-intro">
-          <h1 class="service-title">SERVICE</h1>
-          <p>
-            <span class="highlight">zipzip</span>의 서비스와 함께 빠르고 똑똑하게,<br />
-            원하는 조건의 매물을 만나보세요.
-          </p>
-        </div>
+        <!-- 서비스 소개 섹션 -->
+        <div class="service-section">
+          <div class="service-header">
+            <h2 class="section-title">Our Services</h2>
+            <p class="service-description">
+              <span class="highlight">zipzip</span>의 서비스와 함께 빠르고 똑똑하게,<br />
+              원하는 조건의 매물을 만나보세요.
+            </p>
+          </div>
 
-        <div class="cards">
-          <div class="card">
-            <div class="card-content">
-              <h4 class="card-title">동네 탐방하기</h4>
-              <div class="card-icon-container">
-                <div class="card-icon-circle">
-                  <img src="@/assets/communityIcon.png" alt="Neighborhood Icon" class="card-icon" />
+          <!-- 서비스 카드 -->
+          <div class="service-cards">
+            <div class="service-card" @click="activateButton('community')">
+              <div class="card-icon">
+                <div class="icon-circle">
+                  <img src="@/assets/communityIcon.png" alt="Neighborhood Icon" />
                 </div>
               </div>
-              <p class="card-desc">우리 동네 리뷰 쓰고<br />다른 동네 탐방 하기</p>
+              <div class="card-content">
+                <h4 class="card-title">동네 탐방하기</h4>
+                <p class="card-description">우리 동네 리뷰 쓰고<br />다른 동네 탐방 하기</p>
+              </div>
+              <div class="card-arrow">→</div>
             </div>
-          </div>
-          <div class="card">
-            <div class="card-content">
-              <h4 class="card-title">AI 부동산 중개사</h4>
-              <div class="card-icon-container">
-                <div class="card-icon-circle">
-                  <img src="@/assets/chatbotIcon.png" alt="AI Icon" class="chat-card-icon" />
+
+            <div class="service-card" @click="activateButton('chatbot')">
+              <div class="card-icon">
+                <div class="icon-circle ai-bg">
+                  <img src="@/assets/chatbotIcon.png" alt="AI Icon" class="ai-icon" />
                 </div>
               </div>
-              <p class="card-desc">AI 챗봇과 함께 자신에게<br />맞는 매물을 탐색해보세요</p>
+              <div class="card-content">
+                <h4 class="card-title">AI 부동산 중개사</h4>
+                <p class="card-description">
+                  AI 챗봇과 함께 자신에게<br />맞는 매물을 탐색해보세요
+                </p>
+              </div>
+              <div class="card-arrow">→</div>
             </div>
-          </div>
-          <div class="card">
-            <div class="card-content">
-              <h4 class="card-title">부동산 기사</h4>
-              <div class="card-icon-container">
-                <div class="card-icon-circle">
-                  <img src="@/assets/newsIcon.png" alt="News Icon" class="news-card-icon" />
+
+            <div class="service-card" @click="activateButton('news')">
+              <div class="card-icon">
+                <div class="icon-circle news-bg">
+                  <img src="@/assets/newsIcon.png" alt="News Icon" class="news-icon" />
                 </div>
               </div>
-              <p class="card-desc">AI 요약과 함께 원하는<br />동네의 최신 소식을 살펴보세요</p>
+              <div class="card-content">
+                <h4 class="card-title">부동산 기사</h4>
+                <p class="card-description">
+                  AI 요약과 함께 원하는<br />동네의 최신 소식을 살펴보세요
+                </p>
+              </div>
+              <div class="card-arrow">→</div>
             </div>
           </div>
         </div>
       </div>
+      <!-- 푸터 섹션 -->
+      <div class="footer-section">
+        <div class="social-links">
+          <a href="https://github.com/soyuuuuuni" class="social-link">Soyeon</a>
+          <a href="https://github.com/MinjuKwak01" class="social-link">Minju</a>
+          <a href="https://github.com/SSAFY-HOME" class="social-link">GitHub</a>
+        </div>
+        <p class="copyright">© 2025 ZIPZIP. All rights reserved.</p>
+      </div>
     </section>
   </div>
 </template>
+
 <script setup>
+import { useRouter } from 'vue-router'
 import AppHeader from '@/components/common/AppHeader.vue'
+const router = useRouter()
+
+const activateButton = (name) => {
+  switch (name) {
+    case 'main':
+      router.push('/main')
+      break
+    case 'community':
+      router.push('/main')
+      break
+    case 'chatbot':
+      router.push('/chat')
+      break
+    case 'news':
+      router.push('/news')
+      break
+  }
+}
 </script>
 <script>
 export default {
@@ -182,8 +226,8 @@ export default {
   justify-content: center;
 
   .right-panel {
-    margin-top: 5rem;
-    background: #212026;
+    margin-top: 1rem;
+    background: #010502;
     width: 90%;
     max-width: 100%;
     height: 80vh;
@@ -258,105 +302,144 @@ export default {
     }
   }
 
-  .service-intro {
-    text-align: right;
+  /* 서비스 섹션 */
+  .service-section {
+    margin-bottom: 3rem;
 
-    h1 {
-      color: #e3e3e6;
+    .service-header {
+      margin-bottom: 2rem;
 
-      font-family: Inter;
-      font-size: 36px;
-      font-style: normal;
-      font-weight: 800;
-      line-height: normal;
-      margin-bottom: 0.5rem;
+      .section-title {
+        text-align: right;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        letter-spacing: -0.5px;
+      }
+
+      .service-description {
+        text-align: right;
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.5;
+
+        .highlight {
+          color: #5ea658;
+          font-weight: 600;
+        }
+      }
     }
 
-    p {
-      text-align: right;
-      font-family: Inter;
-      font-size: 20px;
-      font-style: normal;
-      font-weight: 800;
-      line-height: normal;
-      font-size: 1.5rem;
-      color: #aaa;
-      line-height: 1.5;
+    .service-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
     }
 
-    .highlight {
-      color: #5ea658;
-      font-weight: bold;
-    }
-  }
-
-  .cards {
-    display: flex;
-    justify-content: space-between;
-    gap: 1.5rem;
-
-    .card {
-      background: rgba(0, 0, 0, 0.3);
-      flex: 1;
-      padding: 2rem;
+    .service-card {
+      background-color: rgba(255, 255, 255, 0.05);
       border-radius: 12px;
-      stroke-width: 1px;
-      stroke: #a3a3a3;
-      filter: drop-shadow(0px 4px 4px rgba(255, 239, 239, 0.25));
-      border: 1px solid #a3a3a3;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.1);
 
       &:hover {
-        background: rgba(0, 0, 0, 0.5);
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
       }
 
-      .card-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
+      .card-icon {
+        margin-right: 1.5rem;
 
-      .card-title {
-        font-size: 1.25rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
-      }
-
-      .card-icon-container {
-        margin-bottom: 1rem;
-
-        .card-icon-circle {
-          background: rgb(199, 199, 199);
-          width: 50px;
-          height: 50px;
+        .icon-circle {
+          width: 60px;
+          height: 60px;
           border-radius: 50%;
+          background-color: #5d8864;
           display: flex;
           align-items: center;
           justify-content: center;
 
-          .card-icon {
-            width: 80px;
-            height: 80px;
-          }
-          .chat-card-icon {
-            width: 45px;
-            height: 45px;
-          }
-          .news-card-icon {
+          img {
             width: 30px;
+            height: 30px;
+          }
+
+          &.ai-bg {
+            background-color: #4a80b5;
+          }
+
+          &.news-bg {
+            background-color: #b55a4a;
+          }
+
+          .ai-icon,
+          .news-icon {
+            width: 28px;
+            height: 28px;
           }
         }
+      }
 
-        &:nth-child(1) .card-icon-circle {
-          background: #5d8864;
+      .card-content {
+        flex: 1;
+
+        .card-title {
+          font-size: 1.2rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+          font-size: 0.9rem;
+          color: rgba(255, 255, 255, 0.7);
+          line-height: 1.5;
         }
       }
 
-      .card-desc {
-        font-size: 0.8rem;
-        color: #aaa;
-        line-height: 1.5;
+      .card-arrow {
+        font-size: 1.5rem;
+        color: rgba(255, 255, 255, 0.5);
+        transition: transform 0.3s ease;
       }
+
+      &:hover .card-arrow {
+        transform: translateX(5px);
+        color: white;
+      }
+    }
+  }
+
+  /* 푸터 섹션 */
+  .footer-section {
+    margin-top: auto;
+    padding: 2rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    .social-links {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+
+      .social-link {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+
+        &:hover {
+          color: #5ea658;
+        }
+      }
+    }
+
+    .copyright {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
     }
   }
 }
