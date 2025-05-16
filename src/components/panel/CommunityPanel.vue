@@ -194,8 +194,8 @@ const newPost = ref({
 const sortedPosts = computed(() => {
   if (sortOption.value === 'recent') {
     return [...posts.value].sort((a, b) => {
-      const dateA = a?.postDate ? new Date(a.updateDate) : new Date(0)
-      const dateB = b?.postDate ? new Date(b.updateDate) : new Date(0)
+      const dateA = a?.updateDate ? new Date(a.updateDate) : new Date(0)
+      const dateB = b?.updateDate ? new Date(b.updateDate) : new Date(0)
 
       return dateB - dateA
     })
