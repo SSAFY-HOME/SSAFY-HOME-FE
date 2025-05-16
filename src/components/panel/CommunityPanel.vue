@@ -432,7 +432,7 @@ const likePost = async (post) => {
       // 백엔드와 상태 동기화 (이미 좋아요 상태로 설정)
       const postIndex = posts.value.findIndex((p) => p.communityId === post.communityId)
       if (postIndex !== -1) {
-        posts.value[postIndex].isLiked = true
+        posts.value[postIndex].liked = true
       }
     }
   }
