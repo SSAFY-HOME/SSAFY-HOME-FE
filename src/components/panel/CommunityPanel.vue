@@ -525,7 +525,7 @@ const onUnmounted = () => {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.08);
   animation: fadeIn 0.5s ease;
 }
 
