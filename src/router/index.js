@@ -58,6 +58,16 @@ const router = createRouter({
       name: 'RegistHome',
       component: () => import('../views/RegistHomeView.vue'),
     },
+    {
+      path: '/oauth',
+      name: 'KakaoRedirect',
+      component: () => import('@/views/KakaoRedirectView.vue'),
+    },
+    {
+      path: '/oauth/withdraw',
+      name: 'KakaoWithdraw',
+      component: () => import('@/components/common/KakaoWithDraw.vue'),
+    },
   ],
 })
 

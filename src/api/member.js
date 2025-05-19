@@ -118,4 +118,26 @@ export const memberAPI = {
       throw error
     }
   },
+  uploadProfileImage: async (formData) => {
+    try {
+      const response = await api.post('/member/profile/image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      return response.data
+    } catch (error) {
+      console.error('프로필 이미지 수정 실패', error)
+      throw error
+    }
+  },
+  kakaoWithdrawByCode: async (code) => {
+    try {
+      const response = await api.post(`/oauth/withdraw?code=${code}`)
+      return response.data
+    } catch (error) {
+      console.error('카카오 회원 탈퇴 실패:', error)
+      throw error
+    }
+  },
 }

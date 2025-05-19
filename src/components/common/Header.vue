@@ -62,18 +62,21 @@ const isLoggedIn = ref(false)
 const isLogoutModalVisible = ref(false)
 const logoutMessage = ref('')
 const router = useRouter()
-
+const isKakaoUser = ref(false)
 // 로컬 스토리지에서 토큰 확인하여 로그인 상태 설정
 const checkLoginStatus = () => {
   const token = localStorage.getItem('accessToken')
   isLoggedIn.value = !!token
+  isKakaoUser.value = localStorage.getItem('social') === 'true'
 }
 
 // 로그아웃 처리
 const handleLogout = () => {
+  // 일반 로그아웃 처리
   localStorage.removeItem('accessToken')
   localStorage.removeItem('isAdmin')
-  logoutMessage.value = '로그아웃이 완료되었습니다'
+  localStorage.removeItem('social')
+  logoutMessage.value = '로그아웃이 완료되었습니다.'
   isLoggedIn.value = false
   isLogoutModalVisible.value = true
 }

@@ -116,13 +116,14 @@ const handleLogin = async () => {
       localStorage.setItem('isAdmin', result.isAdmin)
       // 필요한 경우 토큰 저장
       localStorage.setItem('accessToken', result.token)
+      localStorage.setItem('isSocial', result.social)
 
       // 홈 페이지 또는 이전 페이지로 리다이렉트
       console.log(result.hasHome)
       if (result.hasHome === false) {
         router.push('/regist/home')
       } else {
-        router.push('/main')
+        router.push('/')
       }
     } else {
       // 오류 메시지 표시
@@ -137,18 +138,20 @@ const handleLogin = async () => {
   }
 }
 
-// 카카오 로그인 함수 (실제 구현은 카카오 SDK 연동 필요)
+// 카카오 로그인 함수
 const kakaoLogin = () => {
-  alert('카카오 로그인 기능은 준비 중입니다.')
-  // 실제 카카오 로그인 구현
-  // Kakao.Auth.login({
-  //   success: (response) => {
-  //     // 성공 처리
-  //   },
-  //   fail: (error) => {
-  //     console.error('카카오 로그인 실패:', error)
-  //   }
-  // })
+  const REST_API_KEY = import.meta.env.VITE_KAKAO_LOGIN_REST_API_KEY
+  const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI
+
+  if (!REST_API_KEY || !REDIRECT_URI) {
+    errorMessage.value = '카카오 로그인 설정이 올바르지 않습니다. 관리자에게 문의하세요.'
+    console.error('카카오 로그인 환경 변수 누락:', { REST_API_KEY, REDIRECT_URI })
+    return
+  }
+
+  const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`
+
+  window.location.href = kakaoAuthUrl
 }
 </script>
 
@@ -258,7 +261,7 @@ const kakaoLogin = () => {
 }
 
 .kakao-btn {
-  background: #fee500;
+  background: #f0e332;
   color: #3c1e1e;
   border: none;
   border-radius: 5px;
