@@ -22,6 +22,9 @@ defineProps({
 
 const emit = defineEmits(['close'])
 
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
 // Close when clicking the confirmation button
 const handleClose = () => {
   emit('close')

@@ -95,4 +95,48 @@ export const apartmentAPI = {
       }
     }
   },
+  /**
+   * 아파트 좋아요 하는 함수
+   * @param {number} apartmentId - 아파트 ID
+   * @returns {Promise<Object>} 에러 정보
+   */
+  likeApartment: async (apartmentId) => {
+    try {
+      const response = await api.post(`like/${apartmentId}`)
+      return {
+        status: 200,
+        data: response.data,
+        message: '아파트를 성공적으로 찜했습니다.',
+      }
+    } catch (error) {
+      console.error('아파트를 찜하는 중 오류가 발생했습니다:', error)
+      return {
+        status: error.response?.status || 500,
+        message: error.response?.data?.message || '아파트를 찜하는 중 오류가 발생했습니다.',
+        error: error,
+      }
+    }
+  },
+  /**
+   * 아파트 좋아요 취소하는 기능
+   * @param {number} apartmentId - 아파트 ID
+   * @returns {Promise<Object>}  에러 정보
+   */
+  unlikeApartment: async (apartmentId) => {
+    try {
+      const response = await api.delete(`like/${apartmentId}`)
+      return {
+        status: 200,
+        data: response.data,
+        message: '아파트를 성공적으로 찜 해제했습니다.',
+      }
+    } catch (error) {
+      console.error('아파트 찜 해제 중 오류가 발생했습니다:', error)
+      return {
+        status: error.response?.status || 500,
+        message: error.response?.data?.message || '아파트 찜 해제 중 오류가 발생했습니다.',
+        error: error,
+      }
+    }
+  },
 }

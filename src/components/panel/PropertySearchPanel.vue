@@ -1,4 +1,4 @@
-<!-- PropertySearchPanel.vue의 수정된 부분 -->
+<!-- PropertySearchPanel.vue -->
 <template>
   <div class="property-panel">
     <h3 class="section-title">아파트 검색</h3>
@@ -132,10 +132,20 @@
           class="apartment-card"
           v-for="apartment in apartments"
           :key="apartment.id"
-          @click="showOnMap(apartment)"
           :class="{ 'selected-apartment': selectedApartmentId === apartment.id }"
         >
-          <div class="apartment-info">
+          <!-- 좋아요 버튼 (오른쪽 상단에 배치) -->
+          <div class="like-button-container">
+            <button
+              class="like-button"
+              @click.stop="toggleLike(apartment)"
+              :class="{ liked: apartment.likedApt }"
+            >
+              <span class="heart-icon">{{ apartment.likedApt ? '❤️' : '🤍' }}</span>
+            </button>
+          </div>
+
+          <div class="apartment-info" @click="showOnMap(apartment)">
             <h3 class="apartment-name">{{ apartment.name }}</h3>
             <p class="apartment-address">{{ apartment.addr }}</p>
             <div class="apartment-details">
@@ -237,7 +247,6 @@ const fetchApartments = async (districtId) => {
 
   isLoadingApartments.value = true
   try {
-    // 실제 API 엔드포인트로 교체 필요
     const result = await apartmentAPI.getApartments(districtId)
     apartments.value = result.data
     emit('showAllOnMap', apartments.value)
@@ -246,6 +255,25 @@ const fetchApartments = async (districtId) => {
     apartments.value = []
   } finally {
     isLoadingApartments.value = false
+  }
+}
+
+// 좋아요 토글 기능
+const toggleLike = async (apartment) => {
+  try {
+    console.log(apartment.aptSeq)
+    if (apartment.likedApt) {
+      // 좋아요 취소
+      await apartmentAPI.unlikeApartment(apartment.aptSeq)
+      apartment.likedApt = false
+    } else {
+      // 좋아요 추가
+      await apartmentAPI.likeApartment(apartment.aptSeq)
+      apartment.likedApt = true
+    }
+  } catch (error) {
+    console.error('좋아요 처리 중 오류가 발생했습니다:', error)
+    alert('좋아요 처리 중 오류가 발생했습니다. 다시 시도해주세요.')
   }
 }
 
@@ -652,6 +680,7 @@ label {
 
 .apartment-card {
   display: flex;
+  position: relative; /* 좋아요 버튼 위치 지정을 위해 추가 */
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -659,9 +688,9 @@ label {
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
-    border-color 0.3s ease; /* 트랜지션에 border-color 추가 */
+    border-color 0.3s ease;
   cursor: pointer;
-  border: 2px solid transparent; /* 기본 border 설정 */
+  border: 2px solid transparent;
 }
 
 .apartment-card:hover {
@@ -671,15 +700,64 @@ label {
 
 /* 선택된 아파트 카드 스타일 */
 .apartment-card.selected-apartment {
-  border-color: #4caf50; /* 선택된 아파트에 초록색 테두리 */
-  background-color: #f7fcf7; /* 배경색 살짝 변경 */
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2); /* 그림자 색상 변경 */
+  border-color: #4caf50;
+  background-color: #f7fcf7;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
 }
 
 /* 선택된 상태에서 호버 효과 */
 .apartment-card.selected-apartment:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 14px rgba(76, 175, 80, 0.25);
+}
+
+/* 좋아요 버튼 스타일 */
+.like-button-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+}
+
+.like-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.like-button:hover {
+  transform: scale(1.1);
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.heart-icon {
+  font-size: 18px;
+}
+
+.like-button.liked {
+  animation: heartbeat 0.3s ease-in-out;
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .apartment-info {
@@ -695,6 +773,7 @@ label {
   font-weight: 600;
   margin-bottom: 4px;
   color: #333;
+  padding-right: 50px; /* 좋아요 버튼 공간 확보 */
 }
 
 .apartment-address {
@@ -718,7 +797,7 @@ label {
   color: #555;
 }
 
-/* 매물 리스트 버튼 스타일 (새로 추가) */
+/* 매물 리스트 버튼 스타일 */
 .apartment-actions {
   margin-top: auto;
 }
@@ -726,9 +805,9 @@ label {
 .listing-button {
   width: 100%;
   padding: 8px 12px;
-  background-color: #e8f5e9; /* 연한 초록색 배경 */
-  color: #4c4e4c; /* 초록색 텍스트 */
-  border: 1px solid #4caf50; /* 초록색 테두리 */
+  background-color: #e8f5e9;
+  color: #4c4e4c;
+  border: 1px solid #4caf50;
   border-radius: 4px;
   font-size: 14px;
   font-weight: 500;
@@ -740,8 +819,7 @@ label {
 }
 
 .listing-button:hover {
-  background-color: #c8e6c9; /* 호버 시 약간 더 진한 초록색 */
-  /* 그림자 효과 제거됨 */
+  background-color: #c8e6c9;
 }
 
 .button-icon {
@@ -762,6 +840,16 @@ label {
 
   .filter-row {
     flex-direction: column;
+  }
+
+  .like-button-container {
+    top: 5px;
+    right: 5px;
+  }
+
+  .like-button {
+    width: 35px;
+    height: 35px;
   }
 }
 </style>
