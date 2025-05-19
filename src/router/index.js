@@ -63,6 +63,11 @@ const router = createRouter({
       name: 'KakaoRedirect',
       component: () => import('@/views/KakaoRedirectView.vue'),
     },
+    {
+      path: '/oauth/withdraw',
+      name: 'KakaoWithdraw',
+      component: () => import('@/components/common/KakaoWithDraw.vue'),
+    },
   ],
 })
 

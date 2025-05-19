@@ -131,5 +131,13 @@ export const memberAPI = {
       throw error
     }
   },
-  
+  kakaoWithdrawByCode: async (code) => {
+    try {
+      const response = await api.post(`/oauth/withdraw?code=${code}`)
+      return response.data
+    } catch (error) {
+      console.error('카카오 회원 탈퇴 실패:', error)
+      throw error
+    }
+  },
 }

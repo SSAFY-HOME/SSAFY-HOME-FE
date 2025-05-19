@@ -72,22 +72,13 @@ const checkLoginStatus = () => {
 
 // 로그아웃 처리
 const handleLogout = () => {
-  if (isKakaoUser.value) {
-    // 카카오 로그아웃 처리
-    const REST_API_KEY = import.meta.env.VITE_KAKAO_LOGIN_REST_API_KEY
-    const LOGOUT_REDIRECT_URI = import.meta.env.VITE_KAKAO_logout_URI
-    const kakaoLogoutUrl = `https://kauth.kakao.com/oauth/logout?client_id=${REST_API_KEY}&logout_redirect_uri=${encodeURIComponent(LOGOUT_REDIRECT_URI)}`
-
-    window.location.href = kakaoLogoutUrl
-  } else {
-    // 일반 로그아웃 처리
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('isAdmin')
-    localStorage.removeItem('social')
-    logoutMessage.value = '로그아웃이 완료되었습니다.'
-    isLoggedIn.value = false
-    isLogoutModalVisible.value = true
-  }
+  // 일반 로그아웃 처리
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('isAdmin')
+  localStorage.removeItem('social')
+  logoutMessage.value = '로그아웃이 완료되었습니다.'
+  isLoggedIn.value = false
+  isLogoutModalVisible.value = true
 }
 
 // 로그아웃 모달 닫기

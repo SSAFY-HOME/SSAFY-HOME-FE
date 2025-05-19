@@ -236,7 +236,7 @@
               <i class="fas fa-info-circle"></i> 카카오톡 계정으로 연결된 회원은 카카오 로그인 인증
               후 탈퇴가 가능합니다.
             </p>
-            <button class="kakao-login-button" @click="startKakaoWithdrawal">
+            <button class="kakao-login-button" @click="requestKakaoReLogin">
               <i class="fas fa-comment"></i> 카카오톡으로 인증하기
             </button>
           </div>
@@ -580,55 +580,13 @@ const updatePassword = async () => {
   }
 }
 
-// 카카오 로그인 사용자 탈퇴 과정 시작
-const startKakaoWithdrawal = async () => {
-  try {
-    // 카카오 로그인 SDK가 초기화되어 있다고 가정
-    if (!window.Kakao || !window.Kakao.Auth) {
-      alert('카카오 로그인 서비스를 불러오는 중 오류가 발생했습니다.')
-      return
-    }
+// 카카오 재인증 요청
+const requestKakaoReLogin = () => {
+  const REST_API_KEY = import.meta.env.VITE_KAKAO_LOGIN_REST_API_KEY
+  const REDIRECT_URI = import.meta.env.VITE_KAKAO_WITHDRAWAL_REDIRECT_URI
 
-    // 카카오 로그인 요청
-    window.Kakao.Auth.login({
-      success: function (authObj) {
-        // 로그인 성공 시 회원 탈퇴 진행
-        if (authObj.access_token) {
-          completeKakaoWithdrawal(authObj.access_token)
-        } else {
-          alert('카카오 인증에 실패했습니다. 다시 시도해주세요.')
-        }
-      },
-      fail: function (err) {
-        alert('카카오 로그인에 실패했습니다: ' + JSON.stringify(err))
-      },
-    })
-  } catch (error) {
-    console.error('카카오 로그인 오류:', error)
-    alert('카카오 인증 중 오류가 발생했습니다. 다시 시도해주세요.')
-  }
-}
-
-// 카카오 인증 후 탈퇴 완료 처리
-const completeKakaoWithdrawal = async (kakaoToken) => {
-  if (!confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return
-
-  try {
-    // kakaoToken을 서버에 전달하여 회원 탈퇴 진행
-    await memberAPI.deleteKakaoMember(kakaoToken)
-
-    // 로그아웃 처리
-    localStorage.removeItem('accessToken')
-    alert('회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.')
-    router.push('/notice')
-  } catch (error) {
-    console.error('회원 탈퇴 오류:', error)
-    if (error.response && error.response.status === 401) {
-      alert('카카오 인증에 실패했습니다. 다시 시도해주세요.')
-    } else {
-      alert('회원 탈퇴 중 오류가 발생했습니다.')
-    }
-  }
+  const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`
+  window.location.href = kakaoAuthUrl
 }
 
 // 일반 사용자 탈퇴
@@ -1385,6 +1343,13 @@ onMounted(() => {
 }
 
 .add-button {
+  background-color: transparent;
+  color: #4caf50;
+  border: 1px solid #4caf50;
+  font-size: 13px;
+  margin-top: 10px;
+}
+.kakao-login-button {
   background-color: transparent;
   color: #4caf50;
   border: 1px solid #4caf50;

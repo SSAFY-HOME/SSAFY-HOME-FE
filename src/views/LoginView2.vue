@@ -123,7 +123,7 @@ const handleLogin = async () => {
       if (result.hasHome === false) {
         router.push('/regist/home')
       } else {
-        router.push('/main')
+        router.push('/')
       }
     } else {
       // 오류 메시지 표시
@@ -138,7 +138,7 @@ const handleLogin = async () => {
   }
 }
 
-// 카카오 로그인 함수 (실제 구현은 카카오 SDK 연동 필요)
+// 카카오 로그인 함수
 const kakaoLogin = () => {
   const REST_API_KEY = import.meta.env.VITE_KAKAO_LOGIN_REST_API_KEY
   const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI
