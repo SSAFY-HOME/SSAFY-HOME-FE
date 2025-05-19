@@ -73,8 +73,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { chatAPI } from '@/api/chat'
 
 // 상태 관리
 const router = useRouter()
@@ -85,60 +86,13 @@ const newMessage = ref('')
 const messages = ref([])
 const chatMessagesContainer = ref(null)
 
-// API 관련 설정 (실제 구현 시 import 해야 함)
-// import { chatAPI } from '@/api/chat'
-
-// 초기 데이터 로드 및 추가 메시지 예시 (더 많은 메시지 표시용)
+// 초기 데이터 로드
 const fetchChatMessages = async () => {
   isLoadingMessages.value = true
 
   try {
-    // 실제 환경에서는 API 호출로 대체
-    // const response = await chatAPI.getMessages()
-    // messages.value = response.data
-
-    // 예시 데이터 사용 (테스트용) - 더 많은 메시지로 채워넣기
-    messages.value = [
-      {
-        id: 1,
-        senderType: 'USER',
-        message: '안녕하세요, 아파트 정보를 알려주세요.',
-        timestamp: '2025-05-15',
-      },
-      {
-        id: 2,
-        senderType: 'AI',
-        message:
-          '안녕하세요! 어떤 아파트 정보가 필요하신가요? 특정 지역이나 아파트 이름을 알려주시면 도움드릴 수 있습니다.',
-        timestamp: '2025-05-15',
-      },
-      {
-        id: 3,
-        senderType: 'USER',
-        message: '풍암동 아파트 거래현황에 대해 알려줘',
-        timestamp: '2025-05-16',
-      },
-      {
-        id: 4,
-        senderType: 'AI',
-        message:
-          '현재 제 지식 기반에는 풍암동 아파트 거래현황에 대한 구체적인 정보가 없습니다. 하지만 부동산 시장에 대해 일반적으로 말씀드리자면, 아파트 거래는 해당 지역의 경제 상황, 인프라 개발, 교통 편의성, 그리고 주변 환경에 많은 영향을 받습니다. 만약 풍암동의 특정한 정보를 원하신다면, 지역 부동산 중개인이나 관련 부동산 정보 플랫폼을 통해 최신 데이터를 확인하시는 것이 좋습니다.',
-        timestamp: '2025-05-16',
-      },
-      {
-        id: 5,
-        senderType: 'USER',
-        message: '풍암동에서 가장 인기 있는 아파트는 어디인가요?',
-        timestamp: '2025-05-16',
-      },
-      {
-        id: 6,
-        senderType: 'AI',
-        message:
-          "풍암동에서 인기 있는 아파트는 일반적으로 교통 접근성, 학군, 편의시설 접근성 등에 따라 달라집니다. 주민들 사이에서는 '진태크리스타피아', '대주아파트', '풍암호수타운' 등이 자주 언급됩니다. 하지만 가장 최신 인기 동향은 실시간으로 바뀔 수 있으니, 정확한 정보는 부동산 앱이나 지역 중개사무소를 통해 확인하시는 것이 좋겠습니다.",
-        timestamp: '2025-05-16',
-      },
-    ]
+    const response = await chatAPI.getMessages()
+    messages.value = response.data
   } catch (error) {
     console.error('채팅 내용을 불러오는 중 오류가 발생했습니다:', error)
     messages.value = []
@@ -147,8 +101,6 @@ const fetchChatMessages = async () => {
     scrollToBottom()
   }
 }
-
-import { chatAPI } from '@/api/chat' // 실제 API 호출을 위한 import
 
 // 메시지 전송
 const sendMessage = async () => {
@@ -173,14 +125,14 @@ const sendMessage = async () => {
 
     // 채팅 API 호출
     const response = await chatAPI.sendMessage({ message: userMessageText })
+    const data = response.data.aiMessage
 
     // AI 응답 (테스트용)
     const aiMessage = {
-      id: Date.now() + 1, // 임시 ID
-      senderType: 'AI',
-      message:
-        '죄송합니다만, 현재 해당 지역의 최신 거래 정보를 제공해드리기 어렵습니다. 정확한 정보를 원하시면 국토교통부 실거래가 공개시스템이나 한국부동산원의 부동산통계정보시스템을 확인해보시는 것이 좋겠습니다.',
-      timestamp: new Date().toISOString().split('T')[0],
+      id: data.id,
+      senderType: data.senderType,
+      message: data.message,
+      timestamp: new Date(data.timestamp).toISOString().split('T')[0],
     }
 
     messages.value.push(aiMessage)
@@ -261,7 +213,7 @@ watch(messages, () => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 700px;
+  min-height: 500px;
   max-height: 800px;
 }
 
@@ -480,7 +432,7 @@ watch(messages, () => {
   border: none;
   resize: none;
   padding: 8px 12px;
-  font-size: 14px;
+  font-size: 13px;
   border-radius: 6px;
   background-color: #f9f9f9;
   transition: background-color 0.2s ease;
