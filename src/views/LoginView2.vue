@@ -143,6 +143,12 @@ const kakaoLogin = () => {
   const REST_API_KEY = import.meta.env.VITE_KAKAO_LOGIN_REST_API_KEY
   const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI
 
+  if (!REST_API_KEY || !REDIRECT_URI) {
+    errorMessage.value = '카카오 로그인 설정이 올바르지 않습니다. 관리자에게 문의하세요.'
+    console.error('카카오 로그인 환경 변수 누락:', { REST_API_KEY, REDIRECT_URI })
+    return
+  }
+
   const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`
 
   window.location.href = kakaoAuthUrl
