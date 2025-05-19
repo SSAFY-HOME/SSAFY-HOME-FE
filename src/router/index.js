@@ -68,6 +68,16 @@ const router = createRouter({
       name: 'KakaoWithdraw',
       component: () => import('@/components/common/KakaoWithDraw.vue'),
     },
+    {
+      path: '/news',
+      name: 'NewsList',
+      component: () => import('@/views/NewsList.vue'),
+    },
+    {
+      path: '/news/detail',
+      name: 'NewsDetail',
+      component: () => import('@/views/NewsDetailView.vue'),
+    },
   ],
 })
 
