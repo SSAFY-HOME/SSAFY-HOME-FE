@@ -70,6 +70,7 @@ import HomePanel from '@/components/panel/HomePanel.vue'
 import PropertySearchPanel from '@/components/panel/PropertySearchPanel.vue'
 // import SearchPanel from '@/components/panel/SearchPanel.vue'
 import CommunityPanel from '@/components/panel/CommunityPanel.vue'
+import ChatRoomPanel from '@/components/panel/ChatRoomPanel.vue'
 // import ChatbotPanel from '@/components/panel/ChatbotPanel.vue'
 // import MenuPanel from '@/components/panel/MenuPanel.vue'
 
@@ -127,15 +128,15 @@ const activateMenu = (menuName) => {
     case 'community':
       currentComponent.value = CommunityPanel
       break
-    // case 'chatbot':
-    //   currentComponent.value = ChatbotPanel
-    //   break
+    case 'chatbot':
+      currentComponent.value = ChatRoomPanel
+      break
     // case 'menu':
     //   currentComponent.value = MenuPanel
     //   break
-    case 'profile':
-      currentComponent.value = MyPagePanel
-      break
+    // case 'profile':
+    //   currentComponent.value = MyPagePanel
+    //   break
     default:
       currentComponent.value = null
   }
@@ -158,6 +159,7 @@ const logout = () => {
 // 로그아웃 모달 닫기
 const closeLogout = () => {
   isLogoutModalVisible.value = false
+  router.push('/login')
 }
 
 // DealPanel 관련 상태 관리
