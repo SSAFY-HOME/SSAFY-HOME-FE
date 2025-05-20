@@ -128,7 +128,6 @@ const router = useRouter()
 const newsDetail = ref({})
 const isLoading = ref(true)
 const error = ref(null)
-const viewCount = ref(Math.floor(Math.random() * 500) + 100) // Mock view count
 const newsItem = {
   title: route.query.title,
   pubDate: route.query.pubDate,
@@ -136,7 +135,7 @@ const newsItem = {
 }
 const fetchNewsDetail = async () => {
   const link = route.query.link
-  if (!newsItem) {
+  if (!route.query.title || !route.query.pubDate || !route.query.link) {
     error.value = '뉴스 정보를 찾을 수 없습니다.'
     isLoading.value = false
     return

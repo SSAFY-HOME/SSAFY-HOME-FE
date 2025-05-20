@@ -65,7 +65,6 @@ const fetchNews = async () => {
   try {
     isLoading.value = true
     const res = await newsAPI.getNewsList('')
-    console.log('res:', res)
     newsList.value = res
   } catch (error) {
     console.error('뉴스를 불러오는데 실패했습니다:', error)
