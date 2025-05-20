@@ -5,13 +5,12 @@ export const newsAPI = {
     const response = await api.get('/news', {
       params: { location },
     })
-    return response.data.result
+    return response.data
   },
 
-  getNewsSummary: async (link) => {
-    const response = await api.get('/news/summary', {
-      params: { link },
-    })
-    return response.data.result
+  getNewsSummary: async (newsItem) => {
+    const response = await api.post('/news/summary', newsItem)
+    console.log('응답:', response)
+    return response.data
   },
 }
