@@ -1,4 +1,4 @@
-import axios from 'axios'
+import api from './index'
 
 /**
  * 카카오 API 관련 함수들
@@ -16,7 +16,7 @@ export const kakaoAPI = {
 
     try {
       // API 요청
-      const response = await axios.get('/api/kakao/places', {
+      const response = await api.get('/api/kakao/places', {
         params: {
           query,
           category_group_code: categoryGroupCode,
@@ -60,7 +60,7 @@ export const kakaoAPI = {
 
     try {
       // API 요청
-      const response = await axios.get('http://localhost:8080/api/kakao/places', {
+      const response = await api.get('http://localhost:8080/api/kakao/places', {
         params: {
           query: searchKeyword,
           category_group_code: categoryGroupCode,
