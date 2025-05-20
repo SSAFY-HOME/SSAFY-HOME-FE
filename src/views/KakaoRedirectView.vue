@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import api from '@/api/index'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,8 +14,8 @@ onMounted(async () => {
   }
 
   try {
-    const response = await axios.get(`http://localhost:8080/oauth?code=${code}`)
-    const user = response.data.data
+    const response = await api.get(`oauth?code=${code}`)
+    const user = response.data
 
     // ✅ 사용자 정보 저장 (예: localStorage)
     localStorage.setItem('email', user.email)
