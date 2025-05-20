@@ -50,7 +50,7 @@ export const memberAPI = {
       console.error('로그인 실패:', error)
       return {
         status: 500,
-        message: error.response?.data?.message || '로그인 중 오류가 발생했습니다.',
+        message: '로그인 중 오류가 발생했습니다.',
         error: error,
       }
     }
