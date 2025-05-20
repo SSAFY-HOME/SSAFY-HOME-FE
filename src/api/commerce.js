@@ -25,9 +25,9 @@ export const kakaoAPI = {
 
       // 응답 데이터 정형화
       return {
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data?.content || [],
+        status: response.status,
+        message: response.message,
+        data: response.statusdata?.content || [],
       }
     } catch (error) {
       console.error('장소 검색 실패:', error)
@@ -69,9 +69,9 @@ export const kakaoAPI = {
 
       // 응답 데이터 정형화
       return {
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data || [],
+        status: response.status,
+        message: response.message,
+        data: response.data || [],
       }
     } catch (error) {
       console.error('주변 상권 검색 실패:', error)
