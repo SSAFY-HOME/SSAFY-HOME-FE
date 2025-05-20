@@ -60,7 +60,7 @@ export const kakaoAPI = {
 
     try {
       // API 요청
-      const response = await api.get('http://localhost:8080/api/kakao/places', {
+      const response = await api.get('/api/kakao/places', {
         params: {
           query: searchKeyword,
           category_group_code: categoryGroupCode,
