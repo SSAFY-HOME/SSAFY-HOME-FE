@@ -152,6 +152,7 @@
               <span class="detail-item">{{ apartment.buildYear }}년 준공</span>
               <span class="detail-item">도로명 주소: {{ apartment.roadNmSggCd }}</span>
             </div>
+            <ApartmentMiniChart v-if="apartment.deals" :dealData="apartment.deals" />
             <div class="apartment-actions">
               <button class="listing-button" @click.stop="viewListings(apartment)">
                 <span class="button-icon">📋</span> 매물 리스트 보기
@@ -231,7 +232,6 @@ const fetchDistricts = async (cityId) => {
 
   isLoadingDistricts.value = true
   try {
-    // 실제 API 엔드포인트로 교체 필요
     const result = await apartmentAPI.getDistricts(cityId)
     districts.value = result.data
   } catch (error) {
