@@ -12,11 +12,11 @@
         <div class="nav-section">
           <div class="main-nav">
             <RouterLink to="/main" class="main-nav-link">부동산 실거래 조회</RouterLink>
-            <RouterLink to="/chat" class="main-nav-link">부동산 상담 채팅</RouterLink>
+            <div class="main-nav-link" @click="activateButton('chatbot')">부동산 상담 채팅</div>
           </div>
           <div class="sub-nav">
             <RouterLink to="/news" class="sub-nav-link">부동산 기사</RouterLink>
-            <RouterLink to="/community" class="sub-nav-link">동네 커뮤니티</RouterLink>
+            <div class="sub-nav-link" @click="activateButton('community')">동네 커뮤니티</div>
           </div>
         </div>
       </div>
@@ -51,7 +51,22 @@
 import { ref, onMounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import LogoutModal from '@/components/modal/LogoutModal.vue'
-
+const activateButton = (name) => {
+  switch (name) {
+    case 'main':
+      router.push('/main')
+      break
+    case 'community':
+      router.push({ path: '/main', query: { menu: 'community' } })
+      break
+    case 'property':
+      router.push({ path: '/main', query: { menu: 'property' } })
+      break
+    case 'chatbot':
+      router.push({ path: '/main', query: { menu: 'chatbot' } })
+      break
+  }
+}
 // 로그인 상태 관리
 const isLoggedIn = ref(false)
 const isLogoutModalVisible = ref(false)

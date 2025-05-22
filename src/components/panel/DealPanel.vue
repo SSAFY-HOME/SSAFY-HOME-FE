@@ -40,7 +40,7 @@
           <span class="detail-tag">{{ listings.length }}개 매물</span>
         </div>
       </div>
-
+      <ApartmentDetailChart v-if="apartment" :aptSeq="apartment.aptSeq" />
       <div class="filters">
         <div class="filter-header">
           <h4>필터</h4>
@@ -124,7 +124,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { dealAPI } from '@/api/deal'
-
+import ApartmentDetailChart from '@/components/chart/ApartmentDetailChart.vue'
 // Props 정의
 const props = defineProps({
   isVisible: {
@@ -353,7 +353,7 @@ onMounted(() => {
 }
 
 .listing-panel.active {
-  width: 380px;
+  width: 500px;
 }
 
 .panel-header {

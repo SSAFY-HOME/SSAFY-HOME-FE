@@ -97,7 +97,7 @@
       </button>
       <button class="commerce-button" @click="openCommercePanel" :disabled="!selectedDistrict">
         <span class="button-icon">🏪</span>
-        <span class="button-text">주변 상권보기</span>
+        <span class="button-text">지역 분석</span>
       </button>
     </div>
     <!-- 검색 결과 -->
@@ -151,6 +151,15 @@
             <div class="apartment-details">
               <span class="detail-item">{{ apartment.buildYear }}년 준공</span>
               <span class="detail-item">도로명 주소: {{ apartment.roadNmSggCd }}</span>
+            </div>
+            <!-- 미니 차트 컴포넌트 추가 -->
+            <div class="price-info">
+              <span class="avg-price">평균 {{ formatPrice(apartment.avgPrice) }}</span>
+
+              <span class="price-range"
+                >최저 {{ formatPrice(apartment.minPrice) }} ~ 최고
+                {{ formatPrice(apartment.maxPrice) }}</span
+              >
             </div>
             <div class="apartment-actions">
               <button class="listing-button" @click.stop="viewListings(apartment)">
@@ -231,7 +240,6 @@ const fetchDistricts = async (cityId) => {
 
   isLoadingDistricts.value = true
   try {
-    // 실제 API 엔드포인트로 교체 필요
     const result = await apartmentAPI.getDistricts(cityId)
     districts.value = result.data
   } catch (error) {
@@ -398,7 +406,19 @@ const handleClickOutside = (event) => {
     districtDropdownOpen.value = false
   }
 }
-
+// 가격 포맷팅 함수
+const formatPrice = (price) => {
+  if (price >= 10000) {
+    const oku = Math.floor(price / 10000)
+    const man = price % 10000
+    if (man === 0) {
+      return `${oku}억`
+    } else {
+      return `${oku}억 ${man.toLocaleString()}`
+    }
+  }
+  return `${price.toLocaleString()}만원`
+}
 // 컴포넌트 마운트 시 초기 데이터 로드
 onMounted(() => {
   fetchProvinces()
@@ -431,9 +451,9 @@ watch(sortOption, () => {
     apartments.value = [...apartments.value].sort((a, b) => {
       switch (sortOption.value) {
         case 'price_asc':
-          return a.price - b.price
+          return a.avgPrice - b.avgPrice
         case 'price_desc':
-          return b.price - a.price
+          return b.avgPrice - a.avgPrice
         case 'year_desc':
           return b.buildYear - a.buildYear
         case 'year_asc':
@@ -616,7 +636,23 @@ label {
   font-weight: 600;
   color: #333;
 }
+.price-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
 
+.avg-price {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4caf50;
+}
+.price-range {
+  font-size: 10px;
+  color: #777;
+  margin-bottom: 5px;
+}
 .sort-options select {
   padding: 6px 10px;
   border: 1px solid #ddd;

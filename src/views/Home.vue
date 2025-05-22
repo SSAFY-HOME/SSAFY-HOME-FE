@@ -31,7 +31,7 @@
                 placeholder="지역, 지하철, 대학, 단지명 또는 매물번호를 입력해주세요."
               />
             </div> -->
-            <button class="search-btn" @click="activateButton('main')">
+            <button class="search-btn" @click="activateButton('property')">
               집 찾으러 가기 <span class="arrow">→</span>
             </button>
           </div>
@@ -117,10 +117,13 @@ const activateButton = (name) => {
       router.push('/main')
       break
     case 'community':
-      router.push('/main')
+      router.push({ path: '/main', query: { menu: 'community' } })
+      break
+    case 'property':
+      router.push({ path: '/main', query: { menu: 'property' } })
       break
     case 'chatbot':
-      router.push('/chat')
+      router.push({ path: '/main', query: { menu: 'chatbot' } })
       break
     case 'news':
       router.push('/news')
