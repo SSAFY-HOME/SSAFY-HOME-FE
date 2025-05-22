@@ -115,14 +115,13 @@
         <div class="info-card favorites">
           <div class="card-header">
             <h3 class="section-title"><i class="fas fa-heart"></i> 관심 아파트</h3>
-            <button class="view-all-button small"><i class="fas fa-list"></i> 전체보기</button>
           </div>
           <div class="card-content">
             <div v-if="favoriteApartments.length > 0" class="favorites-list">
               <div v-for="apt in favoriteApartments" :key="apt.id" class="favorite-item">
                 <div class="favorite-info">
                   <p class="favorite-name">{{ apt.name }}</p>
-                  <p class="favorite-address">{{ apt.address }}</p>
+                  <p class="favorite-address">{{ apt.addr }}</p>
                 </div>
                 <button class="remove-favorite">
                   <i class="fas fa-times"></i>
@@ -248,19 +247,18 @@
         <div class="info-card">
           <div class="card-header">
             <h3 class="section-title"><i class="fas fa-clipboard-list"></i> 내가 쓴 게시글</h3>
-            <button class="view-all-button small"><i class="fas fa-list"></i> 전체보기</button>
           </div>
           <div class="card-content">
             <div v-if="userPosts.length > 0" class="activity-list">
-              <div v-for="post in userPosts" :key="post.id" class="activity-item">
+              <div v-for="post in userPosts" :key="post.communityId" class="activity-item">
                 <div class="activity-content">
                   <h4 class="activity-title">{{ post.title }}</h4>
-                  <p class="activity-excerpt">{{ post.excerpt }}</p>
+                  <p class="activity-excerpt">{{ post.content }}</p>
                 </div>
                 <div class="activity-meta">
-                  <span class="activity-date">{{ formatDate(post.createdAt) }}</span>
+                  <span class="activity-date">{{ formatDate(post.updateDate) }}</span>
                   <span class="activity-stats">
-                    <i class="fas fa-heart"></i> {{ post.likes }}
+                    <i class="fas fa-heart"></i> {{ post.like }}
                     <i class="fas fa-comment ml-2"></i> {{ post.comments }}
                   </span>
                 </div>
@@ -276,7 +274,6 @@
         <div class="info-card">
           <div class="card-header">
             <h3 class="section-title"><i class="fas fa-comment-dots"></i> 내가 쓴 댓글</h3>
-            <button class="view-all-button small"><i class="fas fa-list"></i> 전체보기</button>
           </div>
           <div class="card-content">
             <div v-if="userComments.length > 0" class="activity-list">
@@ -347,6 +344,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { memberAPI } from '@/api/member'
 import AppHeader from '@/components/common/Header.vue'
+import { communityAPI } from '@/api/community'
 
 const router = useRouter()
 const isLoggedIn = ref(false)
@@ -452,42 +450,27 @@ const fetchUserProfile = async () => {
 }
 
 const fetchFavoriteApartments = async () => {
-  // API 연동 시 실제 함수로 대체
-  favoriteApartments.value = [
-    { id: 1, name: '래미안 아파트', address: '서울시 강남구 테헤란로 123' },
-    { id: 2, name: '자이 아파트', address: '서울시 서초구 서초대로 456' },
-    { id: 3, name: '푸르지오 아파트', address: '서울시 송파구 올림픽로 789' },
-  ]
+  //아파트 좋아요 API
+  try {
+    const response = await memberAPI.getFavoriteApartments()
+    if (response && response.data) {
+      favoriteApartments.value = response.data
+    }
+  } catch (error) {
+    console.error('관심 아파트 가져오기 오류:', error)
+  }
 }
 
 const fetchUserPosts = async () => {
-  // API 연동 시 실제 함수로 대체
-  userPosts.value = [
-    {
-      id: 1,
-      title: '아파트 가격 전망이 어떻게 될까요?',
-      excerpt: '요즘 시장 상황이 불안정한데 전문가들의 의견이 궁금합니다.',
-      createdAt: new Date(2025, 4, 10),
-      likes: 24,
-      comments: 13,
-    },
-    {
-      id: 2,
-      title: '우리 아파트 분리수거 문제',
-      excerpt: '분리수거 관련해서 주민 여러분의 의견이 필요합니다.',
-      createdAt: new Date(2025, 4, 5),
-      likes: 31,
-      comments: 27,
-    },
-    {
-      id: 3,
-      title: '새로 개발된 단지 정보 공유',
-      excerpt: '새로 분양하는 아파트 정보를 공유합니다.',
-      createdAt: new Date(2025, 3, 28),
-      likes: 19,
-      comments: 8,
-    },
-  ]
+  //내가 작성한 커뮤니티 게시글 API
+  try {
+    const response = await communityAPI.getUserPosts()
+    if (response && response.data) {
+      userPosts.value = response.data
+    }
+  } catch (error) {
+    console.error('내가 작성한 게시글 가져오기 오류:', error)
+  }
 }
 
 const fetchUserComments = async () => {
@@ -514,22 +497,45 @@ const fetchUserComments = async () => {
   ]
 }
 
-const formatDate = (date) => {
-  if (!date) return ''
+const formatDate = (dateString) => {
+  if (!dateString) return ''
 
-  const now = new Date()
-  const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24))
+  try {
+    const date = new Date(dateString)
 
-  if (diffDays === 0) return '오늘'
-  if (diffDays === 1) return '어제'
-  if (diffDays < 7) return `${diffDays}일 전`
+    // 유효하지 않은 날짜 체크
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid date string:', dateString)
+      return dateString // 원본 문자열 반환
+    }
 
-  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+
+    const diffTime = today - targetDate
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+    // 미래 날짜 처리
+    if (diffDays < 0) {
+      return `${Math.abs(diffDays)}일 후`
+    }
+
+    if (diffDays === 0) return '오늘'
+    if (diffDays === 1) return '어제'
+    if (diffDays < 7) return `${diffDays}일 전`
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}주 전`
+
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
+  } catch (error) {
+    console.error('Error formatting date:', error)
+    return dateString
+  }
 }
 
 const goToLogin = () => router.push('/login')
 const modifyApartment = () => router.push('/regist/home')
-const goToSearch = () => router.push('/search')
+const goToSearch = () => router.push('/main')
 const goToCommunity = () => router.push('/community')
 
 const validatePassword = () => {
@@ -1275,7 +1281,7 @@ onMounted(() => {
 .save-button,
 .view-all-button,
 .add-button {
-  padding: 10px 16px;
+  padding: 10px 16px 10px 10px;
   border-radius: 4px;
   font-size: 14px;
   font-weight: 500;
@@ -1363,7 +1369,7 @@ onMounted(() => {
 }
 
 button.small {
-  padding: 6px 12px;
+  padding: 6px 8px 6px 2px;
   font-size: 13px;
 }
 
