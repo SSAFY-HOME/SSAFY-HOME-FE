@@ -37,7 +37,11 @@
                 }}</span>
                 <span class="message-time">{{ formatDate(message.timestamp) }}</span>
               </div>
-              <p class="message-text">{{ message.message }}</p>
+              <!-- 마크다운 렌더링 -->
+              <div
+                class="message-text markdown-content"
+                v-html="renderMarkdown(message.message)"
+              ></div>
             </div>
           </div>
         </div>
@@ -45,22 +49,55 @@
 
       <!-- 채팅 입력 영역 -->
       <div class="chat-input-area">
-        <textarea
-          class="chat-input"
-          v-model="newMessage"
-          placeholder="아파트 관련 질문을 입력하세요..."
-          @keydown.enter.prevent="sendMessage"
-          :disabled="isSending"
-          rows="3"
-        ></textarea>
-        <button
-          class="send-button"
-          @click="sendMessage"
-          :disabled="!newMessage.trim() || isSending"
-        >
-          <span class="button-icon">📤</span>
-          <span class="button-text">전송</span>
-        </button>
+        <div class="input-wrapper">
+          <textarea
+            class="chat-input"
+            v-model="newMessage"
+            placeholder="아파트 관련 질문을 입력하세요..."
+            @keydown.enter.prevent="handleEnterKey"
+            :disabled="isSending"
+            rows="3"
+          ></textarea>
+          <div class="input-tools">
+            <button
+              type="button"
+              class="markdown-help-btn"
+              @click="showMarkdownHelp = !showMarkdownHelp"
+              title="마크다운 도움말"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+            <button
+              class="send-button"
+              @click="sendMessage"
+              :disabled="!newMessage.trim() || isSending"
+            >
+              <span class="button-icon">📤</span>
+              <span class="button-text">전송</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 마크다운 도움말 -->
+      <div v-if="showMarkdownHelp" class="markdown-help">
+        <div class="help-header">
+          <h4>마크다운 사용법</h4>
+          <button @click="showMarkdownHelp = false" class="close-btn">×</button>
+        </div>
+        <div class="help-content">
+          <div class="help-item"><code>**굵은 글씨**</code> → <strong>굵은 글씨</strong></div>
+          <div class="help-item"><code>*기울임*</code> → <em>기울임</em></div>
+          <div class="help-item"><code>`코드`</code> → <code>코드</code></div>
+          <div class="help-item"><code>- 목록 항목</code> → 불릿 리스트</div>
+          <div class="help-item"><code>1. 번호 목록</code> → 번호 리스트</div>
+          <div class="help-item"><code>[링크](URL)</code> → 링크</div>
+        </div>
       </div>
 
       <!-- 전송 중 표시 -->
@@ -76,6 +113,8 @@
 import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { chatAPI } from '@/api/chat'
+import { marked } from 'marked' // npm install marked
+import DOMPurify from 'dompurify' // npm install dompurify
 
 // 상태 관리
 const router = useRouter()
@@ -85,6 +124,98 @@ const isSending = ref(false)
 const newMessage = ref('')
 const messages = ref([])
 const chatMessagesContainer = ref(null)
+const showMarkdownHelp = ref(false)
+
+// 마크다운 설정
+const configureMarked = () => {
+  marked.setOptions({
+    breaks: true, // 줄바꿈을 <br>로 변환
+    gfm: true, // GitHub Flavored Markdown 지원
+    sanitize: false, // DOMPurify로 별도 처리
+  })
+
+  // 코드 블록 렌더러 커스터마이징
+  const renderer = new marked.Renderer()
+
+  // 코드 블록 스타일링
+  renderer.code = (code, language) => {
+    const validLang = language && hljs?.getLanguage(language) ? language : 'plaintext'
+    const highlighted =
+      language && hljs?.getLanguage(language)
+        ? hljs.highlight(code, { language: validLang }).value
+        : code
+
+    return `<pre class="code-block"><code class="hljs language-${validLang}">${highlighted}</code></pre>`
+  }
+
+  // 인라인 코드 스타일링
+  renderer.codespan = (code) => {
+    return `<code class="inline-code">${code}</code>`
+  }
+
+  // 링크 보안 처리
+  renderer.link = (href, title, text) => {
+    const titleAttr = title ? ` title="${title}"` : ''
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer"${titleAttr}>${text}</a>`
+  }
+
+  marked.use({ renderer })
+}
+
+// 마크다운 렌더링 함수
+const renderMarkdown = (text) => {
+  if (!text) return ''
+
+  try {
+    // 마크다운을 HTML로 변환
+    const rawHtml = marked(text)
+
+    // XSS 방지를 위한 HTML 정화
+    const cleanHtml = DOMPurify.sanitize(rawHtml, {
+      ALLOWED_TAGS: [
+        'p',
+        'br',
+        'strong',
+        'em',
+        'u',
+        's',
+        'code',
+        'pre',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'ul',
+        'ol',
+        'li',
+        'blockquote',
+        'a',
+        'img',
+      ],
+      ALLOWED_ATTR: ['href', 'title', 'src', 'alt', 'target', 'rel', 'class'],
+    })
+
+    return cleanHtml
+  } catch (error) {
+    console.error('마크다운 렌더링 오류:', error)
+    // 오류 발생 시 원본 텍스트 반환
+    return text.replace(/\n/g, '<br>')
+  }
+}
+
+// Enter 키 처리 (Shift+Enter는 줄바꿈, Enter는 전송)
+const handleEnterKey = (event) => {
+  if (event.shiftKey) {
+    // Shift+Enter: 줄바꿈 허용
+    return
+  } else {
+    // Enter: 메시지 전송
+    event.preventDefault()
+    sendMessage()
+  }
+}
 
 // 초기 데이터 로드
 const fetchChatMessages = async () => {
@@ -113,10 +244,10 @@ const sendMessage = async () => {
 
     // 사용자 메시지 추가 (UI 즉시 반영)
     const userMessage = {
-      id: Date.now(), // 임시 ID (실제로는 서버에서 할당)
+      id: Date.now(),
       senderType: 'USER',
       message: userMessageText,
-      timestamp: new Date().toISOString().split('T')[0],
+      timestamp: new Date().toISOString(),
     }
 
     messages.value.push(userMessage)
@@ -127,12 +258,12 @@ const sendMessage = async () => {
     const response = await chatAPI.sendMessage({ message: userMessageText })
     const data = response.data.aiMessage
 
-    // AI 응답 (테스트용)
+    // AI 응답
     const aiMessage = {
       id: data.id,
       senderType: data.senderType,
       message: data.message,
-      timestamp: new Date(data.timestamp).toISOString().split('T')[0],
+      timestamp: data.timestamp,
     }
 
     messages.value.push(aiMessage)
@@ -165,14 +296,12 @@ const formatDate = (dateString) => {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
 
-  // 오늘이면 시간만 표시
   if (messageDate.getTime() === today.getTime()) {
     const hours = date.getHours().toString().padStart(2, '0')
     const minutes = date.getMinutes().toString().padStart(2, '0')
     return `오늘 ${hours}:${minutes}`
   }
 
-  // 그 외에는 날짜 전체 표시
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
@@ -192,6 +321,7 @@ const checkLoginStatus = () => {
 
 // 컴포넌트 마운트 시 초기화
 onMounted(() => {
+  configureMarked()
   checkLoginStatus()
 })
 
@@ -202,6 +332,7 @@ watch(messages, () => {
 </script>
 
 <style scoped>
+/* 기존 스타일 유지 + 마크다운 관련 스타일 추가 */
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -412,23 +543,125 @@ watch(messages, () => {
   font-size: 14px;
   line-height: 1.5;
   color: #333;
-  white-space: pre-wrap;
   word-break: break-word;
+}
+
+/* 마크다운 콘텐츠 스타일 */
+.markdown-content {
+  font-family: inherit;
+}
+
+.markdown-content :deep(h1),
+.markdown-content :deep(h2),
+.markdown-content :deep(h3),
+.markdown-content :deep(h4),
+.markdown-content :deep(h5),
+.markdown-content :deep(h6) {
+  margin: 12px 0 8px 0;
+  font-weight: 600;
+  color: #333;
+}
+
+.markdown-content :deep(h1) {
+  font-size: 1.5em;
+}
+.markdown-content :deep(h2) {
+  font-size: 1.4em;
+}
+.markdown-content :deep(h3) {
+  font-size: 1.3em;
+}
+.markdown-content :deep(h4) {
+  font-size: 1.2em;
+}
+.markdown-content :deep(h5) {
+  font-size: 1.1em;
+}
+.markdown-content :deep(h6) {
+  font-size: 1em;
+}
+
+.markdown-content :deep(p) {
+  margin: 8px 0;
+}
+
+.markdown-content :deep(ul),
+.markdown-content :deep(ol) {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.markdown-content :deep(li) {
+  margin: 4px 0;
+}
+
+.markdown-content :deep(blockquote) {
+  border-left: 4px solid #4caf50;
+  padding-left: 12px;
+  margin: 8px 0;
+  color: #666;
+  font-style: italic;
+}
+
+.markdown-content :deep(.inline-code) {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #2e7d32;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.markdown-content :deep(.code-block) {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.markdown-content :deep(.code-block code) {
+  background: none;
+  padding: 0;
+  border: none;
+}
+
+.markdown-content :deep(a) {
+  color: #4caf50;
+  text-decoration: none;
+}
+
+.markdown-content :deep(a:hover) {
+  text-decoration: underline;
+}
+
+.markdown-content :deep(strong) {
+  font-weight: 600;
+}
+
+.markdown-content :deep(em) {
+  font-style: italic;
 }
 
 /* 채팅 입력 영역 */
 .chat-input-area {
-  display: flex;
-  gap: 8px;
-  padding: 8px;
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
   margin-bottom: 8px;
 }
 
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+}
+
 .chat-input {
-  flex-grow: 1;
+  width: 100%;
   border: none;
   resize: none;
   padding: 8px 12px;
@@ -436,11 +669,34 @@ watch(messages, () => {
   border-radius: 6px;
   background-color: #f9f9f9;
   transition: background-color 0.2s ease;
+  margin-bottom: 8px;
 }
 
 .chat-input:focus {
   outline: none;
   background-color: #f0f0f0;
+}
+
+.input-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.markdown-help-btn {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: pointer;
+  color: #666;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.markdown-help-btn:hover {
+  background-color: #f0f0f0;
+  color: #4caf50;
 }
 
 .send-button {
@@ -476,6 +732,67 @@ watch(messages, () => {
   font-size: 14px;
 }
 
+/* 마크다운 도움말 */
+.markdown-help {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  animation: fadeIn 0.3s ease;
+}
+
+.help-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.help-header h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.help-content {
+  padding: 12px 16px;
+}
+
+.help-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.help-item code {
+  background-color: #e8e8e8;
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-right: 8px;
+  font-family: 'Courier New', monospace;
+  min-width: 120px;
+}
+
 .sending-indicator {
   display: flex;
   align-items: center;
@@ -505,6 +822,15 @@ watch(messages, () => {
 
   .chat-panel {
     min-height: 500px;
+  }
+
+  .input-tools {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .markdown-help-btn {
+    align-self: flex-start;
   }
 }
 
