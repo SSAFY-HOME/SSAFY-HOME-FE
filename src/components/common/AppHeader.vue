@@ -11,7 +11,7 @@
 
         <div class="nav-section">
           <div class="main-nav">
-            <RouterLink to="/main" class="main-nav-link">부동산 실거래 조회</RouterLink>
+            <div class="main-nav-link" @click="activateButton('home')">부동산 실거래 조회</div>
             <div class="main-nav-link" @click="activateButton('chatbot')">부동산 상담 채팅</div>
           </div>
           <div class="sub-nav">
@@ -55,6 +55,9 @@ const activateButton = (name) => {
   switch (name) {
     case 'main':
       router.push('/main')
+      break
+    case 'home':
+      router.push({ path: '/main', query: { menu: 'home' } })
       break
     case 'community':
       router.push({ path: '/main', query: { menu: 'community' } })
