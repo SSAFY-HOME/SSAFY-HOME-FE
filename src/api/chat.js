@@ -26,7 +26,7 @@ export const chatAPI = {
   },
   /**
    * 채팅 메시지 목록 가져오기 API 호출 함수
-   *
+   * @returns {Promise<Object>} 메시지 목록
    *
    */
   getMessages: async () => {
