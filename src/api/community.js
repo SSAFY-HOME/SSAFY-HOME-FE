@@ -123,4 +123,23 @@ export const communityAPI = {
       }
     }
   },
+  getUserPosts: async () => {
+    try {
+      // API 요청
+      const response = await api.get(`/community/my-posts`)
+      return {
+        status: 200,
+        data: response.data,
+        message: '커뮤니티 목록을 성공적으로 불러왔습니다.',
+      }
+    } catch (error) {
+      console.error('커뮤니티 데이터를 불러오는 중 오류가 발생했습니다:', error)
+      return {
+        status: error.response?.status || 500,
+        message:
+          error.response?.data?.message || '커뮤니티 목록을 불러오는 중 오류가 발생했습니다.',
+        error: error,
+      }
+    }
+  },
 }

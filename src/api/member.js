@@ -140,4 +140,23 @@ export const memberAPI = {
       throw error
     }
   },
+  getFavoriteApartments: async () => {
+    try {
+      const response = await api.get('/like')
+      if (response === undefined || response == null) {
+        throw new Error('서버 응답이 없습니다.')
+      }
+      if (response && response.status != 200) {
+        throw new Error(response.message || '관심 아파트 조회에 실패했습니다.')
+      }
+      return {
+        success: true,
+        message: '관심 아파트 조회가 성공적으로 되었습니다.',
+        data: response.data,
+      }
+    } catch (error) {
+      console.error('관심 아파트 조회 실패', error)
+      throw error
+    }
+  },
 }
