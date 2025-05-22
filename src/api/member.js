@@ -50,7 +50,7 @@ export const memberAPI = {
       console.error('로그인 실패:', error)
       return {
         status: 500,
-        message: error.response?.data?.message || '로그인 중 오류가 발생했습니다.',
+        message: '로그인 중 오류가 발생했습니다.',
         error: error,
       }
     }
@@ -137,6 +137,25 @@ export const memberAPI = {
       return response.data
     } catch (error) {
       console.error('카카오 회원 탈퇴 실패:', error)
+      throw error
+    }
+  },
+  getFavoriteApartments: async () => {
+    try {
+      const response = await api.get('/like')
+      if (response === undefined || response == null) {
+        throw new Error('서버 응답이 없습니다.')
+      }
+      if (response && response.status != 200) {
+        throw new Error(response.message || '관심 아파트 조회에 실패했습니다.')
+      }
+      return {
+        success: true,
+        message: '관심 아파트 조회가 성공적으로 되었습니다.',
+        data: response.data,
+      }
+    } catch (error) {
+      console.error('관심 아파트 조회 실패', error)
       throw error
     }
   },

@@ -199,7 +199,6 @@ const kakaoLogin = () => {
 .right-panel h2 {
   font-size: 28px;
   font-weight: 700;
-  margin-bottom: 40px;
   text-align: center;
   color: #333;
 }
@@ -310,7 +309,7 @@ const kakaoLogin = () => {
   color: #e53935;
   padding: 12px;
   border-radius: 5px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   font-size: 14px;
   text-align: center;
 }
