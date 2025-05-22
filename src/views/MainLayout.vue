@@ -258,11 +258,25 @@ watch(isListingPanelVisible, (newValue) => {
     selectedApartment.value = null
   }
 })
-
+import { useRoute } from 'vue-router'
+const route = useRoute()
 // 컴포넌트 마운트 시 실행
 onMounted(() => {
   checkLoginStatus()
+  const menuFromQuery = route.query.menu
+  if (menuFromQuery) {
+    activeMenu.value = menuFromQuery
+  }
 })
+watch(
+  () => route.query.menu,
+  (newMenu) => {
+    if (newMenu) {
+      activateMenu(newMenu)
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>
