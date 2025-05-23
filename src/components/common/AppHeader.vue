@@ -48,9 +48,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import LogoutModal from '@/components/modal/LogoutModal.vue'
+import { useMemberStore } from '@/stores/user'
 const activateButton = (name) => {
   switch (name) {
     case 'main':
@@ -71,7 +72,9 @@ const activateButton = (name) => {
   }
 }
 // 로그인 상태 관리
-const isLoggedIn = ref(false)
+const memberStore = useMemberStore()
+const user = computed(() => memberStore)
+const isLoggedIn = computed(() => !!user.value.accessToken)
 const isLogoutModalVisible = ref(false)
 const logoutMessage = ref('')
 const router = useRouter()
@@ -84,8 +87,13 @@ const checkLoginStatus = () => {
 
 // 로그아웃 처리
 const handleLogout = () => {
+  localStorage.removeItem('email')
+  localStorage.removeItem('hasHome')
+  localStorage.removeItem('isSocial')
+  localStorage.removeItem('refreshToken')
   localStorage.removeItem('accessToken')
   localStorage.removeItem('isAdmin')
+  memberStore.clearMember()
   logoutMessage.value = '로그아웃이 완료되었습니다'
   isLoggedIn.value = false
   isLogoutModalVisible.value = true // 모달 표시

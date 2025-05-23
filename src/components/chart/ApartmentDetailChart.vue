@@ -142,9 +142,9 @@ export default {
       dealData: [],
       loading: false,
       error: null,
-      chartWidth: 500,
-      chartHeight: 200,
-      padding: 50,
+      chartWidth: 550,
+      chartHeight: 300,
+      padding: 80,
       tooltip: {
         show: false,
         x: 0,
@@ -363,6 +363,7 @@ export default {
 }
 .stat-card {
   display: flex;
+  justify-content: space-around;
   align-items: center;
   padding: 16px;
   border-radius: 8px;

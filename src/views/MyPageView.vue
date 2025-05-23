@@ -78,9 +78,9 @@
           <div class="card-content">
             <div class="form-group">
               <label for="name">이름</label>
-              <input type="text" id="name" v-model="user.name" />
+              <input type="text" id="name" v-model="user.name" readonly />
               <label for="nickname">이메일</label>
-              <input type="text" id="nickname" v-model="user.email" />
+              <input type="text" id="nickname" v-model="user.email" readonly />
             </div>
           </div>
         </div>
@@ -345,20 +345,14 @@ import { useRouter } from 'vue-router'
 import { memberAPI } from '@/api/member'
 import AppHeader from '@/components/common/Header.vue'
 import { communityAPI } from '@/api/community'
-
+import { useMemberStore } from '@/stores/user'
+const user = computed(() => memberStore)
 const router = useRouter()
-const isLoggedIn = ref(false)
+const isLoggedIn = computed(() => !!user.value.accessToken)
 const profileImage = ref(null)
 const confirmPassword = ref('')
 const errors = ref({})
-const user = ref({
-  name: '',
-  currentPassword: '',
-  password: '',
-  passwordConfirm: '',
-  apartment: null,
-  social: '',
-})
+const memberStore = useMemberStore()
 
 const activeTab = ref('info')
 const showImageModal = ref(false)
@@ -368,7 +362,7 @@ const userPosts = ref([])
 const userComments = ref([])
 
 // 카카오 로그인 사용자 체크 (social 필드가 'true' 문자열인 경우)
-const isKakaoUser = computed(() => user.value.social === true || user.value.social === 'true')
+const isKakaoUser = computed(() => user.value.isSocial === true || user.value.social === 'true')
 
 // 패스워드 강도 계산
 const passwordStrengthClass = computed(() => {

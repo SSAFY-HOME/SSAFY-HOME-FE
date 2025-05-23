@@ -71,6 +71,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { memberAPI } from '@/api/member'
 import AppHeader from '@/components/common/Header.vue'
+import { useMemberStore } from '@/stores/user'
 
 const router = useRouter()
 
@@ -106,20 +107,33 @@ const handleLogin = async () => {
     }
 
     const result = await memberAPI.logIn(userData)
-
+    const user = result.data
     // 로그인 결과 처리
     if (result.status === 200) {
       // 로그인 성공 처리
       console.log('로그인 성공:', result.message)
-
       // 로컬 스토리지에 토큰 저장
-      localStorage.setItem('isAdmin', result.isAdmin)
-      // 필요한 경우 토큰 저장
-      localStorage.setItem('accessToken', result.token)
-      localStorage.setItem('isSocial', result.social)
+      localStorage.setItem('isAdmin', user.isAdmin)
+      localStorage.setItem('accessToken', user.accessToken)
+      localStorage.setItem('refreshToken', user.refreshToken)
+      localStorage.setItem('isSocial', user.social)
+
+      // pinia에 user데이터 저장
+      const memberStore = useMemberStore()
+
+      memberStore.setMember({
+        image: user.image,
+        name: user.name,
+        email: user.email,
+        accessToken: user.accessToken,
+        refreshToken: user.refreshToken,
+        isSocial: user.social,
+        admin: user.admin,
+        apartment: user.apartment,
+        hasHomeInfo: user.hasHomeInfo,
+      })
 
       // 홈 페이지 또는 이전 페이지로 리다이렉트
-      console.log(result.hasHome)
       if (result.hasHome === false) {
         router.push('/regist/home')
       } else {

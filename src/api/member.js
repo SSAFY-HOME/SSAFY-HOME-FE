@@ -41,9 +41,8 @@ export const memberAPI = {
         return {
           status: 200,
           message: '로그인이 성공적으로 완료되었습니다.',
-          token: response.data.accessToken,
-          isAdmin: response.data.admin ?? false,
-          hasHome: response.data.hasHomeInfo ?? false,
+
+          data: response.data,
         }
       }
     } catch (error) {
@@ -106,6 +105,29 @@ export const memberAPI = {
       })
     } catch (error) {
       console.error('비밀번호 수정 실패', error)
+      throw error
+    }
+  },
+  reissue: async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken')
+      const refreshToken = localStorage.getItem('refreshToken')
+
+      const response = await api.post(
+        '/member/reissue',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'X-Refresh-Token': refreshToken,
+          },
+        },
+      )
+
+      // 새 accessToken 반환
+      return response
+    } catch (error) {
+      console.error('토큰 재발급 실패:', error)
       throw error
     }
   },

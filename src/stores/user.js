@@ -2,43 +2,40 @@ import { defineStore } from 'pinia'
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
-    id: null,
     name: '', // ← nickname이 아니라 name으로 통일
     email: '',
     image: '',
-    isKakao: false,
+    isSocial: '',
     apartment: '',
-    sido: '',
-    gungu: '',
-    dong: '',
     accessToken: '',
+    refreshToken: '',
+    admin: '',
+    hasHomeInfo: '',
   }),
 
   actions: {
     setMember(memberData) {
-      this.id = memberData.id
       this.name = memberData.name // ← nickname → name
       this.email = memberData.email
       this.image = memberData.image
-      this.isKakao = memberData.isKakao || false
+      this.isSocial = memberData.isSocial || ''
       this.apartment = memberData.apartment || ''
-      this.sido = memberData.sido || ''
-      this.gungu = memberData.gungu || ''
-      this.dong = memberData.dong || ''
       this.accessToken = memberData.accessToken || ''
+      this.refreshToken = memberData.refreshToken || ''
+      this.admin = memberData.admin || false
+      this.hasHomeInfo = memberData.hasHomeInfo || false
     },
 
     clearMember() {
-      this.id = null
       this.name = ''
       this.email = ''
       this.image = ''
-      this.isKakao = false
+      this.isSocial = ''
       this.apartment = ''
-      this.sido = ''
-      this.gungu = ''
-      this.dong = ''
       this.accessToken = ''
+      this.admin = ''
+      this.hasHomeInfo = ''
+      this.refreshToken = ''
     },
   },
 })
