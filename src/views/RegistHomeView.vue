@@ -181,7 +181,7 @@
 <script setup>
 import AppHeader from '@/components/common/Header.vue'
 import RegistHomeModal from '@/components/modal/RegistHomeModal.vue' // 모달 컴포넌트
-
+import { useMemberStore } from '@/stores/user'
 import { ref, watch, onMounted } from 'vue'
 import { apartmentAPI } from '@/api/apartment' // 기존 코드에서 API import 유지
 
@@ -357,6 +357,7 @@ const selectApartment = (apartment) => {
 const registerApartment = () => {
   showConfirmModal.value = true
 }
+const memberStore = useMemberStore()
 
 import { memberAPI } from '@/api/member'
 import { useRouter } from 'vue-router'
@@ -368,8 +369,10 @@ const confirmRegistration = async () => {
   }
   try {
     await memberAPI.registHome(aptData)
+    memberStore.apartment = selectedApartment.value
     showConfirmModal.value = false
     registrationComplete.value = true
+
     router.push('/mypage')
   } catch (err) {
     alert('홈 등록 중 오류가 발생했습니다.')

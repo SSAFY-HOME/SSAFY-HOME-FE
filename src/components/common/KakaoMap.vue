@@ -4,6 +4,12 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, defineExpose } from 'vue'
+import { useMemberStore } from '@/stores/user'
+import { kakaoAPI } from '@/api/commerce'
+import { apartmentAPI } from '@/api/apartment'
+
+const memberStore = useMemberStore()
+
 let currentInfoWindow = null // 현재 열린 인포윈도우 저장
 
 // 지도 컨테이너 참조
@@ -14,11 +20,19 @@ let kakaoMap = null
 let markers = []
 
 // 지도 초기화 함수
-const initializeMap = () => {
+const initializeMap = async () => {
   if (window.kakao && window.kakao.maps) {
+    let centerLat = 37.5665
+    let centerLng = 126.978
     // 지도 생성
+
+    const apt = memberStore.apartment
+    if (apt && apt.latitude && apt.longitude) {
+      centerLat = apt.latitude
+      centerLng = apt.longitude
+    }
     const options = {
-      center: new window.kakao.maps.LatLng(37.5665, 126.978), // 서울 중심 좌표
+      center: new window.kakao.maps.LatLng(centerLat, centerLng), // 서울 중심 좌표
       level: 5, // 확대 레벨
     }
 
@@ -28,6 +42,28 @@ const initializeMap = () => {
     window.kakao.maps.event.addListener(kakaoMap, 'idle', () => {
       kakaoMap.relayout()
     })
+
+    // 초기 마커 표시
+    await showInitialMarkers(apt?.dongCode)
+  }
+}
+
+// 초기화 시 마커 표시 함수
+const showInitialMarkers = async (dongCode) => {
+  if (!dongCode) return
+
+  try {
+    // 아파트 불러오기
+    const aptResult = await apartmentAPI.getApartments(dongCode)
+    const apartments = aptResult.data
+    showMultipleApartmentsOnMap(apartments)
+
+    // 상권 불러오기
+    const commerceResult = await kakaoAPI.searchNearbyCommerces({ dongCode })
+    const commerces = commerceResult.data
+    showMultipleCommercesOnMap(commerces)
+  } catch (e) {
+    console.error('초기 마커 표시 중 오류:', e)
   }
 }
 

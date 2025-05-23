@@ -165,7 +165,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import defaultProfileImage from '@/assets/default_profile_img.png'
 
 // emit 정의

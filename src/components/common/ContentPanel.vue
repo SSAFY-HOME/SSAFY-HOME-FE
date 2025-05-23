@@ -98,7 +98,7 @@ watch(
 }
 
 .content-panel.active {
-  width: 410px; /* 패널 활성화 시 너비 */
+  width: 520px; /* 패널 활성화 시 너비 */
 }
 
 .panel-header {

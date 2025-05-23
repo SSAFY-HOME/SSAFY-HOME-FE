@@ -4,7 +4,7 @@
       <!-- 페이지 로고 - 클릭 시 홈으로 이동 -->
       <div class="logo-container" @click="goToHome">
         <div class="logo-icon">
-          <img src="@/assets/logobright_green.png" alt="ZIPZIP" class="logo-img" />
+          <img src="@/assets/logo.png" alt="ZIPZIP" class="logo-img" />
         </div>
       </div>
 
@@ -321,7 +321,7 @@ const goToMyPage = () => {
 }
 
 .logo-img {
-  height: 80px; /* 로고 이미지 높이 조정 */
+  height: 130px; /* 로고 이미지 높이 조정 */
   width: auto;
 }
 

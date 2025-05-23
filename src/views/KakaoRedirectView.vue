@@ -2,6 +2,7 @@
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api/index'
+import { useMemberStore } from '@/stores/user'
 
 const route = useRoute()
 const router = useRouter()
@@ -23,6 +24,20 @@ onMounted(async () => {
     localStorage.setItem('isAdmin', user.admin)
     localStorage.setItem('hasHome', user.hasHomeInfo)
     localStorage.setItem('isSocial', user.social)
+
+    // pinia에 user데이터 저장
+    const memberStore = useMemberStore()
+
+    memberStore.setMember({
+      image: user.image,
+      email: user.email,
+      accessToken: user.accessToken,
+      isSocial: user.social,
+      name: user.name,
+      admin: user.admin,
+      apartment: user.apartment,
+      hasHomeInfo: user.hasHomeInfo,
+    })
 
     if (user.hasHomeInfo === false) {
       router.push('/regist/home')

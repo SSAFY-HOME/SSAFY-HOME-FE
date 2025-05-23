@@ -353,7 +353,7 @@ onMounted(() => {
 }
 
 .listing-panel.active {
-  width: 500px;
+  width: 580px;
 }
 
 .panel-header {
