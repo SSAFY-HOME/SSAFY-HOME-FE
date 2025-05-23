@@ -8,9 +8,12 @@ export const newsAPI = {
     return response.data
   },
 
-  getNewsSummary: async (newsItem) => {
-    const response = await api.post('/news/summary', newsItem)
-    console.log('응답:', response)
+  getNewsDetail: async (newsItem) => {
+    const response = await api.post('/news/detail', newsItem)
+    return response.data
+  },
+  getNewsSummary: async (newsContent) => {
+    const response = await api.post('/news/summary', newsContent)
     return response.data
   },
 }

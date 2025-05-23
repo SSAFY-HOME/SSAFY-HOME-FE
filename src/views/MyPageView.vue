@@ -536,7 +536,7 @@ const formatDate = (dateString) => {
 const goToLogin = () => router.push('/login')
 const modifyApartment = () => router.push('/regist/home')
 const goToSearch = () => router.push('/main')
-const goToCommunity = () => router.push('/community')
+const goToCommunity = () => router.push({ path: '/main', query: { menu: 'community' } })
 
 const validatePassword = () => {
   if (!user.value.password) {
