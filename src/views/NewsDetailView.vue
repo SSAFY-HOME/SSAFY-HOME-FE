@@ -40,7 +40,7 @@
 
         <div class="divider"></div>
 
-        <!-- Main Content - Redesigned -->
+        <!-- Main Content -->
         <div class="article-content-wrapper">
           <!-- News Image (if available) -->
           <div v-if="newsDetail.image" class="article-image-container">
@@ -58,13 +58,34 @@
 
             <!-- AI Summary - Right Side -->
             <div class="article-sidebar">
-              <div v-if="newsDetail.summary" class="ai-summary">
+              <div class="ai-summary">
                 <div class="summary-header">
                   <i class="fas fa-robot"></i>
                   <span>AI 뉴스 요약</span>
+                  <button
+                    v-if="!newsSummary && !isSummaryLoading"
+                    @click="generateSummary"
+                    class="summary-generate-btn"
+                  >
+                    <i class="fas fa-magic"></i> 요약 생성
+                  </button>
                 </div>
-                <div class="summary-content">
-                  {{ newsDetail.summary }}
+
+                <!-- Summary Loading -->
+                <div v-if="isSummaryLoading" class="summary-loading">
+                  <div class="summary-spinner"></div>
+                  <span>AI가 뉴스를 요약하고 있습니다...</span>
+                </div>
+
+                <!-- Summary Content -->
+                <div v-else-if="newsSummary" class="summary-content">
+                  {{ newsSummary }}
+                </div>
+
+                <!-- Auto generating message -->
+                <div v-else class="summary-auto-generating">
+                  <i class="fas fa-clock"></i>
+                  <span>AI 요약이 자동으로 생성됩니다...</span>
                 </div>
               </div>
 
@@ -128,13 +149,17 @@ const router = useRouter()
 const newsDetail = ref({})
 const isLoading = ref(true)
 const error = ref(null)
+const newsSummary = ref('')
+const isSummaryLoading = ref(false)
+
 const newsItem = {
   title: route.query.title,
   pubDate: route.query.pubDate,
   link: route.query.link,
 }
+
+// 뉴스 상세 정보 가져오기
 const fetchNewsDetail = async () => {
-  const link = route.query.link
   if (!route.query.title || !route.query.pubDate || !route.query.link) {
     error.value = '뉴스 정보를 찾을 수 없습니다.'
     isLoading.value = false
@@ -145,19 +170,50 @@ const fetchNewsDetail = async () => {
     isLoading.value = true
     error.value = null
 
-    const res = await newsAPI.getNewsSummary(newsItem)
+    // 뉴스 상세 정보 가져오기
+    const res = await newsAPI.getNewsDetail(newsItem)
     newsDetail.value = {
-      title: res.title || '제목 없음',
-      pubDate: res.pubDate || '날짜 정보 없음',
-      link: res.link || link,
-      summary: res.summary || null,
+      title: res.title || newsItem.title || '제목 없음',
+      pubDate: res.pubDate || newsItem.pubDate || '날짜 정보 없음',
+      link: res.link || newsItem.link,
       content: res.content || '내용 없음',
+      image: res.image,
+      locations: res.locations,
     }
+
+    // 뉴스 정보 로딩 완료 후 화면 표시
+    isLoading.value = false
+
+    // 뉴스 정보가 화면에 표시된 후 별도로 요약 생성 시작
+    generateSummary()
   } catch (err) {
     console.error('Error fetching news detail:', err)
     error.value = '뉴스를 불러오는데 실패했습니다.'
-  } finally {
     isLoading.value = false
+  }
+}
+
+// 요약 생성 함수
+const generateSummary = async () => {
+  try {
+    isSummaryLoading.value = true
+
+    // NewsSummaryResDto 형식으로 요약 요청
+    const summaryRequest = {
+      title: newsDetail.value.title,
+      content: newsDetail.value.content,
+      pubDate: newsDetail.value.pubDate,
+      link: newsDetail.value.link,
+    }
+
+    const res = await newsAPI.getNewsSummary(summaryRequest)
+    newsSummary.value = res.summary || '요약 정보 없음'
+  } catch (err) {
+    console.error('Error generating news summary:', err)
+    // 요약 생성 실패는 치명적이지 않으므로 에러 상태로 설정하지 않음
+    newsSummary.value = '요약을 생성할 수 없습니다.'
+  } finally {
+    isSummaryLoading.value = false
   }
 }
 
@@ -181,15 +237,29 @@ const searchByLocation = (location) => {
   })
 }
 
+// 라우트 변경 감지
 watch(
   () => route.query.link,
   (newLink) => {
     if (newLink) {
+      // 새로운 뉴스 아이템 설정
+      Object.assign(newsItem, {
+        title: route.query.title,
+        pubDate: route.query.pubDate,
+        link: route.query.link,
+      })
+
+      // 상태 초기화
+      newsSummary.value = ''
+      isSummaryLoading.value = false
+      error.value = null
+
       fetchNewsDetail()
     }
   },
 )
 
+// 컴포넌트 마운트
 onMounted(() => {
   fetchNewsDetail()
 })
@@ -347,52 +417,12 @@ onMounted(() => {
   color: #888;
 }
 
-.article-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.author-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.author-name {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.article-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.action-item {
-  font-size: 13px;
-  color: #666;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.share-btn {
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.share-btn:hover {
-  color: #4caf50;
-}
-
 .divider {
   height: 1px;
   background-color: #eee;
 }
 
-/* Article Content - REDESIGNED */
+/* Article Content */
 .article-content-wrapper {
   padding: 30px;
 }
@@ -409,7 +439,7 @@ onMounted(() => {
   object-fit: cover;
 }
 
-/* New two-column layout */
+/* Two-column layout */
 .content-layout {
   display: flex;
   gap: 30px;
@@ -471,16 +501,84 @@ onMounted(() => {
 .summary-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
   font-weight: 600;
   margin-bottom: 12px;
   color: #4caf50;
+}
+
+.summary-header > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-generate-btn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.summary-generate-btn:hover {
+  background-color: #3d9140;
+  transform: translateY(-1px);
+}
+
+.summary-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.summary-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #4caf50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 .summary-content {
   font-size: 15px;
   line-height: 1.6;
   color: #333;
+}
+
+.summary-auto-generating {
+  color: #4caf50;
+  font-size: 14px;
+  padding: 20px 0;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.summary-auto-generating i {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .original-article {
@@ -611,17 +709,10 @@ onMounted(() => {
     padding: 20px;
   }
 
-  .article-info,
   .news-meta {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-  }
-
-  .article-actions {
-    width: 100%;
-    justify-content: space-between;
-    margin-top: 10px;
   }
 
   .related-locations,
@@ -631,6 +722,16 @@ onMounted(() => {
 
   .navigation-buttons {
     padding: 15px 20px;
+  }
+
+  .summary-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .summary-generate-btn {
+    align-self: flex-end;
   }
 }
 </style>

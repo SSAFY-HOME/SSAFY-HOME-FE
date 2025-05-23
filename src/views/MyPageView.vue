@@ -24,7 +24,7 @@
             />
             <div class="profile-image-overlay">
               <button class="image-edit-button">
-                <i class="fas fa-camera"></i>
+                <span class="icon">📷</span>
               </button>
             </div>
           </div>
@@ -40,7 +40,7 @@
           :class="{ active: activeTab === 'info' }"
           @click="activeTab = 'info'"
         >
-          <i class="fas fa-user"></i> 기본 정보
+          <span class="icon">👤</span> 기본 정보
         </button>
 
         <button
@@ -49,7 +49,7 @@
           @click="activeTab = 'security'"
           v-if="!isKakaoUser"
         >
-          <i class="fas fa-lock"></i> 비밀번호 변경 및 탈퇴
+          <span class="icon">🔒</span> 비밀번호 변경 및 탈퇴
         </button>
         <button
           class="tab-button"
@@ -57,14 +57,14 @@
           @click="activeTab = 'security'"
           v-if="isKakaoUser"
         >
-          <i class="fas fa-lock"></i> 탈퇴
+          <span class="icon">🔒</span> 탈퇴
         </button>
         <button
           class="tab-button"
           :class="{ active: activeTab === 'activity' }"
           @click="activeTab = 'activity'"
         >
-          <i class="fas fa-chart-line"></i> 활동 내역
+          <span class="icon">📊</span> 활동 내역
         </button>
       </div>
 
@@ -73,7 +73,7 @@
         <!-- 프로필 정보 -->
         <div class="info-card">
           <div class="card-header">
-            <h3 class="section-title"><i class="fas fa-id-card"></i> 프로필 정보</h3>
+            <h3 class="section-title"><span class="icon">🆔</span> 프로필 정보</h3>
           </div>
           <div class="card-content">
             <div class="form-group">
@@ -87,9 +87,9 @@
         <!-- 아파트 정보 -->
         <div class="info-card apartment-info">
           <div class="card-header">
-            <h3 class="section-title"><i class="fas fa-home"></i> 나의 아파트 정보</h3>
+            <h3 class="section-title"><span class="icon">🏠</span> 나의 아파트 정보</h3>
             <button class="edit-button small" @click="modifyApartment">
-              <i class="fas fa-edit"></i> 수정
+              <span class="icon">✏️</span> 수정
             </button>
           </div>
           <div class="card-content">
@@ -97,15 +97,15 @@
               <div class="apartment-text">
                 <p class="apartment-name">{{ user.apartment.apartmentName }}</p>
                 <p class="apartment-address">
-                  <i class="fas fa-map-marker-alt"></i> {{ user.apartment.address }}
+                  <span class="icon">📍</span> {{ user.apartment.address }}
                 </p>
                 <p class="apartment-year">
-                  <i class="fas fa-calendar-alt"></i> {{ user.apartment.buildYear }}년 준공
+                  <span class="icon">📅</span> {{ user.apartment.buildYear }}년 준공
                 </p>
               </div>
             </div>
             <p v-else class="no-apartment">
-              <i class="fas fa-exclamation-circle"></i> 등록된 아파트 정보가 없습니다.
+              <span class="icon">❗</span> 등록된 아파트 정보가 없습니다.
               <button class="add-button" @click="modifyApartment">아파트 등록하기</button>
             </p>
           </div>
@@ -114,7 +114,7 @@
         <!-- 관심 아파트 -->
         <div class="info-card favorites">
           <div class="card-header">
-            <h3 class="section-title"><i class="fas fa-heart"></i> 관심 아파트</h3>
+            <h3 class="section-title"><span class="icon">❤️</span> 관심 아파트</h3>
           </div>
           <div class="card-content">
             <div v-if="favoriteApartments.length > 0" class="favorites-list">
@@ -123,13 +123,10 @@
                   <p class="favorite-name">{{ apt.name }}</p>
                   <p class="favorite-address">{{ apt.addr }}</p>
                 </div>
-                <button class="remove-favorite">
-                  <i class="fas fa-times"></i>
-                </button>
               </div>
             </div>
             <p v-else class="no-favorites">
-              <i class="fas fa-heart-broken"></i> 등록된 관심 아파트가 없습니다.
+              <span class="icon">💔</span> 등록된 관심 아파트가 없습니다.
               <button class="add-button" @click="goToSearch">아파트 찾아보기</button>
             </p>
           </div>
@@ -141,7 +138,7 @@
         <!-- 일반 사용자: 비밀번호 변경 폼 -->
         <div class="info-card" v-if="!isKakaoUser">
           <div class="card-header">
-            <h3 class="section-title"><i class="fas fa-key"></i> 비밀번호 변경</h3>
+            <h3 class="section-title"><span class="icon">🔑</span> 비밀번호 변경</h3>
           </div>
           <div class="card-content">
             <form @submit.prevent="updatePassword" class="password-form">
@@ -192,7 +189,7 @@
                 }}</span>
               </div>
               <button class="save-button" type="submit">
-                <i class="fas fa-key"></i> 비밀번호 변경하기
+                <span class="icon">🔑</span> 비밀번호 변경하기
               </button>
             </form>
           </div>
@@ -201,7 +198,7 @@
         <!-- 회원 탈퇴 섹션 - 일반 사용자 -->
         <div class="info-card danger-zone" v-if="!isKakaoUser">
           <div class="card-header danger">
-            <h3 class="section-title"><i class="fas fa-exclamation-triangle"></i> 계정 관리</h3>
+            <h3 class="section-title"><span class="icon">⚠️</span> 계정 관리</h3>
           </div>
           <div class="card-content">
             <p class="warning-text">
@@ -217,7 +214,7 @@
               />
             </div>
             <button class="delete-account-button" @click="deleteUser">
-              <i class="fas fa-user-slash"></i> 회원 탈퇴
+              <span class="icon">🚫</span> 회원 탈퇴
             </button>
           </div>
         </div>
@@ -225,18 +222,18 @@
         <!-- 회원 탈퇴 섹션 - 카카오 사용자 -->
         <div class="info-card danger-zone" v-if="isKakaoUser">
           <div class="card-header danger">
-            <h3 class="section-title"><i class="fas fa-exclamation-triangle"></i> 계정 관리</h3>
+            <h3 class="section-title"><span class="icon">⚠️</span> 계정 관리</h3>
           </div>
           <div class="card-content">
             <p class="warning-text">
               계정을 삭제하면 모든 데이터가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
             </p>
             <p class="kakao-notice">
-              <i class="fas fa-info-circle"></i> 카카오톡 계정으로 연결된 회원은 카카오 로그인 인증
-              후 탈퇴가 가능합니다.
+              <span class="icon">ℹ️</span> 카카오톡 계정으로 연결된 회원은 카카오 로그인 인증 후
+              탈퇴가 가능합니다.
             </p>
             <button class="kakao-login-button" @click="requestKakaoReLogin">
-              <i class="fas fa-comment"></i> 카카오톡으로 인증하기
+              <span class="icon">💬</span> 카카오톡으로 인증하기
             </button>
           </div>
         </div>
@@ -246,7 +243,7 @@
       <div v-if="activeTab === 'activity'" class="tab-content">
         <div class="info-card">
           <div class="card-header">
-            <h3 class="section-title"><i class="fas fa-clipboard-list"></i> 내가 쓴 게시글</h3>
+            <h3 class="section-title"><span class="icon">📋</span> 내가 쓴 게시글</h3>
           </div>
           <div class="card-content">
             <div v-if="userPosts.length > 0" class="activity-list">
@@ -258,40 +255,15 @@
                 <div class="activity-meta">
                   <span class="activity-date">{{ formatDate(post.updateDate) }}</span>
                   <span class="activity-stats">
-                    <i class="fas fa-heart"></i> {{ post.like }}
-                    <i class="fas fa-comment ml-2"></i> {{ post.comments }}
+                    <span class="icon">❤️</span> {{ post.like }} <span class="icon ml-2">💬</span>
+                    {{ post.comments }}
                   </span>
                 </div>
               </div>
             </div>
             <p v-else class="no-activity">
-              <i class="fas fa-clipboard"></i> 작성한 게시글이 없습니다.
+              <span class="icon">📋</span> 작성한 게시글이 없습니다.
               <button class="add-button" @click="goToCommunity">게시글 작성하기</button>
-            </p>
-          </div>
-        </div>
-
-        <div class="info-card">
-          <div class="card-header">
-            <h3 class="section-title"><i class="fas fa-comment-dots"></i> 내가 쓴 댓글</h3>
-          </div>
-          <div class="card-content">
-            <div v-if="userComments.length > 0" class="activity-list">
-              <div v-for="comment in userComments" :key="comment.id" class="activity-item">
-                <div class="activity-content">
-                  <p class="activity-comment">{{ comment.content }}</p>
-                  <p class="activity-parent">
-                    <i class="fas fa-reply fa-flip-horizontal"></i>
-                    {{ comment.postTitle }}
-                  </p>
-                </div>
-                <div class="activity-meta">
-                  <span class="activity-date">{{ formatDate(comment.createdAt) }}</span>
-                </div>
-              </div>
-            </div>
-            <p v-else class="no-activity">
-              <i class="fas fa-comment-slash"></i> 작성한 댓글이 없습니다.
             </p>
           </div>
         </div>
@@ -305,7 +277,7 @@
       <div class="modal-header">
         <h3>프로필 이미지 변경</h3>
         <button class="close-button" @click="closeImageModal">
-          <i class="fas fa-times"></i>
+          <span class="icon">❌</span>
         </button>
       </div>
       <div class="modal-body">
@@ -324,10 +296,10 @@
             class="file-input"
           />
           <label for="profile-image-upload" class="file-input-label">
-            <i class="fas fa-upload"></i> 이미지 선택
+            <span class="icon">⬆️</span> 이미지 선택
           </label>
           <button class="remove-image-button" @click="removeProfileImage">
-            <i class="fas fa-trash-alt"></i> 이미지 삭제
+            <span class="icon">🗑️</span> 이미지 삭제
           </button>
         </div>
       </div>
@@ -359,7 +331,6 @@ const showImageModal = ref(false)
 const previewImage = ref(null)
 const favoriteApartments = ref([])
 const userPosts = ref([])
-const userComments = ref([])
 
 // 카카오 로그인 사용자 체크 (social 필드가 'true' 문자열인 경우)
 const isKakaoUser = computed(() => user.value.isSocial === true || user.value.social === 'true')
@@ -416,7 +387,6 @@ const checkLoginStatus = () => {
     fetchUserProfile()
     fetchFavoriteApartments()
     fetchUserPosts()
-    fetchUserComments()
   }
 }
 
@@ -467,30 +437,6 @@ const fetchUserPosts = async () => {
   }
 }
 
-const fetchUserComments = async () => {
-  // API 연동 시 실제 함수로 대체
-  userComments.value = [
-    {
-      id: 1,
-      content: '정말 좋은 정보 감사합니다. 저도 검토 중이었는데 도움이 많이 되었어요.',
-      postTitle: '새로 개발된 단지 정보 공유',
-      createdAt: new Date(2025, 4, 12),
-    },
-    {
-      id: 2,
-      content: '자세한 설명 감사합니다. 추가 질문이 있는데 연락 가능할까요?',
-      postTitle: '아파트 가격 전망이 어떻게 될까요?',
-      createdAt: new Date(2025, 4, 8),
-    },
-    {
-      id: 3,
-      content: '저도 동일한 경험이 있어요. 관리사무소에 문의해보시는게 좋을 것 같습니다.',
-      postTitle: '우리 아파트 분리수거 문제',
-      createdAt: new Date(2025, 4, 5),
-    },
-  ]
-}
-
 const formatDate = (dateString) => {
   if (!dateString) return ''
 
@@ -530,7 +476,7 @@ const formatDate = (dateString) => {
 const goToLogin = () => router.push('/login')
 const modifyApartment = () => router.push('/regist/home')
 const goToSearch = () => router.push('/main')
-const goToCommunity = () => router.push('/community')
+const goToCommunity = () => router.push({ path: '/main', query: { menu: 'community' } })
 
 const validatePassword = () => {
   if (!user.value.password) {
@@ -866,6 +812,14 @@ onMounted(() => {
   color: #777;
 }
 
+/* 아이콘 공통 스타일 */
+.icon {
+  display: inline-block;
+  font-size: 16px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
 /* 탭 메뉴 */
 .profile-tabs {
   display: flex;
@@ -899,7 +853,7 @@ onMounted(() => {
   border-bottom: 2px solid #4caf50;
 }
 
-.tab-button i {
+.tab-button .icon {
   margin-right: 6px;
 }
 
@@ -947,12 +901,12 @@ onMounted(() => {
   margin: 0;
 }
 
-.section-title i {
+.section-title .icon {
   margin-right: 8px;
   color: #4caf50;
 }
 
-.danger-zone .section-title i {
+.danger-zone .section-title .icon {
   color: #d32f2f;
 }
 
@@ -1000,8 +954,8 @@ onMounted(() => {
   margin: 0;
 }
 
-.apartment-address i,
-.apartment-year i {
+.apartment-address .icon,
+.apartment-year .icon {
   margin-right: 5px;
   color: #6c757d;
 }
@@ -1013,7 +967,7 @@ onMounted(() => {
   margin: 20px 0;
 }
 
-.no-apartment i {
+.no-apartment .icon {
   margin-right: 8px;
   color: #999;
 }
@@ -1083,7 +1037,7 @@ onMounted(() => {
   margin: 20px 0;
 }
 
-.no-favorites i {
+.no-favorites .icon {
   margin-right: 8px;
   color: #999;
 }
@@ -1134,7 +1088,7 @@ onMounted(() => {
   margin: 0 0 5px 0;
 }
 
-.activity-parent i {
+.activity-parent .icon {
   margin-right: 5px;
   color: #777;
 }
@@ -1158,7 +1112,7 @@ onMounted(() => {
   gap: 10px;
 }
 
-.activity-stats i {
+.activity-stats .icon {
   margin-right: 3px;
 }
 
@@ -1173,7 +1127,7 @@ onMounted(() => {
   margin: 20px 0;
 }
 
-.no-activity i {
+.no-activity .icon {
   margin-right: 8px;
   color: #999;
 }
@@ -1274,7 +1228,8 @@ onMounted(() => {
 .delete-account-button,
 .save-button,
 .view-all-button,
-.add-button {
+.add-button,
+.kakao-login-button {
   padding: 10px 16px 10px 10px;
   border-radius: 4px;
   font-size: 14px;
@@ -1286,12 +1241,13 @@ onMounted(() => {
   justify-content: center;
 }
 
-.edit-button i,
-.add-apartment-button i,
-.delete-account-button i,
-.save-button i,
-.view-all-button i,
-.add-button i {
+.edit-button .icon,
+.add-apartment-button .icon,
+.delete-account-button .icon,
+.save-button .icon,
+.view-all-button .icon,
+.add-button .icon,
+.kakao-login-button .icon {
   margin-right: 6px;
 }
 
@@ -1342,13 +1298,7 @@ onMounted(() => {
   color: #333;
 }
 
-.add-button {
-  background-color: transparent;
-  color: #4caf50;
-  border: 1px solid #4caf50;
-  font-size: 13px;
-  margin-top: 10px;
-}
+.add-button,
 .kakao-login-button {
   background-color: transparent;
   color: #4caf50;
@@ -1357,13 +1307,14 @@ onMounted(() => {
   margin-top: 10px;
 }
 
-.add-button:hover {
+.add-button:hover,
+.kakao-login-button:hover {
   background-color: #4caf50;
   color: white;
 }
 
 button.small {
-  padding: 6px 8px 6px 2px;
+  padding: 6px 8px;
   font-size: 13px;
 }
 
@@ -1549,6 +1500,26 @@ button.small {
   background-color: #e0e0e0;
 }
 
+.warning-text {
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.kakao-notice {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 12px;
+  margin: 15px 0;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.kakao-notice .icon {
+  color: #17a2b8;
+}
+
 /* 반응형 스타일 */
 @media (max-width: 768px) {
   .profile-stats {
@@ -1570,7 +1541,7 @@ button.small {
     padding: 12px 0;
   }
 
-  .tab-button i {
+  .tab-button .icon {
     margin-right: 4px;
   }
 
