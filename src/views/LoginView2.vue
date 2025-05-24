@@ -134,7 +134,7 @@ const handleLogin = async () => {
       })
 
       // 홈 페이지 또는 이전 페이지로 리다이렉트
-      if (result.hasHome === false) {
+      if (user.hasHomeInfo === false) {
         router.push('/regist/home')
       } else {
         router.push('/')

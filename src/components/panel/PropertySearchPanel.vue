@@ -152,7 +152,7 @@
               <span class="detail-item">{{ apartment.buildYear }}년 준공</span>
               <span class="detail-item">도로명 주소: {{ apartment.roadNmSggCd }}</span>
             </div>
-            <!-- 미니 차트 컴포넌트 추가 -->
+            <!-- 통계 추가 -->
             <div class="price-info">
               <span class="avg-price">평균 {{ formatPrice(apartment.avgPrice) }}</span>
 

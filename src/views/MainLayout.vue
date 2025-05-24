@@ -106,12 +106,12 @@ const activateMenu = (menuName) => {
   }
 
   // 다른 메뉴로 전환할 때 기존 마커 제거
-  if (activeMenu.value !== '' && kakaoMapRef.value) {
-    kakaoMapRef.value.clearMarkers()
-    // ListingPanel도 함께 닫기
-    isListingPanelVisible.value = false
-    isCommercePanelVisible.value = false
-  }
+  // if (activeMenu.value !== '' && kakaoMapRef.value) {
+  //   kakaoMapRef.value.clearMarkers()
+  //   // ListingPanel도 함께 닫기
+  //   isListingPanelVisible.value = false
+  //   isCommercePanelVisible.value = false
+  // }
 
   activeMenu.value = menuName
   console.log('활성화된 메뉴:', menuName)

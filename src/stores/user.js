@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
-    name: '', // ← nickname이 아니라 name으로 통일
+    name: '',
     email: '',
     image: '',
     isSocial: '',
@@ -15,7 +15,7 @@ export const useMemberStore = defineStore('member', {
 
   actions: {
     setMember(memberData) {
-      this.name = memberData.name // ← nickname → name
+      this.name = memberData.name
       this.email = memberData.email
       this.image = memberData.image
       this.isSocial = memberData.isSocial || ''
@@ -37,5 +37,10 @@ export const useMemberStore = defineStore('member', {
       this.hasHomeInfo = ''
       this.refreshToken = ''
     },
+  },
+
+  persist: {
+    storage: localStorage, 
+    paths: ['name', 'email', 'image', 'isSocial', 'apartment', 'accessToken', 'refreshToken', 'admin', 'hasHomeInfo'],
   },
 })
