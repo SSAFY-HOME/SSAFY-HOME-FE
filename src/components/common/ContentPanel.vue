@@ -147,6 +147,7 @@ watch(
 
 /* 매물 리스트 패널이 활성화되었을 때 조정 */
 .content-panel.active.listing-active {
+  left :200px;
   width: 420px; /* 매물 리스트 패널이 표시될 때 너비 조정 */
 }
 

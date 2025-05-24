@@ -249,7 +249,24 @@ const fetchDistricts = async (cityId) => {
     isLoadingDistricts.value = false
   }
 }
-
+const sortApartments = () => {
+  if (apartments.value.length > 0) {
+    apartments.value = [...apartments.value].sort((a, b) => {
+      switch (sortOption.value) {
+        case 'price_asc':
+          return a.avgPrice - b.avgPrice
+        case 'price_desc':
+          return b.avgPrice - a.avgPrice
+        case 'year_desc':
+          return b.buildYear - a.buildYear
+        case 'year_asc':
+          return a.buildYear - b.buildYear
+        default:
+          return 0
+      }
+    })
+  }
+}
 const fetchApartments = async (districtId) => {
   if (!districtId) return
 
@@ -257,6 +274,7 @@ const fetchApartments = async (districtId) => {
   try {
     const result = await apartmentAPI.getApartments(districtId)
     apartments.value = result.data
+    sortApartments()
     emit('showAllOnMap', apartments.value)
   } catch (error) {
     console.error('아파트 데이터를 불러오는 중 오류가 발생했습니다:', error)
@@ -446,23 +464,7 @@ watch(selectedDistrict, () => {
 
 // 정렬 옵션 변경 감시
 watch(sortOption, () => {
-  // 정렬 옵션에 따른 데이터 정렬
-  if (apartments.value.length > 0) {
-    apartments.value = [...apartments.value].sort((a, b) => {
-      switch (sortOption.value) {
-        case 'price_asc':
-          return a.avgPrice - b.avgPrice
-        case 'price_desc':
-          return b.avgPrice - a.avgPrice
-        case 'year_desc':
-          return b.buildYear - a.buildYear
-        case 'year_asc':
-          return a.buildYear - b.buildYear
-        default:
-          return 0
-      }
-    })
-  }
+   sortApartments()
 })
 </script>
 

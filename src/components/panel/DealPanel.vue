@@ -342,7 +342,7 @@ onMounted(() => {
   height: 100%;
   position: absolute;
   top: 0;
-  left: 490px;
+  left: 600px;
   background-color: white;
   box-shadow: -1px 0 10px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease;

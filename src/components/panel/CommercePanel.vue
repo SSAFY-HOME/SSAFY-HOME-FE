@@ -485,7 +485,7 @@ onMounted(() => {
   height: 100%;
   position: absolute;
   top: 0;
-  left: 490px; /* property-panel 옆에 배치 */
+  left: 600px; /* property-panel 옆에 배치 */
   background-color: white;
   box-shadow: -1px 0 10px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease;
