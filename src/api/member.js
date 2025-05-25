@@ -140,16 +140,39 @@ export const memberAPI = {
       throw error
     }
   },
-  uploadProfileImage: async (formData) => {
+
+  /**
+   * 프로필 이미지 업로드용 Presigned URL 요청
+   * @param {string} fileName - 파일명
+   * @param {string} contentType - 파일 타입 (예: image/jpeg)
+   * @returns {Promise} Presigned URL과 imageKey
+   */
+  async getProfileImageUploadUrl(fileName, contentType) {
     try {
-      const response = await api.post('/member/profile/image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const response = await api.post(`/member/image/presigned-url`, {
+        fileName,
+        contentType,
       })
       return response.data
     } catch (error) {
-      console.error('프로필 이미지 수정 실패', error)
+      console.error('Presigned URL 요청 실패:', error)
+      throw error
+    }
+  },
+
+  /**
+   * 프로필 이미지 업로드 완료 처리
+   * @param {string} imageKey - S3에 업로드된 이미지 키
+   * @returns {Promise} 완료 처리 결과
+   */
+  async completeProfileImageUpload(imageKey) {
+    try {
+      const response = await api.post(`/member/image/complete`, {
+        imageKey,
+      })
+      return response.data
+    } catch (error) {
+      console.error('프로필 이미지 업로드 완료 처리 실패:', error)
       throw error
     }
   },

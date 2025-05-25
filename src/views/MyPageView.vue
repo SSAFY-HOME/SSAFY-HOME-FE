@@ -18,9 +18,12 @@
         <div class="profile-avatar-container">
           <div class="profile-image-container" @click="openImageModal">
             <img
-              :src="profileImage || '/api/placeholder/150/150'"
+              :src="profileImage"
               alt="프로필 이미지"
               class="profile-image"
+              @error="handleImageError"
+              @load="handleImageLoad"
+              :key="profileImage"
             />
             <div class="profile-image-overlay">
               <button class="image-edit-button">
@@ -95,9 +98,9 @@
           <div class="card-content">
             <div v-if="user.apartment" class="apartment-details">
               <div class="apartment-text">
-                <p class="apartment-name">{{ user.apartment.name }}</p>
+                <p class="apartment-name">{{ user.apartment.apartmentName }}</p>
                 <p class="apartment-address">
-                  <span class="icon">📍</span> {{ user.apartment.addr }}
+                  <span class="icon">📍</span> {{ user.apartment.address }}
                 </p>
                 <p class="apartment-year">
                   <span class="icon">📅</span> {{ user.apartment.buildYear }}년 준공
@@ -283,11 +286,23 @@
       <div class="modal-body">
         <div class="image-preview">
           <img
-            :src="previewImage || profileImage || '/api/placeholder/150/150'"
+            :src="previewImageUrl"
             alt="프로필 이미지 미리보기"
+            @error="handleImageError"
+            @load="handleImageLoad"
+            :key="previewImageUrl"
           />
         </div>
-        <div class="upload-controls">
+
+        <!-- 업로드 진행률 표시 -->
+        <div v-if="isUploading" class="upload-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: uploadProgress + '%' }"></div>
+          </div>
+          <p class="progress-text">업로드 중... {{ uploadProgress }}%</p>
+        </div>
+
+        <div class="upload-controls" v-if="!isUploading">
           <input
             type="file"
             id="profile-image-upload"
@@ -298,14 +313,26 @@
           <label for="profile-image-upload" class="file-input-label">
             <span class="icon">⬆️</span> 이미지 선택
           </label>
-          <button class="remove-image-button" @click="removeProfileImage">
+
+          <button
+            class="remove-image-button"
+            @click="removeProfileImage"
+            v-if="user.image && user.image !== 'null' && user.image.trim() !== ''"
+          >
             <span class="icon">🗑️</span> 이미지 삭제
           </button>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="cancel-button" @click="closeImageModal">취소</button>
-        <button class="save-button" @click="saveProfileImage">저장</button>
+        <button class="cancel-button" @click="closeImageModal" :disabled="isUploading">취소</button>
+        <button
+          class="save-button"
+          @click="saveProfileImage"
+          :disabled="!selectedFile || isUploading"
+        >
+          <span v-if="isUploading">업로드 중...</span>
+          <span v-else>저장</span>
+        </button>
       </div>
     </div>
   </div>
@@ -318,10 +345,10 @@ import { memberAPI } from '@/api/member'
 import AppHeader from '@/components/common/Header.vue'
 import { communityAPI } from '@/api/community'
 import { useMemberStore } from '@/stores/user'
+
 const user = computed(() => memberStore)
 const router = useRouter()
 const isLoggedIn = computed(() => !!user.value.accessToken)
-const profileImage = ref(null)
 const confirmPassword = ref('')
 const errors = ref({})
 const memberStore = useMemberStore()
@@ -331,9 +358,87 @@ const showImageModal = ref(false)
 const previewImage = ref(null)
 const favoriteApartments = ref([])
 const userPosts = ref([])
+const selectedFile = ref(null)
+const uploadProgress = ref(0)
+const isUploading = ref(false)
 
-// 카카오 로그인 사용자 체크 (social 필드가 'true' 문자열인 경우)
+// 🔥 개선된 기본 프로필 이미지 처리
+import defaultProfileImage from '@/assets/default-profile-image.png'
+
+const DEFAULT_PROFILE_IMAGE = defaultProfileImage
+const imageErrorCount = ref(new Map()) // 이미지 에러 카운트 추적
+
+// 카카오 로그인 사용자 체크
 const isKakaoUser = computed(() => user.value.isSocial === true || user.value.social === 'true')
+
+// 🆕 개선된 프로필 이미지 URL 처리
+const profileImage = computed(() => {
+  console.log('프로필 이미지 확인:', user.value.image)
+
+  // 이미지가 있고 유효한 URL인 경우
+  if (user.value.image && user.value.image.trim() !== '' && user.value.image !== 'null') {
+    return user.value.image
+  }
+
+  // 이미지가 없거나 null인 경우 기본 이미지 반환
+  return DEFAULT_PROFILE_IMAGE
+})
+
+// 미리보기 이미지 URL
+const previewImageUrl = computed(() => {
+  if (previewImage.value) {
+    return previewImage.value
+  }
+  return profileImage.value
+})
+
+// 🆕 이미지 URL 유효성 검사
+const isValidImageUrl = (url) => {
+  if (!url || url === 'null' || url.trim() === '') return false
+  if (url === DEFAULT_PROFILE_IMAGE) return true
+
+  // S3 URL 패턴 검사
+  const s3UrlPattern = /^https:\/\/[^\/]+\.s3\.[^\/]+\.amazonaws\.com\/.+/
+  const httpPattern = /^https?:\/\/.+/
+
+  return s3UrlPattern.test(url) || httpPattern.test(url) || url.startsWith('data:image/')
+}
+
+// 🆕 개선된 이미지 에러 핸들러 (무한루프 방지)
+const handleImageError = (event) => {
+  const imgSrc = event.target.src
+
+  console.warn('이미지 로드 실패:', imgSrc)
+
+  // 이미 기본 이미지인 경우 무한루프 방지
+  if (imgSrc === DEFAULT_PROFILE_IMAGE || imgSrc.includes('default-profile-image')) {
+    console.warn('기본 이미지 로드도 실패했습니다. 더 이상 재시도하지 않습니다.')
+    return
+  }
+
+  // 에러 카운트 추적으로 무한루프 방지
+  const currentCount = imageErrorCount.value.get(imgSrc) || 0
+  if (currentCount >= 2) {
+    console.warn('이미지 로드 재시도 한계 초과:', imgSrc)
+    return
+  }
+
+  imageErrorCount.value.set(imgSrc, currentCount + 1)
+
+  console.log('기본 이미지로 교체:', DEFAULT_PROFILE_IMAGE)
+  event.target.src = DEFAULT_PROFILE_IMAGE
+}
+
+// 🆕 이미지 로드 성공 핸들러
+const handleImageLoad = (event) => {
+  const imgSrc = event.target.src
+  console.log('이미지 로드 성공:', imgSrc)
+
+  // 성공시 에러 카운트 초기화
+  if (imageErrorCount.value.has(imgSrc)) {
+    imageErrorCount.value.delete(imgSrc)
+  }
+}
 
 // 패스워드 강도 계산
 const passwordStrengthClass = computed(() => {
@@ -394,16 +499,20 @@ const fetchUserProfile = async () => {
   try {
     const response = await memberAPI.getProfile()
     if (response && response.data) {
+      console.log('받은 프로필 데이터:', response.data.image)
+
       user.value = {
         ...response.data,
+        image: response.data.image || DEFAULT_PROFILE_IMAGE,
         currentPassword: '',
         password: '',
         passwordConfirm: '',
         social: response.data.social,
       }
-      if (response.data.image) {
-        profileImage.value = response.data.image
-      }
+
+      console.log('프로필 정보:', user.value.image)
+
+      // 🆕 이미지 URL 로그 추가
     }
   } catch (error) {
     if (error.response && error.response.status === 401) {
@@ -414,7 +523,6 @@ const fetchUserProfile = async () => {
 }
 
 const fetchFavoriteApartments = async () => {
-  //아파트 좋아요 API
   try {
     const response = await memberAPI.getFavoriteApartments()
     if (response && response.data) {
@@ -426,7 +534,6 @@ const fetchFavoriteApartments = async () => {
 }
 
 const fetchUserPosts = async () => {
-  //내가 작성한 커뮤니티 게시글 API
   try {
     const response = await communityAPI.getUserPosts()
     if (response && response.data) {
@@ -443,10 +550,9 @@ const formatDate = (dateString) => {
   try {
     const date = new Date(dateString)
 
-    // 유효하지 않은 날짜 체크
     if (isNaN(date.getTime())) {
       console.warn('Invalid date string:', dateString)
-      return dateString // 원본 문자열 반환
+      return dateString
     }
 
     const now = new Date()
@@ -456,7 +562,6 @@ const formatDate = (dateString) => {
     const diffTime = today - targetDate
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
 
-    // 미래 날짜 처리
     if (diffDays < 0) {
       return `${Math.abs(diffDays)}일 후`
     }
@@ -503,7 +608,6 @@ const updatePassword = async () => {
   validatePasswordConfirm()
   if (!errors.value.password && !errors.value.passwordConfirm) {
     try {
-      // 현재 비밀번호 검증 추가
       if (!user.value.currentPassword) {
         alert('현재 비밀번호를 입력해주세요.')
         return
@@ -526,7 +630,6 @@ const updatePassword = async () => {
   }
 }
 
-// 카카오 재인증 요청
 const requestKakaoReLogin = () => {
   const REST_API_KEY = import.meta.env.VITE_KAKAO_LOGIN_REST_API_KEY
   const REDIRECT_URI = import.meta.env.VITE_KAKAO_WITHDRAWAL_REDIRECT_URI
@@ -535,7 +638,6 @@ const requestKakaoReLogin = () => {
   window.location.href = kakaoAuthUrl
 }
 
-// 일반 사용자 탈퇴
 const deleteUser = async () => {
   if (!confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return
 
@@ -547,12 +649,12 @@ const deleteUser = async () => {
   try {
     await memberAPI.deleteMember(confirmPassword.value)
     localStorage.removeItem('email')
-  localStorage.removeItem('hasHome')
-  localStorage.removeItem('isSocial')
-  localStorage.removeItem('refreshToken')
-  localStorage.removeItem('accessToken')
-  localStorage.removeItem('isAdmin')
-  memberStore.clearMember()
+    localStorage.removeItem('hasHome')
+    localStorage.removeItem('isSocial')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('isAdmin')
+    memberStore.clearMember()
     alert('회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.')
     router.push('/')
   } catch (error) {
@@ -565,15 +667,24 @@ const deleteUser = async () => {
   }
 }
 
-// 이미지 관련 함수들
+// 프로필 이미지 관련 함수들
 const openImageModal = () => {
   console.log('모달 열기 호출됨')
   showImageModal.value = true
+  previewImage.value = null
+  selectedFile.value = null
+  uploadProgress.value = 0
 }
 
 const closeImageModal = () => {
   showImageModal.value = false
   previewImage.value = null
+  selectedFile.value = null
+  uploadProgress.value = 0
+  isUploading.value = false
+
+  const fileInput = document.getElementById('profile-image-upload')
+  if (fileInput) fileInput.value = ''
 }
 
 const previewProfileImage = (event) => {
@@ -582,8 +693,18 @@ const previewProfileImage = (event) => {
 
   if (!file.type.match('image.*')) {
     alert('이미지 파일만 업로드 가능합니다.')
+    event.target.value = ''
     return
   }
+
+  const maxSize = 5 * 1024 * 1024 // 5MB
+  if (file.size > maxSize) {
+    alert('파일 크기는 5MB를 초과할 수 없습니다.')
+    event.target.value = ''
+    return
+  }
+
+  selectedFile.value = file
 
   const reader = new FileReader()
   reader.onload = (e) => {
@@ -592,20 +713,113 @@ const previewProfileImage = (event) => {
   reader.readAsDataURL(file)
 }
 
+// Presigned URL을 사용한 프로필 이미지 업로드
+const uploadProfileImageWithPresignedUrl = async (file) => {
+  try {
+    isUploading.value = true
+    uploadProgress.value = 10
+
+    const presignedData = await memberAPI.getProfileImageUploadUrl(file.name, file.type)
+    uploadProgress.value = 30
+
+    const uploadResponse = await fetch(presignedData.presignedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type,
+      },
+      mode: 'cors',
+      credentials: 'omit',
+    })
+
+    if (!uploadResponse.ok) {
+      throw new Error(`S3 업로드 실패: ${uploadResponse.status}`)
+    }
+
+    uploadProgress.value = 70
+
+    await memberAPI.completeProfileImageUpload(presignedData.imageKey)
+    uploadProgress.value = 100
+    await fetchUserProfile()
+    closeImageModal()
+  } catch (error) {
+    let errorMessage = '프로필 이미지 업로드에 실패했습니다.'
+    alert(errorMessage)
+    throw error
+  } finally {
+    isUploading.value = false
+    uploadProgress.value = 0
+  }
+}
+
+const uploadProfileImageDirect = async (file) => {
+  try {
+    isUploading.value = true
+    uploadProgress.value = 50
+
+    await memberAPI.uploadProfileImageDirect(file)
+    uploadProgress.value = 100
+
+    await fetchUserProfile()
+    alert('프로필 이미지가 성공적으로 업로드되었습니다!')
+    closeImageModal()
+  } catch (error) {
+    console.error('프로필 이미지 직접 업로드 실패:', error)
+    alert('프로필 이미지 업로드에 실패했습니다.')
+  } finally {
+    isUploading.value = false
+    uploadProgress.value = 0
+  }
+}
+
+const saveProfileImage = async () => {
+  if (!selectedFile.value) {
+    alert('업로드할 이미지를 선택해주세요.')
+    return
+  }
+
+  try {
+    await uploadProfileImageWithPresignedUrl(selectedFile.value)
+  } catch (error) {
+    console.warn('Presigned URL 업로드 실패, 직접 업로드 시도:', error)
+
+    try {
+      await uploadProfileImageDirect(selectedFile.value)
+    } catch (directError) {
+      console.error('직접 업로드도 실패:', directError)
+      alert('프로필 이미지 업로드에 실패했습니다. 잠시 후 다시 시도해주세요.')
+    }
+  }
+}
+
+// 🆕 개선된 프로필 이미지 삭제
 const removeProfileImage = async () => {
+  if (!confirm('프로필 이미지를 삭제하시겠습니까?')) return
+
   try {
     await memberAPI.removeProfileImage()
-    profileImage.value = null
+
+    // 🔥 로컬 상태 업데이트 개선
+    user.value.image = null // image 필드를 null로 설정
     previewImage.value = null
+    selectedFile.value = null
 
     const fileInput = document.getElementById('profile-image-upload')
     if (fileInput) fileInput.value = ''
 
     alert('프로필 이미지가 삭제되었습니다.')
   } catch (error) {
-    alert('이미지 삭제 중 오류가 발생했습니다.')
     console.error('이미지 삭제 오류:', error)
+    alert('이미지 삭제 중 오류가 발생했습니다.')
   }
+}
+
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 onMounted(() => {
@@ -745,12 +959,44 @@ onMounted(() => {
   border: 4px solid white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   position: relative;
+  cursor: pointer;
 }
 
-.profile-image {
+/* 🆕 기본 이미지 스타일 추가 */
+.profile-image,
+.image-preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  background-color: #f5f5f5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill='%23e0e0e0'%3E%3Ccircle cx='50' cy='35' r='15'/%3E%3Cpath d='M50 55c-15 0-25 10-25 20v10h50V75c0-10-10-20-25-20z'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 60px 60px;
+  transition: opacity 0.3s ease;
+}
+
+/* 이미지 로딩 중 상태 */
+.profile-image[src=''],
+.image-preview img[src=''] {
+  opacity: 0.6;
+}
+
+/* 기본 이미지일 때 배경 숨기기 */
+.profile-image[src*='default-profile-image'],
+.image-preview img[src*='default-profile-image'] {
+  background-image: none;
+}
+
+/* 이미지 로드 실패시 스타일 */
+.image-error {
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 12px;
 }
 
 .profile-image-overlay {
@@ -791,31 +1037,6 @@ onMounted(() => {
   font-size: 14px;
   color: #666;
   margin: 0 0 15px 0;
-}
-
-.profile-stats {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin: 10px 0 15px 0;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #444;
-}
-
-.stat-number {
-  font-size: 20px;
-  font-weight: 600;
-  color: #333;
-}
-
-.stat-label {
-  font-size: 13px;
-  color: #777;
 }
 
 /* 아이콘 공통 스타일 */
@@ -923,20 +1144,6 @@ onMounted(() => {
   align-items: center;
 }
 
-.apartment-image {
-  width: 100px;
-  height: 75px;
-  border-radius: 6px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.apartment-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .apartment-text {
   flex: 1;
 }
@@ -999,13 +1206,6 @@ onMounted(() => {
   background-color: #f9f9f9;
 }
 
-.favorite-image {
-  width: 60px;
-  height: 60px;
-  border-radius: 4px;
-  object-fit: cover;
-}
-
 .favorite-info {
   flex: 1;
 }
@@ -1021,19 +1221,6 @@ onMounted(() => {
   font-size: 13px;
   color: #666;
   margin: 0;
-}
-
-.remove-favorite {
-  background-color: transparent;
-  border: none;
-  color: #999;
-  padding: 5px;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.remove-favorite:hover {
-  color: #d32f2f;
 }
 
 .no-favorites {
@@ -1079,24 +1266,6 @@ onMounted(() => {
   color: #666;
   margin: 0 0 10px 0;
   line-height: 1.4;
-}
-
-.activity-comment {
-  font-size: 14px;
-  color: #333;
-  margin: 0 0 5px 0;
-  line-height: 1.4;
-}
-
-.activity-parent {
-  font-size: 13px;
-  color: #666;
-  margin: 0 0 5px 0;
-}
-
-.activity-parent .icon {
-  margin-right: 5px;
-  color: #777;
 }
 
 .activity-meta {
@@ -1324,38 +1493,6 @@ button.small {
   font-size: 13px;
 }
 
-.edit-profileImage-regist,
-.edit-profileImage-remove {
-  padding: 8px 15px;
-  font-size: 14px;
-  border-radius: 4px;
-  margin: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.edit-profileImage-regist {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-}
-
-.edit-profileImage-regist:hover {
-  background-color: #388e3c;
-}
-
-.edit-profileImage-remove {
-  background-color: #f5f5f5;
-  color: #d32f2f;
-  border: 1px solid #e0e0e0;
-}
-
-.edit-profileImage-remove:hover {
-  background-color: #f44336;
-  color: white;
-  border-color: #f44336;
-}
-
 /* 모달 스타일 */
 .modal {
   position: fixed;
@@ -1432,10 +1569,32 @@ button.small {
   border: 4px solid #f0f0f0;
 }
 
-.image-preview img {
+/* 업로드 진행률 스타일 */
+.upload-progress {
+  margin: 15px 0;
+}
+
+.progress-bar {
   width: 100%;
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
   height: 100%;
-  object-fit: cover;
+  background: linear-gradient(90deg, #4caf50, #66bb6a);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin: 0;
 }
 
 .upload-controls {
@@ -1506,6 +1665,13 @@ button.small {
   background-color: #e0e0e0;
 }
 
+/* 버튼 비활성화 스타일 */
+.save-button:disabled,
+.cancel-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .warning-text {
   color: #666;
   margin-bottom: 15px;
@@ -1528,18 +1694,9 @@ button.small {
 
 /* 반응형 스타일 */
 @media (max-width: 768px) {
-  .profile-stats {
-    gap: 15px;
-  }
-
   .apartment-details {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .apartment-image {
-    width: 100%;
-    height: 120px;
   }
 
   .tab-button {
@@ -1565,11 +1722,6 @@ button.small {
   .tab-button {
     padding: 12px 15px;
     min-width: 100px;
-  }
-
-  .profile-stats {
-    width: 100%;
-    justify-content: space-around;
   }
 
   .tab-content {
