@@ -12,6 +12,7 @@
       <!-- 동적 컴포넌트 렌더링 -->
       <component
         :is="currentComponent"
+        :highlighted-id="highlightedId"
         @show-on-map="$emit('show-on-map', $event)"
         @show-all-on-map="$emit('show-all-on-map', $event)"
         @view-listings="$emit('view-listings', $event)"
@@ -34,6 +35,10 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  highlightedId: {
+   type: Number,
+   default: null,
+ },
 })
 
 // 이벤트 정의 - view-listings 이벤트 추가
@@ -76,6 +81,7 @@ const getPanelTitle = (menu) => {
 watch(
   () => props.activeMenu,
   (newValue) => {
+     console.log('[ContentPanel] props.highlightedId 전달됨:', newValue)
     // 메뉴가 변경될 때 수행할 작업
     // 예: 특정 메뉴 선택 시 추가 데이터 로드 등
   },

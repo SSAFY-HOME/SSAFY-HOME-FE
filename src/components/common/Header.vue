@@ -179,7 +179,7 @@ export default {
           font-size: 1.4rem;
           font-weight: 600;
           transition: color 0.3s;
-
+          cursor: pointer;
           &:hover,
           &.router-link-active {
             color: #82b06d;
@@ -197,7 +197,7 @@ export default {
           text-decoration: none;
           font-size: 0.9rem;
           transition: color 0.3s;
-
+          cursor: pointer;
           &:hover,
           &.router-link-active {
             color: #82b06d;
@@ -217,7 +217,7 @@ export default {
         text-decoration: none;
         font-size: 1rem;
         transition: color 0.3s;
-
+        cursor: pointer;
         &:hover {
           color: #82b06d;
         }

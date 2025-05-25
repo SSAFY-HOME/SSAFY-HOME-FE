@@ -95,9 +95,9 @@
           <div class="card-content">
             <div v-if="user.apartment" class="apartment-details">
               <div class="apartment-text">
-                <p class="apartment-name">{{ user.apartment.name }}</p>
+                <p class="apartment-name">{{ user.apartment.apartmentName }}</p>
                 <p class="apartment-address">
-                  <span class="icon">📍</span> {{ user.apartment.addr }}
+                  <span class="icon">📍</span> {{ user.apartment.address }}
                 </p>
                 <p class="apartment-year">
                   <span class="icon">📅</span> {{ user.apartment.buildYear }}년 준공
