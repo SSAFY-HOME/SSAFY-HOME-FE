@@ -95,9 +95,9 @@
           <div class="card-content">
             <div v-if="user.apartment" class="apartment-details">
               <div class="apartment-text">
-                <p class="apartment-name">{{ user.apartment.apartmentName }}</p>
+                <p class="apartment-name">{{ user.apartment.name }}</p>
                 <p class="apartment-address">
-                  <span class="icon">📍</span> {{ user.apartment.address }}
+                  <span class="icon">📍</span> {{ user.apartment.addr }}
                 </p>
                 <p class="apartment-year">
                   <span class="icon">📅</span> {{ user.apartment.buildYear }}년 준공
@@ -546,9 +546,15 @@ const deleteUser = async () => {
 
   try {
     await memberAPI.deleteMember(confirmPassword.value)
-    localStorage.removeItem('accessToken')
+    localStorage.removeItem('email')
+  localStorage.removeItem('hasHome')
+  localStorage.removeItem('isSocial')
+  localStorage.removeItem('refreshToken')
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('isAdmin')
+  memberStore.clearMember()
     alert('회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.')
-    router.push('/notice')
+    router.push('/')
   } catch (error) {
     if (error.response && error.response.status === 401) {
       alert('비밀번호가 일치하지 않습니다.')

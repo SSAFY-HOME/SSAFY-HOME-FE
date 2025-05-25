@@ -262,51 +262,145 @@ const showCommerceOnMap = (commerceInfo) => {
  */
 
 // 여러 아파트를 지도에 표시하는 함수
+// const showMultipleApartmentsOnMap = (apartments) => {
+//   if (!kakaoMap || !apartments || apartments.length === 0) return
+
+//   // 기존 아파트 마커들 제거
+//   clearMarkersByType('apartment')
+
+//   // 모든 마커의 위치를 포함할 범위 객체
+//   const bounds = new window.kakao.maps.LatLngBounds()
+
+//   // 마커 이미지 설정
+//   const imageSrc = apartmentImg
+//   const imageSize = new window.kakao.maps.Size(40, 45)
+//   const imageOption = { offset: new window.kakao.maps.Point(27, 69) }
+//   const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imageOption)
+
+//   // 각 아파트마다 마커 생성
+//   apartments.forEach((apt) => {
+//     if (!apt.latitude || !apt.longitude) return
+
+//     const position = new window.kakao.maps.LatLng(apt.latitude, apt.longitude)
+//     const marker = new window.kakao.maps.Marker({
+//       position: position,
+//       image: markerImage,
+//       map: kakaoMap,
+//     })
+
+//     // 마커 정보 저장
+//     markers.push({
+//       marker: marker,
+//       type: 'apartment',
+//       id: apt.id,
+//     })
+
+//     // 마커 클릭 이벤트 추가
+//     window.kakao.maps.event.addListener(marker, 'click', () => {
+//       showApartmentOnMap(apt)
+//     })
+
+//     // bounds에 마커 위치 추가
+//     bounds.extend(position)
+//   })
+
+//   // 모든 마커를 포함하도록 지도 범위 조정
+//   kakaoMap.setBounds(bounds)
+// }
+// 💡 emit 추가를 위해 defineEmits 선언 필요
+const emit = defineEmits(['showAllOnMap'])
+const formatPrice = (price) => {
+  if (!price) return '-'
+  const oku = Math.floor(price / 10000)
+  const man = price % 10000
+  return man === 0 ? `${oku}억` : `${oku}억 ${man.toLocaleString()}`
+}
+
 const showMultipleApartmentsOnMap = (apartments) => {
   if (!kakaoMap || !apartments || apartments.length === 0) return
 
-  // 기존 아파트 마커들 제거
+  // ✅ emit 통해 상위 컴포넌트로 아파트 리스트 전달
+  emit('showAllOnMap', apartments)
+
+  // 기존 아파트 마커 제거
   clearMarkersByType('apartment')
 
-  // 모든 마커의 위치를 포함할 범위 객체
   const bounds = new window.kakao.maps.LatLngBounds()
 
-  // 마커 이미지 설정
-  const imageSrc = apartmentImg
-  const imageSize = new window.kakao.maps.Size(40, 45)
-  const imageOption = { offset: new window.kakao.maps.Point(27, 69) }
-  const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imageOption)
-
-  // 각 아파트마다 마커 생성
   apartments.forEach((apt) => {
     if (!apt.latitude || !apt.longitude) return
 
     const position = new window.kakao.maps.LatLng(apt.latitude, apt.longitude)
+
+    // 💡 가격 + 준공년 SVG 마커 만들기
+    const formattedPrice = formatPrice(apt.avgPrice)
+    const markerSvg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="90" height="55" viewBox="0 0 90 45">
+    <rect x="0" y="0" width="80" height="40" rx="6" ry="6" fill="#4B8C3A" />
+    <text x="40" y="15" font-size="11" fill="white" font-weight="bold" text-anchor="middle" >
+      ${formattedPrice}
+    </text>
+    <text x="40" y="30" font-size="8" fill="#ddd" text-anchor="middle">
+      ${apt.buildYear}년 준공
+    </text>
+  </svg>
+`
+
+    
+    const svgBase64 = btoa(unescape(encodeURIComponent(markerSvg)))
+    const imageSrc = 'data:image/svg+xml;base64,' + svgBase64
+    const imageSize = new window.kakao.maps.Size(90, 45)
+    const imageOption = { offset: new window.kakao.maps.Point(45, 45) }
+    const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imageOption)
+
+    // 마커 생성
     const marker = new window.kakao.maps.Marker({
       position: position,
       image: markerImage,
       map: kakaoMap,
     })
 
-    // 마커 정보 저장
-    markers.push({
-      marker: marker,
-      type: 'apartment',
-      id: apt.id,
+    // Hover용 인포윈도우
+    const infoContent = `
+      <div style="padding: 20px; font-size: 11px; max-width: 280px;">
+        <strong style="font-size: 13px;">${apt.name}</strong><br/>
+        주소: ${apt.addr}<br/>
+        평균가: ${formattedPrice}<br/>
+        준공년도: ${apt.buildYear}<br/>
+        도로명 주소: ${apt.roadNmSggCd || ''}<br/>
+      </div>
+    `
+    const infoWindow = new window.kakao.maps.InfoWindow({
+      content: infoContent,
+      removable: false,
+      zIndex : 3,
+      yAnchor:3.5,
     })
 
-    // 마커 클릭 이벤트 추가
+    window.kakao.maps.event.addListener(marker, 'mouseover', () => {
+      infoWindow.open(kakaoMap, marker)
+    })
+    window.kakao.maps.event.addListener(marker, 'mouseout', () => {
+      infoWindow.close()
+    })
+
     window.kakao.maps.event.addListener(marker, 'click', () => {
       showApartmentOnMap(apt)
     })
 
-    // bounds에 마커 위치 추가
+    markers.push({
+      marker: marker,
+      type: 'apartment',
+      id: apt.id,
+      infoWindow: infoWindow,
+    })
+
     bounds.extend(position)
   })
 
-  // 모든 마커를 포함하도록 지도 범위 조정
   kakaoMap.setBounds(bounds)
 }
+
 
 // 여러 상권을 지도에 표시하는 함수 (추가)
 const showMultipleCommercesOnMap = (commerces) => {

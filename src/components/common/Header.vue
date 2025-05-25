@@ -102,6 +102,7 @@ const handleLogout = () => {
   localStorage.removeItem('refreshToken')
   localStorage.removeItem('accessToken')
   localStorage.removeItem('isAdmin')
+  memberStore.clearMember()
   logoutMessage.value = '로그아웃이 완료되었습니다.'
   isLoggedIn.value = false
   isLogoutModalVisible.value = true

@@ -13,7 +13,7 @@
           class="search-input"
         />
         <button @click="searchNews" class="search-button">
-          <i class="fas fa-search"></i>
+          <i class="fas fa-search"><img src="@/assets/search-icon-white.png" class="search-img"/></i>
         </button>
       </div>
     </div>
@@ -127,16 +127,21 @@ onMounted(fetchNews)
   position: relative;
   max-width: 600px;
   margin: 0 auto;
+  display : flex;
+  align-items: center;
 }
 
 .search-input {
-  width: 100%;
-  padding: 14px 50px 14px 20px;
+ width: 100%;
+  height: 50px; /* 고정 높이 설정 */
+  padding: 0 50px 0 20px; /* 좌우 패딩 조정 */
   border: 1px solid #ddd;
   border-radius: 30px;
   font-size: 15px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+  line-height: 50px; /* 세로 정렬용 */
+  
 }
 
 .search-input:focus {
@@ -144,26 +149,32 @@ onMounted(fetchNews)
   border-color: #4caf50;
   box-shadow: 0 2px 15px rgba(76, 175, 80, 0.15);
 }
-
+.search-img {
+  width: 35px;
+  height: 35px;
+  margin-bottom: 15px;
+  display: block;
+  object-fit: contain;
+}
 .search-button {
   position: absolute;
   right: 5px;
   top: 5px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 50%;
   width: 40px;
   height: 40px;
+  border: none;
+  border-radius: 50%;
+  background-color: #6bb46b;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
+  padding: 0;
 }
 
 .search-button:hover {
-  background-color: #3d9140;
+  background-color: #8ec58e;
 }
 
 /* Content Container */
