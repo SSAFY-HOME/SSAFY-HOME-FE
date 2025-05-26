@@ -52,59 +52,58 @@ export const kakaoAPI = {
    * @returns {Promise<Object>} 상권 검색 결과
    */
   searchNearbyCommerces: async ({ city, district, categoryGroupCode = '' }) => {
-  const searchKeyword = `${city} ${district}`.trim()
-  console.log('응답', searchKeyword)
+    const searchKeyword = `${city} ${district}`.trim()
+    console.log('응답', searchKeyword)
 
-  try {
-    // 전체일 경우: 여러 카테고리로 반복 요청
-    if (!categoryGroupCode) {
-      const categoryCodes = Object.values(kakaoAPI.CATEGORY_GROUP_CODES)
-      let allResults = []
+    try {
+      // 전체일 경우: 여러 카테고리로 반복 요청
+      if (!categoryGroupCode) {
+        const categoryCodes = Object.values(kakaoAPI.CATEGORY_GROUP_CODES)
+        let allResults = []
 
-      for (const code of categoryCodes) {
-        const res = await api.get('/api/kakao/places', {
-          params: {
-            query: searchKeyword,
-            category_group_code: code,
-          },
-        })
+        for (const code of categoryCodes) {
+          const res = await api.get('/api/kakao/places', {
+            params: {
+              query: searchKeyword,
+              category_group_code: code,
+            },
+          })
 
-        if (res?.data) {
-          allResults = allResults.concat(res.data)
+          if (res?.data) {
+            allResults = allResults.concat(res.data)
+          }
+        }
+
+        return {
+          status: 200,
+          message: '전체 카테고리 상권 검색 성공',
+          data: allResults,
         }
       }
 
+      // 단일 카테고리일 경우
+      const response = await api.get('/api/kakao/places', {
+        params: {
+          query: searchKeyword,
+          category_group_code: categoryGroupCode,
+        },
+      })
+
       return {
-        status: 200,
-        message: '전체 카테고리 상권 검색 성공',
-        data: allResults,
+        status: response.status,
+        message: response.message,
+        data: response.data || [],
+      }
+    } catch (error) {
+      console.error('상권 검색 실패:', error)
+      return {
+        status: error.response?.status || 500,
+        message: error.response?.data?.message || '상권 검색 중 오류가 발생했습니다.',
+        data: [],
+        error,
       }
     }
-
-    // 단일 카테고리일 경우
-    const response = await api.get('/api/kakao/places', {
-      params: {
-        query: searchKeyword,
-        category_group_code: categoryGroupCode,
-      },
-    })
-
-    return {
-      status: response.status,
-      message: response.message,
-      data: response.data || [],
-    }
-  } catch (error) {
-    console.error('상권 검색 실패:', error)
-    return {
-      status: error.response?.status || 500,
-      message: error.response?.data?.message || '상권 검색 중 오류가 발생했습니다.',
-      data: [],
-      error,
-    }
-  }
-},
-
+  },
 
   /**
    * 카테고리 그룹 코드 목록

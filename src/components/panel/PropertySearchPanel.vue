@@ -408,8 +408,6 @@ watch(
 
 // 매물 리스트 보기 함수
 const viewListings = (apartment) => {
-  console.log(`${apartment.name}의 매물 리스트 보기 클릭됨`, apartment)
-
   // 선택된 아파트 ID 저장
   selectedApartmentId.value = apartment.id
 
@@ -491,7 +489,7 @@ watch(selectedDistrict, () => {
 
 // 정렬 옵션 변경 감시
 watch(sortOption, () => {
-   sortApartments()
+  sortApartments()
 })
 </script>
 

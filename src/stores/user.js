@@ -44,7 +44,17 @@ export const useMemberStore = defineStore('member', {
   },
 
   persist: {
-    storage: localStorage, 
-    paths: ['name', 'email', 'image', 'isSocial', 'apartment', 'accessToken', 'refreshToken', 'admin', 'hasHomeInfo'],
+    storage: localStorage,
+    paths: [
+      'name',
+      'email',
+      'image',
+      'isSocial',
+      'apartment',
+      'accessToken',
+      'refreshToken',
+      'admin',
+      'hasHomeInfo',
+    ],
   },
 })

@@ -12,10 +12,14 @@
     <!-- 탭 네비게이션 -->
     <nav class="tab-nav">
       <button class="tab-btn" :class="{ active: activeTab === 'info' }" @click="selectTab('info')">
-         마이홈
+        마이홈
       </button>
-      <button class="tab-btn" :class="{ active: activeTab === 'wishlist' }" @click="selectTab('wishlist')">
-         위시리스트
+      <button
+        class="tab-btn"
+        :class="{ active: activeTab === 'wishlist' }"
+        @click="selectTab('wishlist')"
+      >
+        위시리스트
       </button>
     </nav>
 
@@ -51,9 +55,7 @@
               <p class="apt-addr">{{ apartment.addr }}</p>
               <p class="apt-meta">{{ apartment.buildYear }}년 준공</p>
             </div>
-            <button class="view-btn" @click.stop="viewListings(apartment)">
-              📋 매물 보기
-            </button>
+            <button class="view-btn" @click.stop="viewListings(apartment)">📋 매물 보기</button>
           </div>
         </div>
         <div v-else class="empty-wishlist">
@@ -65,7 +67,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMemberStore } from '@/stores/user'
 import ApartmentDetailChart from '@/components/chart/ApartmentDetailChart.vue'
@@ -76,16 +78,32 @@ const router = useRouter()
 const memberStore = useMemberStore()
 const isLoggedIn = computed(() => !!memberStore.accessToken)
 
+// 🔥 props 추가 - 부모 컴포넌트의 activeMenu 감지
+const props = defineProps({
+  activeMenu: {
+    type: String,
+    default: '',
+  },
+})
+
 const activeTab = ref('info')
 const apartment = ref(null)
 const favoriteApartments = ref([])
 const selectedApartmentId = ref(null)
+const isViewingListings = ref(false)
 
-const emit = defineEmits(['showOnMap', 'view-listings'])
+// 🔥 이벤트에 hide-listings 추가
+const emit = defineEmits(['showOnMap', 'view-listings', 'hide-listings', 'close-panel'])
 
 const goToLogin = () => router.push('/login')
 
+// 🔥 탭 변경 시 패널 닫기 기능 추가
 const selectTab = async (tab) => {
+  // 탭이 변경될 때 매물 패널 닫기
+  if (activeTab.value !== tab) {
+    hideListings()
+  }
+
   activeTab.value = tab
   if (tab === 'wishlist') await fetchFavoriteApartments()
 }
@@ -99,21 +117,18 @@ const fetchFavoriteApartments = async () => {
   }
 }
 
-const toggleLike = async (apt) => {
-  try {
-    if (apt.likedApt) {
-      await apartmentAPI.unlikeApartment(apt.aptSeq)
-      apt.likedApt = false
-    } else {
-      await apartmentAPI.likeApartment(apt.aptSeq)
-      apt.likedApt = true
-    }
-  } catch (e) {
-    alert('좋아요 처리 중 오류 발생')
-  }
+// 🔥 매물 패널 닫기 함수
+const hideListings = () => {
+  isViewingListings.value = false
+  selectedApartmentId.value = null
+  emit('hide-listings')
 }
 
+// 🔥 지도 클릭 시 매물 패널 닫기
 const showOnMap = (apt) => {
+  // 매물 패널이 열려있다면 닫기
+  hideListings()
+
   selectedApartmentId.value = apt.id
   emit('showOnMap', {
     latitude: apt.latitude,
@@ -124,10 +139,39 @@ const showOnMap = (apt) => {
   })
 }
 
+// 🔥 매물 보기 토글 함수
+const toggleListings = (apt) => {
+  // 같은 아파트의 매물을 다시 클릭하면 패널 닫기
+  if (isViewingListings.value && selectedApartmentId.value === apt.id) {
+    hideListings()
+  } else {
+    // 다른 아파트의 매물을 클릭하거나 처음 클릭하면 패널 열기
+    viewListings(apt)
+  }
+}
+
 const viewListings = (apt) => {
   selectedApartmentId.value = apt.id
+  isViewingListings.value = true
   emit('view-listings', apt)
 }
+
+// 🔥 외부에서 호출 가능한 메서드들을 expose
+defineExpose({
+  hideListings,
+  closePanel: hideListings, // ContentPanel과 동일한 인터페이스 제공
+})
+
+// 🔥 부모 컴포넌트의 activeMenu 변경 감지
+watch(
+  () => props.activeMenu,
+  (newMenu, oldMenu) => {
+    // 다른 메뉴로 변경되었을 때 매물 패널 닫기
+    if (newMenu !== oldMenu && newMenu !== 'profile') {
+      hideListings()
+    }
+  },
+)
 
 onMounted(() => {
   apartment.value = {
@@ -244,7 +288,7 @@ onMounted(() => {
 }
 
 .apt-card {
-  background: #e2e9e2;
+  background: #f5fff5;
   border: 1px solid #c6ddd4;
   padding: 20px;
   border-radius: 12px;
@@ -288,11 +332,21 @@ onMounted(() => {
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: 0.3s;
+  transition: all 0.3s;
 }
 
 .view-btn:hover {
   background: #00c9fe;
+}
+
+/* 🔥 활성 상태의 매물 보기 버튼 스타일 */
+.view-btn.active {
+  background: #ff6b6b;
+  transform: scale(1.02);
+}
+
+.view-btn.active:hover {
+  background: #ff5252;
 }
 
 .wishlist-grid {
