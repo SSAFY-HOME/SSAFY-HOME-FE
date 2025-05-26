@@ -18,12 +18,12 @@
         <div class="profile-avatar-container">
           <div class="profile-image-container" @click="openImageModal">
             <img
-              :src="profileImage"
+              :src="profImage"
               alt="프로필 이미지"
               class="profile-image"
               @error="handleImageError"
               @load="handleImageLoad"
-              :key="profileImage"
+              :key="profImage"
             />
             <div class="profile-image-overlay">
               <button class="image-edit-button">
@@ -290,8 +290,12 @@
             alt="프로필 이미지 미리보기"
             @error="handleImageError"
             @load="handleImageLoad"
-            :key="previewImageUrl"
+            :key="`preview-${previewImage ? 'selected' : 'current'}-${Date.now()}`"
           />
+        </div>
+
+        <div style="text-align: center; margin: 10px 0; font-size: 14px; color: #666">
+          {{ previewImage ? '📸 새로 선택한 이미지' : '👤 현재 프로필 이미지' }}
         </div>
 
         <!-- 업로드 진행률 표시 -->
@@ -309,18 +313,11 @@
             @change="previewProfileImage"
             accept="image/*"
             class="file-input"
+            ref="fileInputRef"
           />
           <label for="profile-image-upload" class="file-input-label">
             <span class="icon">⬆️</span> 이미지 선택
           </label>
-
-          <button
-            class="remove-image-button"
-            @click="removeProfileImage"
-            v-if="user.image && user.image !== 'null' && user.image.trim() !== ''"
-          >
-            <span class="icon">🗑️</span> 이미지 삭제
-          </button>
         </div>
       </div>
       <div class="modal-footer">
@@ -361,9 +358,10 @@ const userPosts = ref([])
 const selectedFile = ref(null)
 const uploadProgress = ref(0)
 const isUploading = ref(false)
+const profImage = ref(null)
 
 // 🔥 개선된 기본 프로필 이미지 처리
-import defaultProfileImage from '@/assets/default-profile-image.png'
+import defaultProfileImage from '@/assets/default_profile_img.png'
 
 const DEFAULT_PROFILE_IMAGE = defaultProfileImage
 const imageErrorCount = ref(new Map()) // 이미지 에러 카운트 추적
@@ -376,8 +374,8 @@ const profileImage = computed(() => {
   console.log('프로필 이미지 확인:', user.value.image)
 
   // 이미지가 있고 유효한 URL인 경우
-  if (user.value.image && user.value.image.trim() !== '' && user.value.image !== 'null') {
-    return user.value.image
+  if (profImage.value && profImage.value.image !== 'null') {
+    return profImage.value
   }
 
   // 이미지가 없거나 null인 경우 기본 이미지 반환
@@ -411,7 +409,7 @@ const handleImageError = (event) => {
   console.warn('이미지 로드 실패:', imgSrc)
 
   // 이미 기본 이미지인 경우 무한루프 방지
-  if (imgSrc === DEFAULT_PROFILE_IMAGE || imgSrc.includes('default-profile-image')) {
+  if (imgSrc === DEFAULT_PROFILE_IMAGE) {
     console.warn('기본 이미지 로드도 실패했습니다. 더 이상 재시도하지 않습니다.')
     return
   }
@@ -419,7 +417,6 @@ const handleImageError = (event) => {
   // 에러 카운트 추적으로 무한루프 방지
   const currentCount = imageErrorCount.value.get(imgSrc) || 0
   if (currentCount >= 2) {
-    console.warn('이미지 로드 재시도 한계 초과:', imgSrc)
     return
   }
 
@@ -432,7 +429,6 @@ const handleImageError = (event) => {
 // 🆕 이미지 로드 성공 핸들러
 const handleImageLoad = (event) => {
   const imgSrc = event.target.src
-  console.log('이미지 로드 성공:', imgSrc)
 
   // 성공시 에러 카운트 초기화
   if (imageErrorCount.value.has(imgSrc)) {
@@ -509,8 +505,7 @@ const fetchUserProfile = async () => {
         passwordConfirm: '',
         social: response.data.social,
       }
-
-      console.log('프로필 정보:', user.value.image)
+      profImage.value = response.data.image || DEFAULT_PROFILE_IMAGE
 
       // 🆕 이미지 URL 로그 추가
     }
@@ -708,6 +703,7 @@ const previewProfileImage = (event) => {
 
   const reader = new FileReader()
   reader.onload = (e) => {
+    console.log('이미지 미리보기 로드:', e.target.result)
     previewImage.value = e.target.result
   }
   reader.readAsDataURL(file)
@@ -792,7 +788,7 @@ const saveProfileImage = async () => {
   }
 }
 
-// 🆕 개선된 프로필 이미지 삭제
+// 프로필 이미지 삭제
 const removeProfileImage = async () => {
   if (!confirm('프로필 이미지를 삭제하시겠습니까?')) return
 

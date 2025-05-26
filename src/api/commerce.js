@@ -56,7 +56,6 @@ export const kakaoAPI = {
 
     // 동 이름을 기준으로 검색할 키워드 생성
     const searchKeyword = ` ${city} ${district}`.trim()
-    console.log('응답', searchKeyword)
 
     try {
       // API 요청

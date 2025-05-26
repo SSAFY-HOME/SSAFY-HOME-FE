@@ -168,10 +168,10 @@ const selectedApartment = ref(null)
 
 // DealPanel 관련 함수
 const handleViewListings = (apartment) => {
-  console.log('매물 리스트 보기 요청:', apartment)
   selectedApartment.value = apartment
   isListingPanelVisible.value = true
 
+  // 매물 패널이 열려있으면 닫기
   if (isCommercePanelVisible.value) {
     isCommercePanelVisible.value = false
   }

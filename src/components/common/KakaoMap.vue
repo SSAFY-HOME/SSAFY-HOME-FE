@@ -105,6 +105,7 @@ const showApartmentOnMap = (apartmentInfo) => {
 
   // 아파트 정보인 경우
   if (!apartmentInfo.isCommerce) {
+    console.log('아파트정보', apartmentInfo)
     // 마커 이미지 설정
     const imageSrc = apartmentImg
     const imageSize = new window.kakao.maps.Size(45, 50)
@@ -346,7 +347,6 @@ const showMultipleApartmentsOnMap = (apartments) => {
   </svg>
 `
 
-    
     const svgBase64 = btoa(unescape(encodeURIComponent(markerSvg)))
     const imageSrc = 'data:image/svg+xml;base64,' + svgBase64
     const imageSize = new window.kakao.maps.Size(90, 45)
@@ -373,8 +373,8 @@ const showMultipleApartmentsOnMap = (apartments) => {
     const infoWindow = new window.kakao.maps.InfoWindow({
       content: infoContent,
       removable: false,
-      zIndex : 3,
-      yAnchor:3.5,
+      zIndex: 3,
+      yAnchor: 3.5,
     })
 
     window.kakao.maps.event.addListener(marker, 'mouseover', () => {
@@ -400,7 +400,6 @@ const showMultipleApartmentsOnMap = (apartments) => {
 
   kakaoMap.setBounds(bounds)
 }
-
 
 // 여러 상권을 지도에 표시하는 함수 (추가)
 const showMultipleCommercesOnMap = (commerces) => {

@@ -841,7 +841,7 @@ watch(messages, () => {
   }
 
   .chat-panel {
-    min-height: 1200px;
+    min-height: 1000px;
   }
 }
 </style>
