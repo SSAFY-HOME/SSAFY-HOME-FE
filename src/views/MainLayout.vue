@@ -241,10 +241,7 @@ const closePanel = () => {
 // 지도 관련 핸들러
 const handleShowOnMap = async (apartmentInfo) => {
   console.log('[MainLayout] showOnMap 받음 → ID:', apartmentInfo.id)
-  if (activeMenu.value !== 'property') {
-    activateMenu('property') // 패널 열기
-    await nextTick() // DOM 완전히 그려질 때까지 대기
-  }
+  isListingPanelVisible.value = true
 
   highlightedId.value = apartmentInfo.id
   kakaoMapRef.value.showApartmentOnMap(apartmentInfo)
