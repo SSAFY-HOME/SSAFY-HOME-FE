@@ -132,7 +132,9 @@
           class="apartment-card"
           v-for="apartment in apartments"
           :key="apartment.id"
-          :class="{ 'selected-apartment': selectedApartmentId === apartment.id }"
+          :id="`apt-${apartment.id}`" 
+  :class="{ 'selected-apartment': selectedApartmentId === apartment.id, 'highlighted': props.highlightedId === apartment.id }"
+          
         >
           <!-- 좋아요 버튼 (오른쪽 상단에 배치) -->
           <div class="like-button-container">
@@ -174,7 +176,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { apartmentAPI } from '@/api/apartment'
 
 // emit 정의 업데이트
@@ -366,18 +368,43 @@ const selectedApartmentId = ref(null)
 
 // 지도에 표시 함수
 const showOnMap = (apartment) => {
-  // 부모 컴포넌트로 아파트 위치 데이터 전달
-
-  // 선택된 아파트 ID 저장
   selectedApartmentId.value = apartment.id
   emit('showOnMap', {
     latitude: apartment.latitude,
     longitude: apartment.longitude,
     name: apartment.name,
-    price: apartment.price,
+    avgPrice: apartment.avgPrice,
     id: apartment.id,
+    buildYear: apartment.buildYear,
+    addr: apartment.addr,
   })
 }
+
+const props = defineProps({
+  highlightedId: Number,
+})
+
+
+watch(
+  () => props.highlightedId,
+  async (newId) => {
+    if (!newId) return
+    console.log('[PropertySearchPanel] highlightedId 변경 감지:', newId)
+    await nextTick()
+
+    const exists = apartments.value.some((apt) => apt.id === newId)
+    if (!exists) {
+      console.warn('[PropertySearchPanel] apartments에 해당 ID 없음:', newId)
+      return
+    }
+
+    const el = document.getElementById(`apt-${newId}`)
+    console.log('[PropertySearchPanel] scroll 대상 DOM:', el)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  },
+)
 
 // 매물 리스트 보기 함수
 const viewListings = (apartment) => {
@@ -735,7 +762,7 @@ label {
 }
 
 /* 선택된 아파트 카드 스타일 */
-.apartment-card.selected-apartment {
+.apartment-card.selected-apartment, .apartment-card.highlighted {
   border-color: #4caf50;
   background-color: #f7fcf7;
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);

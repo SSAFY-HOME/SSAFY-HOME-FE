@@ -26,6 +26,10 @@ export const useMemberStore = defineStore('member', {
       this.hasHomeInfo = memberData.hasHomeInfo || false
     },
 
+    setAccessToken(token) {
+      this.accessToken = token
+    },
+    
     clearMember() {
       this.name = ''
       this.email = ''

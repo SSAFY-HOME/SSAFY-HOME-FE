@@ -16,6 +16,7 @@
       <ContentPanel
         :active-menu="activeMenu"
         :current-component="currentComponent"
+        :highlighted-id="highlightedId"
         @close-panel="closePanel"
         @show-on-map="handleShowOnMap"
         @show-all-on-map="handleShowAllOnMap"
@@ -44,8 +45,11 @@
         @showAllOnMap="handleShowCommercesOnMap"
       />
 
-      <!-- 지도 컴포넌트 -->
-      <KakaoMap ref="kakaoMapRef" />
+      <KakaoMap
+  ref="kakaoMapRef"
+  @show-on-map="handleShowOnMap"
+/>
+
     </div>
 
     <!-- 로그아웃 모달 -->
@@ -84,6 +88,7 @@ const isLogoutModalVisible = ref(false)
 const logoutMessage = ref('')
 const currentComponent = shallowRef(null)
 const kakaoMapRef = ref(null)
+const highlightedId = ref(null)
 
 // 로그인 상태 확인
 const checkLoginStatus = () => {
@@ -231,7 +236,15 @@ const closePanel = () => {
 }
 
 // 지도 관련 핸들러
-const handleShowOnMap = (apartmentInfo) => {
+const handleShowOnMap = async (apartmentInfo) => {
+  console.log('[MainLayout] showOnMap 받음 → ID:', apartmentInfo.id)
+  if (activeMenu.value !== 'property') {
+    activateMenu('property') // 패널 열기
+    await nextTick()         // DOM 완전히 그려질 때까지 대기
+    
+  }
+  
+  highlightedId.value = apartmentInfo.id
   kakaoMapRef.value.showApartmentOnMap(apartmentInfo)
 }
 
@@ -245,10 +258,6 @@ const handleViewCommerces = (locationInfo) => {
   selectedLocation.value = locationInfo
   isCommercePanelVisible.value = true
 
-  // 매물 패널이 열려있으면 닫기
-  if (isListingPanelVisible.value) {
-    isListingPanelVisible.value = false
-  }
 }
 
 // PropertySearchPanel이 아파트가 선택 해제될 때 알 수 있도록 감시자 추가
