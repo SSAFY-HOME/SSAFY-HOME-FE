@@ -51,40 +51,60 @@ export const kakaoAPI = {
    * @param {string} params.categoryGroupCode - 카테고리 그룹 코드 (선택)
    * @returns {Promise<Object>} 상권 검색 결과
    */
-  searchNearbyCommerces: async (params) => {
-    const { city, district, categoryGroupCode = '' } = params
+  searchNearbyCommerces: async ({ city, district, categoryGroupCode = '' }) => {
+  const searchKeyword = `${city} ${district}`.trim()
+  console.log('응답', searchKeyword)
 
-    // 동 이름을 기준으로 검색할 키워드 생성
-    const searchKeyword = ` ${city} ${district}`.trim()
-    console.log('응답', searchKeyword)
+  try {
+    // 전체일 경우: 여러 카테고리로 반복 요청
+    if (!categoryGroupCode) {
+      const categoryCodes = Object.values(kakaoAPI.CATEGORY_GROUP_CODES)
+      let allResults = []
 
-    try {
-      // API 요청
-      const response = await api.get('/api/kakao/places', {
-        params: {
-          query: searchKeyword,
-          category_group_code: categoryGroupCode,
-        },
-      })
+      for (const code of categoryCodes) {
+        const res = await api.get('/api/kakao/places', {
+          params: {
+            query: searchKeyword,
+            category_group_code: code,
+          },
+        })
 
-      // 응답 데이터 정형화
-      return {
-        status: response.status,
-        message: response.message,
-        data: response.data || [],
+        if (res?.data) {
+          allResults = allResults.concat(res.data)
+        }
       }
-    } catch (error) {
-      console.error('주변 상권 검색 실패:', error)
 
-      // 에러 응답을 구조화하여 반환
       return {
-        status: error.response?.data.status || 500,
-        message: error.response?.data?.message || '주변 상권 검색 중 오류가 발생했습니다.',
-        data: [],
-        error,
+        status: 200,
+        message: '전체 카테고리 상권 검색 성공',
+        data: allResults,
       }
     }
-  },
+
+    // 단일 카테고리일 경우
+    const response = await api.get('/api/kakao/places', {
+      params: {
+        query: searchKeyword,
+        category_group_code: categoryGroupCode,
+      },
+    })
+
+    return {
+      status: response.status,
+      message: response.message,
+      data: response.data || [],
+    }
+  } catch (error) {
+    console.error('상권 검색 실패:', error)
+    return {
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || '상권 검색 중 오류가 발생했습니다.',
+      data: [],
+      error,
+    }
+  }
+},
+
 
   /**
    * 카테고리 그룹 코드 목록

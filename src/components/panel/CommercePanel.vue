@@ -365,31 +365,33 @@ const closePanel = () => {
 }
 // 상권 점수 계산용 가중치
 const categoryWeights = {
-  FD6: 1, // 음식점
-  CE7: 1.5, // 카페
-  CS2: 1, // 편의점
-  HP8: 1.2, // 병원
-  PM9: 1, // 약국
-  BK9: 1.2, // 은행
-  AC5: 1, // 학원
-  MT1: 2, // 대형마트
-  PS3: 1.3, // 어린이집, 유치원
-  SC4: 1.3, //학교
-  PK6: 1, //주차장
-  OL7: 1, //주유소
-  SW8: 1.3, //지하철역
-  CT1: 1, //문화시설
-  PO3: 1.3, //공공기관
-  AT4: 1, //관광명소
+  FD6: 0.2, // 음식점
+  CE7: 0.25, // 카페
+  CS2: 0.2, // 편의점
+  HP8: 0.25, // 병원
+  PM9: 0.25, // 약국
+  BK9: 0.25, // 은행
+  AC5: 0.2, // 학원
+  MT1: 0.3, // 대형마트
+  PS3: 0.2, // 어린이집, 유치원
+  SC4: 0.2, //학교
+  PK6: 0.15, //주차장
+  OL7: 0.15, //주유소
+  SW8: 0.25, //지하철역
+  CT1: 0.15, //문화시설
+  PO3: 0.15, //공공기관
+  AT4: 0.1, //관광명소
 }
 
 // 지역 점수 계산
 const areaScore = computed(() => {
-  return commerces.value.reduce((acc, place) => {
+  const rawScore = commerces.value.reduce((acc, place) => {
     const weight = categoryWeights[place.category_group_code] || 0
     return acc + weight
   }, 0)
+  return Math.round(rawScore) 
 })
+
 
 // 점수 평가 문구
 const evaluateAreaScore = (score) => {
