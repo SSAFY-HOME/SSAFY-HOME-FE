@@ -50,7 +50,7 @@
             <div class="like-btn" @click.stop="toggleLike(apartment)">
               {{ apartment.likedApt ? '❤️' : '🤍' }}
             </div>
-            <div @click="showOnMap(apartment)">
+            <div>
               <h4 class="apt-name">{{ apartment.name }}</h4>
               <p class="apt-addr">{{ apartment.addr }}</p>
               <p class="apt-meta">{{ apartment.buildYear }}년 준공</p>

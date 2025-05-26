@@ -132,9 +132,11 @@
           class="apartment-card"
           v-for="apartment in apartments"
           :key="apartment.id"
-          :id="`apt-${apartment.id}`" 
-  :class="{ 'selected-apartment': selectedApartmentId === apartment.id, 'highlighted': props.highlightedId === apartment.id }"
-          
+          :id="`apt-${apartment.id}`"
+          :class="{
+            'selected-apartment': selectedApartmentId === apartment.id,
+            highlighted: props.highlightedId === apartment.id,
+          }"
         >
           <!-- 좋아요 버튼 (오른쪽 상단에 배치) -->
           <div class="like-button-container">
@@ -384,7 +386,6 @@ const props = defineProps({
   highlightedId: Number,
 })
 
-
 watch(
   () => props.highlightedId,
   async (newId) => {
@@ -412,7 +413,15 @@ const viewListings = (apartment) => {
   selectedApartmentId.value = apartment.id
 
   // 부모 컴포넌트로 선택된 아파트 정보 전달
-  emit('view-listings', apartment)
+  emit('view-listings', {
+    latitude: apartment.latitude,
+    longitude: apartment.longitude,
+    name: apartment.name,
+    avgPrice: apartment.avgPrice,
+    id: apartment.id,
+    buildYear: apartment.buildYear,
+    addr: apartment.addr,
+  })
 }
 
 // 주변 상권 패널 열기
@@ -762,7 +771,8 @@ label {
 }
 
 /* 선택된 아파트 카드 스타일 */
-.apartment-card.selected-apartment, .apartment-card.highlighted {
+.apartment-card.selected-apartment,
+.apartment-card.highlighted {
   border-color: #4caf50;
   background-color: #f7fcf7;
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
