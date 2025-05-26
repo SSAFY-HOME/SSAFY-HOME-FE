@@ -5,7 +5,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, defineExpose } from 'vue'
 import { useMemberStore } from '@/stores/user'
-import { kakaoAPI } from '@/api/commerce'
 import { apartmentAPI } from '@/api/apartment'
 
 const memberStore = useMemberStore()
@@ -191,7 +190,7 @@ const createCommerceMarker = (commerce) => {
 const showApartmentOnMap = (apartmentInfo) => {
   if (!kakaoMap) return
   // 단일 아파트용
-  if (apartmentInfo.type === 'apartment') {
+  if ('buildYear' in apartmentInfo) {
     // 기존 강조 마커가 있다면 원래 상태로 되돌림
     markers.forEach((m) => {
       if (m.type === 'apartment') {
@@ -211,7 +210,9 @@ const showApartmentOnMap = (apartmentInfo) => {
           m.marker = newMarker
           m.isHighlighted = false
         }
+        
       }
+
     })
 
     // 현재 클릭된 마커는 다시 생성해서 강조
@@ -231,16 +232,16 @@ const showApartmentOnMap = (apartmentInfo) => {
     }
 
     // 중심 이동
-    const offsetX = -210
-    const proj = kakaoMap.getProjection()
-    const screenPoint = proj.containerPointFromCoords(position)
-    screenPoint.x += offsetX
-    const newPosition = proj.coordsFromContainerPoint(screenPoint)
-    kakaoMap.setCenter(newPosition)
+    // const offsetX = -210
+    // const proj = kakaoMap.getProjection()
+    // const screenPoint = proj.containerPointFromCoords(position)
+    // screenPoint.x += offsetX
+    // const newPosition = proj.coordsFromContainerPoint(screenPoint)
+    // kakaoMap.setCenter(newPosition)
 
     // 단일 아파트용 깔끔한 인포윈도우 생성
     const singleAptInfoContent = `
-    <div style="padding: 10px 15px 35px 15px ; font-size: 13px; max-width: 280px; border-radius: 8px;">
+    <div style="padding: 10px 15px 35px 15px ; font-size: 13px; max-width: 320px; border-radius: 8px;">
       <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #2E7D32;">
         ${apartmentInfo.name}
       </div>
@@ -344,7 +345,7 @@ const showCommerceOnMap = (commerceInfo) => {
     infoWindow.open(kakaoMap, marker)
     currentInfoWindow = infoWindow
   })
-
+  emit('closeDealPanel')
   // 마커 정보 저장
   markers.push({
     marker: marker,
@@ -423,7 +424,8 @@ const showMultipleApartmentsOnMap = (apartments) => {
     window.kakao.maps.event.addListener(marker, 'click', () => {
       console.log('[KakaoMap] 마커 클릭됨:', apt.name, apt.id)
       showApartmentOnMap(apt)
-      emit('showOnMap', apt)
+      // emit('showOnMap', null) //마커 누를 때 매물리스트 열리게 하는 부분 
+      emit('closeDealPanel')
     })
 
     markers.push({
@@ -447,7 +449,7 @@ const returnToPreviousApartments = () => {
   }
 }
 
-// 여러 상권을 지도에 표시하는 함수 (수정됨)
+// 여러 상권을 지도에 표시하는 함수
 const showMultipleCommercesOnMap = (commerces) => {
   if (!kakaoMap || !commerces || commerces.length === 0) return
 

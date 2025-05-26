@@ -134,8 +134,9 @@
           :key="apartment.id"
           :id="`apt-${apartment.id}`"
           :class="{
-            'selected-apartment': selectedApartmentId === apartment.id,
-            highlighted: props.highlightedId === apartment.id,
+            // 'selected-apartment': selectedApartmentId === apartment.id,
+            // highlighted: props.highlightedId === apartment.id,
+            highlighted: isActive(apartment)
           }"
         >
           <!-- 좋아요 버튼 (오른쪽 상단에 배치) -->
@@ -216,6 +217,12 @@ const fetchProvinces = async () => {
   } finally {
     isLoadingProvinces.value = false
   }
+}
+const isActive = (apartment) => {
+  // highlightedId 우선 → 없으면 selectedId 기준
+  return props.highlightedId
+    ? props.highlightedId === apartment.id
+    : selectedApartmentId.value === apartment.id
 }
 
 const fetchCities = async (provinceId) => {
@@ -415,6 +422,7 @@ const viewListings = (apartment) => {
   // 부모 컴포넌트로 선택된 아파트 정보 전달
   emit('view-listings', {
     ...apartment,
+    type : 'apartment',
     avgPrice: apartment.avgPrice ?? 0,
     buildYear: apartment.buildYear ?? '',
     latitude: parseFloat(apartment.latitude),
@@ -575,7 +583,7 @@ label {
   top: 100%;
   left: 0;
   width: 100%;
-  max-height: 220px;
+  max-height: 400px;
   overflow-y: auto;
   background-color: #fff;
   border: 1px solid #ddd;
