@@ -409,19 +409,13 @@ watch(
 
 // 매물 리스트 보기 함수
 const viewListings = (apartment) => {
+  console.log(`${apartment.name}의 매물 리스트 보기 클릭됨`, apartment)
+
   // 선택된 아파트 ID 저장
   selectedApartmentId.value = apartment.id
 
   // 부모 컴포넌트로 선택된 아파트 정보 전달
-  emit('view-listings', {
-    latitude: apartment.latitude,
-    longitude: apartment.longitude,
-    name: apartment.name,
-    avgPrice: apartment.avgPrice,
-    id: apartment.id,
-    buildYear: apartment.buildYear,
-    addr: apartment.addr,
-  })
+  emit('view-listings', apartment)
 }
 
 // 주변 상권 패널 열기

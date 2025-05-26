@@ -338,6 +338,7 @@ onMounted(() => {
 
 <style scoped>
 .listing-panel {
+  position: fixed;
   width: 0;
   height: 100%;
   position: absolute;
