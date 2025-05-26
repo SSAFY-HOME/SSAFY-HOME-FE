@@ -233,6 +233,10 @@ export default {
       try {
         const response = await dealAPI.getDealHistory(this.aptSeq)
         this.dealData = response.data || []
+         this.$nextTick(() => {
+      setTimeout(() => {
+        this.handleResize()
+      }, 50)})
       } catch (error) {
         this.error = error.message || '데이터를 불러오는데 실패했습니다.'
         console.error('거래 데이터 조회 실패:', error)
@@ -243,13 +247,22 @@ export default {
       }
     },
     formatPrice(price) {
-      if (price >= 10000) {
-        const oku = Math.floor(price / 10000)
-        const man = price % 10000
-        return man === 0 ? `${oku}억` : `${oku}억 ${man.toLocaleString()}`
-      }
-      return `${price.toLocaleString()}만원`
-    },
+  if (typeof price === 'string') {
+    price = price.replace(/,/g, '')
+  }
+
+  const numeric = Math.round(Number(price)) // 숫자 변환 및 반올림
+
+  if (isNaN(numeric)) return '정보 없음' // 안전 처리
+
+  if (numeric >= 10000) {
+    const oku = Math.floor(numeric / 10000)
+    const man = numeric % 10000
+    return man === 0 ? `${oku}억` : `${oku}억 ${man.toLocaleString()}`
+  }
+  return `${numeric.toLocaleString()}만원`
+}
+,
     formatDate(deal) {
       return `${deal.dealYear}.${String(deal.dealMonth).padStart(2, '0')}.${String(
         deal.dealDay,
@@ -281,10 +294,17 @@ export default {
         this.chartWidth = Math.min(container.offsetWidth, 600)
       }
     },
+    
+    
   },
+  
   watch: {
     aptSeq() {
-      this.fetchData()
+      this.fetchData().then(() => {
+      this.$nextTick(() => {
+        setTimeout(() => this.handleResize(), 100) // 약간 지연을 줘서 DOM fully 렌더링 후 실행
+      })
+    })
     },
   },
 }

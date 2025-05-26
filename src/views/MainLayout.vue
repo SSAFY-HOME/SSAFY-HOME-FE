@@ -45,7 +45,7 @@
         @showAllOnMap="handleShowCommercesOnMap"
       />
 
-      <KakaoMap ref="kakaoMapRef" @show-on-map="handleShowOnMap" />
+      <KakaoMap ref="kakaoMapRef" @show-on-map="handleShowOnMap" @closeDealPanel="closeListingPanel"/>
     </div>
 
     <!-- 로그아웃 모달 -->
@@ -241,7 +241,8 @@ const closePanel = () => {
 // 지도 관련 핸들러
 const handleShowOnMap = async (apartmentInfo) => {
   console.log('[MainLayout] showOnMap 받음 → ID:', apartmentInfo.id)
-  isListingPanelVisible.value = true
+
+  // isListingPanelVisible.value = true
 
   highlightedId.value = apartmentInfo.id
   kakaoMapRef.value.showApartmentOnMap(apartmentInfo)
