@@ -96,14 +96,14 @@
             </button>
           </div>
           <div class="card-content">
-            <div v-if="user.apartment" class="apartment-details">
+            <div v-if="myApartmentInfo" class="apartment-details">
               <div class="apartment-text">
-                <p class="apartment-name">{{ user.apartment.apartmentName }}</p>
+                <p class="apartment-name">{{ myApartmentInfo.apartmentName }}</p>
                 <p class="apartment-address">
-                  <span class="icon">📍</span> {{ user.apartment.address }}
+                  <span class="icon">📍</span> {{ myApartmentInfo.address }}
                 </p>
                 <p class="apartment-year">
-                  <span class="icon">📅</span> {{ user.apartment.buildYear }}년 준공
+                  <span class="icon">📅</span> {{ myApartmentInfo.buildYear }}년 준공
                 </p>
               </div>
             </div>
@@ -359,6 +359,7 @@ const selectedFile = ref(null)
 const uploadProgress = ref(0)
 const isUploading = ref(false)
 const profImage = ref(null)
+const myApartmentInfo = ref({})
 
 // 🔥 개선된 기본 프로필 이미지 처리
 import defaultProfileImage from '@/assets/default_profile_img.png'
@@ -506,6 +507,8 @@ const fetchUserProfile = async () => {
         social: response.data.social,
       }
       profImage.value = response.data.image || DEFAULT_PROFILE_IMAGE
+      myApartmentInfo.value = response.data.apartment || {}
+      console.log(response.data.apartment)
 
       // 🆕 이미지 URL 로그 추가
     }
