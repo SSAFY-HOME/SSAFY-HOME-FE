@@ -94,7 +94,7 @@ const formatPrice = (price) => {
   if (!price) return '-'
   const oku = Math.floor(price / 10000)
   const man = price % 10000
-  return man === 0 ? `${oku}억` : `${oku}억 ${man.toLocaleString()}`
+  return man === 0 ? `${oku}억` : `${oku}억 ${man.toLocaleString()}만`
 }
 
 // 아파트 마커 생성 함수 (공통)
@@ -106,27 +106,27 @@ const createApartmentMarker = (apt, isHighlighted = false) => {
   const subFontSize = isHighlighted ? 10 : 8
   const strokeWidth = isHighlighted ? 3 : 1
   const strokeColor = isHighlighted ? '#2E7D32' : '#4B8C3A'
-  
+
   const markerSvg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height-10}">
-      <rect x="0" y="0" width="${width-10}" height="${height-15}" rx="8" ry="8" 
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height - 10}">
+      <rect x="0" y="0" width="${width - 10}" height="${height - 15}" rx="8" ry="8"
             fill="#4B8C3A" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
-      <text x="${(width-10)/2}" y="${isHighlighted ? 18 : 15}" font-size="${fontSize}" 
+      <text x="${(width - 10) / 2}" y="${isHighlighted ? 18 : 15}" font-size="${fontSize}"
             fill="white" font-weight="bold" text-anchor="middle">
         ${formattedPrice}
       </text>
-      <text x="${(width-10)/2}" y="${isHighlighted ? 35 : 30}" font-size="${subFontSize}" 
+      <text x="${(width - 10) / 2}" y="${isHighlighted ? 35 : 30}" font-size="${subFontSize}"
             fill="#ddd" text-anchor="middle">
         ${apt.buildYear}년 준공
       </text>
     </svg>
   `
-  
+
   const svgBase64 = btoa(unescape(encodeURIComponent(markerSvg)))
   const imageSrc = 'data:image/svg+xml;base64,' + svgBase64
   const imageSize = new window.kakao.maps.Size(width, height)
-  const imageOption = { offset: new window.kakao.maps.Point(width/2, height) }
-  
+  const imageOption = { offset: new window.kakao.maps.Point(width / 2, height) }
+
   return new window.kakao.maps.MarkerImage(imageSrc, imageSize, imageOption)
 }
 
@@ -158,20 +158,20 @@ const getCategoryIcon = (categoryCode) => {
 // 상권 마커 생성 함수
 const createCommerceMarker = (commerce) => {
   const icon = getCategoryIcon(commerce.category_group_code)
-  
+
   const markerSvg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-      <rect x="2" y="2" width="36" height="36" rx="6" ry="6" 
+      <rect x="2" y="2" width="36" height="36" rx="6" ry="6"
             fill="#2196F3" stroke="#1976D2" stroke-width="2" />
       <text x="20" y="28" font-size="18" text-anchor="middle">${icon}</text>
     </svg>
   `
-  
+
   const svgBase64 = btoa(unescape(encodeURIComponent(markerSvg)))
   const imageSrc = 'data:image/svg+xml;base64,' + svgBase64
   const imageSize = new window.kakao.maps.Size(40, 40)
   const imageOption = { offset: new window.kakao.maps.Point(20, 40) }
-  
+
   return new window.kakao.maps.MarkerImage(imageSrc, imageSize, imageOption)
 }
 
@@ -183,33 +183,54 @@ const createCommerceMarker = (commerce) => {
 const showApartmentOnMap = (apartmentInfo) => {
   if (!kakaoMap) return
 
-  // 상권 마커가 아닌 경우에만 기존 마커 제거
-  if (!apartmentInfo.isCommerce) {
-    // 기존 모든 인포윈도우 닫기
-    if (currentInfoWindow) {
-      currentInfoWindow.close()
-      currentInfoWindow = null
+  // 기존 강조 마커가 있다면 원래 상태로 되돌림
+  markers.forEach((m) => {
+    if (m.type === 'apartment') {
+      if (m.isHighlighted) {
+        // 기존 강조 마커 제거
+        m.marker.setMap(null)
+
+        // 일반 마커로 다시 생성
+        const defaultMarkerImage = createApartmentMarker(m, false)
+        const newMarker = new window.kakao.maps.Marker({
+          position: new window.kakao.maps.LatLng(m.latitude, m.longitude),
+          image: defaultMarkerImage,
+          map: kakaoMap,
+        })
+
+        // 기존 마커 정보 갱신
+        m.marker = newMarker
+        m.isHighlighted = false
+      }
     }
-    
-    // 상권 타입의 마커만 남기고 아파트 마커 제거
-    clearMarkersByType('apartment')
+  })
+
+  // 현재 클릭된 마커는 다시 생성해서 강조
+  const markerImage = createApartmentMarker(apartmentInfo, true)
+  const position = new window.kakao.maps.LatLng(apartmentInfo.latitude, apartmentInfo.longitude)
+  const marker = new window.kakao.maps.Marker({
+    position,
+    image: markerImage,
+    map: kakaoMap,
+  })
+
+  // 새 마커로 교체
+  const idx = markers.findIndex((m) => m.id === apartmentInfo.id && m.type === 'apartment')
+  if (idx !== -1) {
+    markers[idx].marker = marker
+    markers[idx].isHighlighted = true
   }
 
-  // 아파트 정보인 경우
-  if (!apartmentInfo.isCommerce) {
-    // 강조된 마커 이미지 생성
-    const markerImage = createApartmentMarker(apartmentInfo, true)
+  // 중심 이동
+  const offsetX = -210
+  const proj = kakaoMap.getProjection()
+  const screenPoint = proj.containerPointFromCoords(position)
+  screenPoint.x += offsetX
+  const newPosition = proj.coordsFromContainerPoint(screenPoint)
+  kakaoMap.setCenter(newPosition)
 
-    // 새 마커 생성
-    const position = new window.kakao.maps.LatLng(apartmentInfo.latitude, apartmentInfo.longitude)
-    const marker = new window.kakao.maps.Marker({
-      position: position,
-      image: markerImage,
-      map: kakaoMap,
-    })
-
-    // 단일 아파트용 깔끔한 인포윈도우 생성 (선택적)
-    const singleAptInfoContent = `
+  // 단일 아파트용 깔끔한 인포윈도우 생성 (선택적)
+  const singleAptInfoContent = `
       <div style="padding: 15px; font-size: 13px; max-width: 280px; border-radius: 8px;">
         <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #2E7D32;">
           ${apartmentInfo.name}
@@ -225,54 +246,45 @@ const showApartmentOnMap = (apartmentInfo) => {
         </div>
       </div>
     `
-    
-    const singleAptInfoWindow = new window.kakao.maps.InfoWindow({
-      content: singleAptInfoContent,
-      removable: true,
-      zIndex: 5
-    })
 
-    // 마커 클릭 시 인포윈도우 토글
-    window.kakao.maps.event.addListener(marker, 'click', () => {
-      if (currentInfoWindow === singleAptInfoWindow) {
-        // 이미 열려있으면 닫기
-        singleAptInfoWindow.close()
-        currentInfoWindow = null
-      } else {
-        // 기존 인포윈도우 닫기
-        if (currentInfoWindow) {
-          currentInfoWindow.close()
-        }
-        // 새 인포윈도우 열기
-        singleAptInfoWindow.open(kakaoMap, marker)
-        currentInfoWindow = singleAptInfoWindow
+  const singleAptInfoWindow = new window.kakao.maps.InfoWindow({
+    content: singleAptInfoContent,
+    removable: true,
+    zIndex: 5,
+  })
+
+  // 마커 클릭 시 인포윈도우 토글
+  window.kakao.maps.event.addListener(marker, 'click', () => {
+    if (currentInfoWindow === singleAptInfoWindow) {
+      // 이미 열려있으면 닫기
+      singleAptInfoWindow.close()
+      currentInfoWindow = null
+    } else {
+      // 기존 인포윈도우 닫기
+      if (currentInfoWindow) {
+        currentInfoWindow.close()
       }
-    })
+      // 새 인포윈도우 열기
+      singleAptInfoWindow.open(kakaoMap, marker)
+      currentInfoWindow = singleAptInfoWindow
+    }
+  })
 
-    // 마커 정보 저장
-    markers.push({
-      marker: marker,
-      type: 'apartment',
-      id: apartmentInfo.id,
-      isHighlighted: true,
-      infoWindow: singleAptInfoWindow
-    })
-
-    // 지도 중심 이동
-    const offsetX = -210 // 왼쪽 패널 너비 + 여유 공간
-    const proj = kakaoMap.getProjection()
-    const screenPoint = proj.containerPointFromCoords(position)
-    screenPoint.x += offsetX
-    const newPosition = proj.coordsFromContainerPoint(screenPoint)
-    kakaoMap.setCenter(newPosition)
-    kakaoMap.setLevel(3) // 확대 수준 설정
-  }
-  // 상권 정보인 경우
-  else {
-    // 상권 마커 표시 로직
-    showCommerceOnMap(apartmentInfo)
-  }
+  // 마커 정보 저장
+  markers.push({
+    marker: marker,
+    type: 'apartment',
+    id: apartmentInfo.id,
+    isHighlighted: true,
+    infoWindow: singleAptInfoWindow,
+  })
 }
+// 상권 정보인 경우
+//   else {
+//     // 상권 마커 표시 로직
+//     showCommerceOnMap(apartmentInfo)
+//   }
+// }
 
 // 상권 정보를 지도에 표시하는 함수
 const showCommerceOnMap = (commerceInfo) => {
@@ -396,8 +408,8 @@ const showMultipleApartmentsOnMap = (apartments) => {
     const infoWindow = new window.kakao.maps.InfoWindow({
       content: infoContent,
       removable: false,
-      zIndex : 3,
-      yAnchor:3.5,
+      zIndex: 3,
+      yAnchor: 3.5,
     })
 
     window.kakao.maps.event.addListener(marker, 'mouseover', () => {
