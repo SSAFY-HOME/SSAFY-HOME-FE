@@ -181,14 +181,16 @@ const handleViewListings = (apartment) => {
   if (isCommercePanelVisible.value) {
     isCommercePanelVisible.value = false
   }
-  // 선택된 아파트를 지도에서 강조 표시 (선택사항)
+  // 선택된 아파트를 지도에서 강조 표시
   if (kakaoMapRef.value) {
     handleShowOnMap({
       latitude: apartment.latitude,
       longitude: apartment.longitude,
       name: apartment.name,
       id: apartment.id,
-      price: apartment.price,
+      avgPrice: apartment.avgPrice,
+      addr: apartment.addr,
+      buildYear: apartment.buildYear,
       aptSeq: apartment.aptSeq,
       highlight: true, // 강조 표시 옵션 추가
     })
