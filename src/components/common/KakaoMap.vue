@@ -424,7 +424,7 @@ const showMultipleApartmentsOnMap = (apartments) => {
     window.kakao.maps.event.addListener(marker, 'click', () => {
       console.log('[KakaoMap] 마커 클릭됨:', apt.name, apt.id)
       showApartmentOnMap(apt)
-      // emit('showOnMap', null) //마커 누를 때 매물리스트 열리게 하는 부분 
+      emit('showOnMap', apt) //마커 누를 때 매물리스트 열리게 하는 부분 
       emit('closeDealPanel')
     })
 
