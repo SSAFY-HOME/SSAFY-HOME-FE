@@ -389,9 +389,8 @@ const areaScore = computed(() => {
     const weight = categoryWeights[place.category_group_code] || 0
     return acc + weight
   }, 0)
-  return Math.round(rawScore) 
+  return Math.round(rawScore)
 })
-
 
 // 점수 평가 문구
 const evaluateAreaScore = (score) => {
@@ -498,7 +497,7 @@ onMounted(() => {
 }
 
 .commerce-panel.active {
-  width: 550px;
+  width: 580px;
 }
 
 .panel-header {

@@ -61,9 +61,9 @@ const showInitialMarkers = async (dongCode) => {
     showMultipleApartmentsOnMap(apartments)
 
     // 상권 불러오기
-    const commerceResult = await kakaoAPI.searchNearbyCommerces({ dongCode })
-    const commerces = commerceResult.data
-    showMultipleCommercesOnMap(commerces)
+    // const commerceResult = await kakaoAPI.searchNearbyCommerces({ dongCode })
+    //const commerces = commerceResult.data
+    //howMultipleCommercesOnMap(commerces)
   } catch (e) {
     console.error('초기 마커 표시 중 오류:', e)
   }
@@ -236,6 +236,8 @@ const showApartmentOnMap = (apartmentInfo) => {
   screenPoint.x += offsetX
   const newPosition = proj.coordsFromContainerPoint(screenPoint)
   kakaoMap.setCenter(newPosition)
+
+  console.log('[KakaoMap] 단일 아파트 표시:', apartmentInfo.addr, apartmentInfo.id)
 
   // 단일 아파트용 깔끔한 인포윈도우 생성 (선택적)
   const singleAptInfoContent = `
