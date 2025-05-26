@@ -45,11 +45,7 @@
         @showAllOnMap="handleShowCommercesOnMap"
       />
 
-      <KakaoMap
-  ref="kakaoMapRef"
-  @show-on-map="handleShowOnMap"
-/>
-
+      <KakaoMap ref="kakaoMapRef" @show-on-map="handleShowOnMap" />
     </div>
 
     <!-- 로그아웃 모달 -->
@@ -104,19 +100,22 @@ const activateMenu = (menuName) => {
     if (kakaoMapRef.value) {
       kakaoMapRef.value.clearMarkers()
     }
+    // ListingPanel과 CommercePanel도 닫기
+    isListingPanelVisible.value = false
+    isCommercePanelVisible.value = false
     activeMenu.value = ''
     currentComponent.value = null
 
     return
   }
 
-  // 다른 메뉴로 전환할 때 기존 마커 제거
-  // if (activeMenu.value !== '' && kakaoMapRef.value) {
-  //   kakaoMapRef.value.clearMarkers()
-  //   // ListingPanel도 함께 닫기
-  //   isListingPanelVisible.value = false
-  //   isCommercePanelVisible.value = false
-  // }
+  //다른 메뉴로 전환할 때 기존 마커 제거
+  if (activeMenu.value !== '' && kakaoMapRef.value) {
+    kakaoMapRef.value.clearMarkers()
+    // ListingPanel도 함께 닫기
+    isListingPanelVisible.value = false
+    isCommercePanelVisible.value = false
+  }
 
   activeMenu.value = menuName
   console.log('활성화된 메뉴:', menuName)
@@ -176,7 +175,9 @@ const handleViewListings = (apartment) => {
   selectedApartment.value = apartment
   isListingPanelVisible.value = true
 
-  // 매물 패널이 열려있으면 닫기
+  console.log(isCommercePanelVisible.value)
+
+  // 상권 패널이 열려있으면 닫기
   if (isCommercePanelVisible.value) {
     isCommercePanelVisible.value = false
   }
@@ -240,10 +241,9 @@ const handleShowOnMap = async (apartmentInfo) => {
   console.log('[MainLayout] showOnMap 받음 → ID:', apartmentInfo.id)
   if (activeMenu.value !== 'property') {
     activateMenu('property') // 패널 열기
-    await nextTick()         // DOM 완전히 그려질 때까지 대기
-    
+    await nextTick() // DOM 완전히 그려질 때까지 대기
   }
-  
+
   highlightedId.value = apartmentInfo.id
   kakaoMapRef.value.showApartmentOnMap(apartmentInfo)
 }
@@ -257,7 +257,6 @@ const handleViewCommerces = (locationInfo) => {
   console.log('주변 상권 보기 요청:', locationInfo)
   selectedLocation.value = locationInfo
   isCommercePanelVisible.value = true
-
 }
 
 // PropertySearchPanel이 아파트가 선택 해제될 때 알 수 있도록 감시자 추가
