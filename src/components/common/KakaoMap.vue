@@ -91,10 +91,18 @@ const loadKakaoMapScript = () => {
 
 // 가격 포맷팅 함수
 const formatPrice = (price) => {
-  if (!price) return '-'
+  if (!price || price < 0) return '-'
+
   const oku = Math.floor(price / 10000)
   const man = price % 10000
-  return man === 0 ? `${oku}억` : `${oku}억 ${man.toLocaleString()}만`
+
+  if (oku === 0) {
+    return `${man.toLocaleString()}만`
+  } else if (man === 0) {
+    return `${oku}억`
+  } else {
+    return `${oku}억 ${man.toLocaleString()}만`
+  }
 }
 
 // 아파트 마커 생성 함수 (공통)
