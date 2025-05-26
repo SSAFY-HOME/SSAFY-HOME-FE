@@ -50,7 +50,7 @@
             <div class="like-btn" @click.stop="toggleLike(apartment)">
               {{ apartment.likedApt ? '❤️' : '🤍' }}
             </div>
-            <div @click="showOnMap(apartment)">
+            <div>
               <h4 class="apt-name">{{ apartment.name }}</h4>
               <p class="apt-addr">{{ apartment.addr }}</p>
               <p class="apt-meta">{{ apartment.buildYear }}년 준공</p>
@@ -71,13 +71,12 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMemberStore } from '@/stores/user'
 import ApartmentDetailChart from '@/components/chart/ApartmentDetailChart.vue'
-import { apartmentAPI } from '@/api/apartment'
 import { memberAPI } from '@/api/member'
 
 const router = useRouter()
 const memberStore = useMemberStore()
 const isLoggedIn = computed(() => !!memberStore.accessToken)
-
+const selectedApartment = ref(null)
 // 🔥 props 추가 - 부모 컴포넌트의 activeMenu 감지
 const props = defineProps({
   activeMenu: {
@@ -124,33 +123,9 @@ const hideListings = () => {
   emit('hide-listings')
 }
 
-// 🔥 지도 클릭 시 매물 패널 닫기
-const showOnMap = (apt) => {
-  // 매물 패널이 열려있다면 닫기
-  hideListings()
-
-  selectedApartmentId.value = apt.id
-  emit('showOnMap', {
-    latitude: apt.latitude,
-    longitude: apt.longitude,
-    name: apt.name,
-    price: apt.price,
-    id: apt.id,
-  })
-}
-
-// 🔥 매물 보기 토글 함수
-const toggleListings = (apt) => {
-  // 같은 아파트의 매물을 다시 클릭하면 패널 닫기
-  if (isViewingListings.value && selectedApartmentId.value === apt.id) {
-    hideListings()
-  } else {
-    // 다른 아파트의 매물을 클릭하거나 처음 클릭하면 패널 열기
-    viewListings(apt)
-  }
-}
-
 const viewListings = (apt) => {
+  console.log(`${apt.name}의 매물 리스트 보기 클릭됨`, apartment)
+  selectedApartment.value = apt
   selectedApartmentId.value = apt.id
   isViewingListings.value = true
   emit('view-listings', apt)
@@ -235,6 +210,7 @@ onMounted(() => {
 }
 
 .myhome-wrapper {
+  position: relative;
   background: #f7fafd;
   min-height: 100vh;
   padding-bottom: 40px;

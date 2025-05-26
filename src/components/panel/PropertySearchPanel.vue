@@ -132,9 +132,11 @@
           class="apartment-card"
           v-for="apartment in apartments"
           :key="apartment.id"
-          :id="`apt-${apartment.id}`" 
-  :class="{ 'selected-apartment': selectedApartmentId === apartment.id, 'highlighted': props.highlightedId === apartment.id }"
-          
+          :id="`apt-${apartment.id}`"
+          :class="{
+            'selected-apartment': selectedApartmentId === apartment.id,
+            highlighted: props.highlightedId === apartment.id,
+          }"
         >
           <!-- 좋아요 버튼 (오른쪽 상단에 배치) -->
           <div class="like-button-container">
@@ -384,7 +386,6 @@ const props = defineProps({
   highlightedId: Number,
 })
 
-
 watch(
   () => props.highlightedId,
   async (newId) => {
@@ -408,6 +409,8 @@ watch(
 
 // 매물 리스트 보기 함수
 const viewListings = (apartment) => {
+  console.log(`${apartment.name}의 매물 리스트 보기 클릭됨`, apartment)
+
   // 선택된 아파트 ID 저장
   selectedApartmentId.value = apartment.id
 
@@ -762,7 +765,8 @@ label {
 }
 
 /* 선택된 아파트 카드 스타일 */
-.apartment-card.selected-apartment, .apartment-card.highlighted {
+.apartment-card.selected-apartment,
+.apartment-card.highlighted {
   border-color: #4caf50;
   background-color: #f7fcf7;
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);

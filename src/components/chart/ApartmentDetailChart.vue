@@ -128,6 +128,7 @@
 
 <script>
 import { dealAPI } from '@/api/deal'
+import { nextTick } from 'vue'
 
 export default {
   name: 'ApartMiniChart',
@@ -156,7 +157,6 @@ export default {
     }
   },
   computed: {
-    // 통계 계산
     statistics() {
       if (this.dealData.length === 0) return { min: 0, max: 0, avg: 0 }
 
@@ -167,8 +167,6 @@ export default {
 
       return { min, max, avg }
     },
-
-    // 차트 데이터 정렬 및 변환
     sortedDeals() {
       return [...this.dealData].sort((a, b) => {
         const dateA = new Date(a.dealYear, a.dealMonth - 1, a.dealDay)
@@ -176,8 +174,6 @@ export default {
         return dateA - dateB
       })
     },
-
-    // 차트 좌표 계산
     chartData() {
       if (this.sortedDeals.length === 0) return []
 
@@ -204,13 +200,9 @@ export default {
         }
       })
     },
-
-    // SVG polyline용 포인트 문자열
     chartPoints() {
       return this.chartData.map((point) => `${point.x},${point.y}`).join(' ')
     },
-
-    // 최근 거래 (최대 5개)
     recentDeals() {
       return [...this.dealData]
         .sort((a, b) => {
@@ -223,7 +215,9 @@ export default {
   },
   mounted() {
     this.fetchData()
-    this.handleResize()
+    nextTick(() => {
+      this.handleResize()
+    })
     window.addEventListener('resize', this.handleResize)
   },
   beforeUnmount() {
@@ -244,35 +238,30 @@ export default {
         console.error('거래 데이터 조회 실패:', error)
       } finally {
         this.loading = false
+        await nextTick() // 데이터 렌더링 이후에도 한 번 더 보정
+        this.handleResize()
       }
     },
-
     formatPrice(price) {
       if (price >= 10000) {
         const oku = Math.floor(price / 10000)
         const man = price % 10000
-        if (man === 0) {
-          return `${oku}억`
-        } else {
-          return `${oku}억 ${man.toLocaleString()}`
-        }
+        return man === 0 ? `${oku}억` : `${oku}억 ${man.toLocaleString()}`
       }
       return `${price.toLocaleString()}만원`
     },
-
     formatDate(deal) {
-      return `${deal.dealYear}.${deal.dealMonth.padStart(2, '0')}.${deal.dealDay.padStart(2, '0')}`
+      return `${deal.dealYear}.${String(deal.dealMonth).padStart(2, '0')}.${String(
+        deal.dealDay,
+      ).padStart(2, '0')}`
     },
-
     getPointColor(price) {
       const { min, max } = this.statistics
       const ratio = (price - min) / (max - min || 1)
-
-      if (ratio > 0.7) return '#f44336' // 높은 가격 - 빨강
-      if (ratio > 0.3) return '#ff9800' // 중간 가격 - 주황
-      return '#4caf50' // 낮은 가격 - 초록
+      if (ratio > 0.7) return '#f44336'
+      if (ratio > 0.3) return '#ff9800'
+      return '#4caf50'
     },
-
     showTooltip(event, point) {
       this.tooltip = {
         show: true,
@@ -283,11 +272,9 @@ export default {
         floor: point.floor,
       }
     },
-
     hideTooltip() {
       this.tooltip.show = false
     },
-
     handleResize() {
       const container = this.$el?.querySelector('.chart-wrapper')
       if (container) {
