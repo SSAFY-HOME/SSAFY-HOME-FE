@@ -237,19 +237,17 @@ const showApartmentOnMap = (apartmentInfo) => {
   const newPosition = proj.coordsFromContainerPoint(screenPoint)
   kakaoMap.setCenter(newPosition)
 
-  console.log('[KakaoMap] 단일 아파트 표시:', apartmentInfo.addr, apartmentInfo.id)
-
-  // 단일 아파트용 깔끔한 인포윈도우 생성
+  // 단일 아파트용 깔끔한 인포윈도우 생성 (선택적)
   const singleAptInfoContent = `
-      <div style="padding: 35px 15px; font-size: 9px; max-width: 350px; border-radius: 8px;">
-        <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #2E7D32;">
+      <div style="padding: 15px; font-size: 13px; max-width: 280px; border-radius: 8px;">
+        <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #2E7D32;">
           ${apartmentInfo.name}
         </div>
         <div style="color: #666; margin-bottom: 4px; font-size: 12px;">
           📍 ${apartmentInfo.addr}
         </div>
         <div style="color: #4B8C3A; font-weight: bold; margin-bottom: 4px;">
-          💰  평균가: ${formatPrice(apartmentInfo.avgPrice)}
+          💰 평균가: ${formatPrice(apartmentInfo.avgPrice)}
         </div>
         <div style="color: #666; font-size: 12px;">
           🏗️ ${apartmentInfo.buildYear}년 준공
@@ -289,6 +287,12 @@ const showApartmentOnMap = (apartmentInfo) => {
     infoWindow: singleAptInfoWindow,
   })
 }
+// 상권 정보인 경우
+//   else {
+//     // 상권 마커 표시 로직
+//     showCommerceOnMap(apartmentInfo)
+//   }
+// }
 
 // 상권 정보를 지도에 표시하는 함수
 const showCommerceOnMap = (commerceInfo) => {
@@ -300,6 +304,70 @@ const showCommerceOnMap = (commerceInfo) => {
   if (currentInfoWindow) {
     currentInfoWindow.close()
   }
+
+  // 새로운 정사각형 아이콘 마커 생성
+  const markerImage = createCommerceMarker(commerceInfo)
+
+  // 새 마커 생성
+  const position = new window.kakao.maps.LatLng(
+    commerceInfo.latitude || commerceInfo.y,
+    commerceInfo.longitude || commerceInfo.x,
+  )
+  const marker = new window.kakao.maps.Marker({
+    position: position,
+    image: markerImage,
+    map: kakaoMap,
+  })
+
+  // 인포윈도우 내용 생성
+  const iwContent = `
+    <div class="info-window commerce-info" style="padding: 10px 10px 21px 10px; max-width: 250px; font-size: 13px;">
+      <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${commerceInfo.name || commerceInfo.place_name}</div>
+      <div style="color: #2196f3; margin-bottom: 5px;">${commerceInfo.category || commerceInfo.category_name}</div>
+      <div style="color: #666; margin-bottom: 5px;"></div>
+      <div style="color: #666;"></div>
+      ${commerceInfo.place_url ? `<div style="margin-top: 8px;"><a href="${commerceInfo.place_url}" target="_blank" style="color: #2196f3; text-decoration: none;">상세정보 보기</a></div>` : ''}
+    </div>
+  `
+
+  // 인포윈도우 생성
+  const infoWindow = new window.kakao.maps.InfoWindow({
+    content: iwContent,
+    removable: true,
+  })
+
+  // 인포윈도우 즉시 표시
+  infoWindow.open(kakaoMap, marker)
+  currentInfoWindow = infoWindow
+
+  // 마커 클릭 이벤트 추가
+  window.kakao.maps.event.addListener(marker, 'click', () => {
+    // 기존 인포윈도우 닫기
+    if (currentInfoWindow) {
+      currentInfoWindow.close()
+    }
+
+    // 새 인포윈도우 열기
+    infoWindow.open(kakaoMap, marker)
+    currentInfoWindow = infoWindow
+  })
+
+  // 마커 정보 저장
+  markers.push({
+    marker: marker,
+    infoWindow: infoWindow,
+    type: 'commerce',
+    id: commerceInfo.id,
+  })
+
+  // 지도 중심 이동
+  const offsetX = 190 // 오른쪽 패널 너비의 절반 (상권 패널이 오른쪽에 있을 경우)
+  const proj = kakaoMap.getProjection()
+  const screenPoint = proj.containerPointFromCoords(position)
+  screenPoint.x -= offsetX
+  const newPosition = proj.coordsFromContainerPoint(screenPoint)
+  kakaoMap.setCenter(newPosition)
+  kakaoMap.setLevel(3) // 확대 수준 설정
 }
 
 /*
@@ -337,7 +405,7 @@ const showMultipleApartmentsOnMap = (apartments) => {
 
     // Hover용 인포윈도우
     const infoContent = `
-      <div style="padding: 30px 10px; font-size: 11px; max-width: 320px;">
+      <div style="padding: 20px; font-size: 11px; max-width: 280px;">
         <strong style="font-size: 13px;">${apt.name}</strong><br/>
         주소: ${apt.addr}<br/>
         평균가: ${formatPrice(apt.avgPrice)}<br/>
@@ -386,7 +454,7 @@ const returnToPreviousApartments = () => {
   }
 }
 
-// 여러 상권을 지도에 표시하는 함수
+// 여러 상권을 지도에 표시하는 함수 (수정됨)
 const showMultipleCommercesOnMap = (commerces) => {
   if (!kakaoMap || !commerces || commerces.length === 0) return
 
@@ -414,10 +482,12 @@ const showMultipleCommercesOnMap = (commerces) => {
 
     // 인포윈도우 내용 생성
     const iwContent = `
-      <div class="info-window commerce-info" style="padding: 20px 10px 30px 10px; max-width: 350px; font-size: 13px;">
+      <div class="info-window commerce-info" style="padding: 10px; max-width: 250px; font-size: 13px;">
         <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">${commerce.place_name}</div>
         <div style="color: #2196f3; margin-bottom: 5px;">${commerce.category_name}</div>
-        
+        <div style="color: #666; margin-bottom: 5px;"></div>
+        <div style="color: #666;"></div>
+        ${commerce.place_url ? `<div style="margin-top: 8px;"><a href="${commerce.place_url}" target="_blank" style="color: #2196f3; text-decoration: none;">상세정보 보기</a></div>` : ''}
       </div>
     `
 
