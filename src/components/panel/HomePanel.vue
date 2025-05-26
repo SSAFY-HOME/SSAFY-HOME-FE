@@ -110,6 +110,7 @@ const selectTab = async (tab) => {
 const fetchFavoriteApartments = async () => {
   try {
     const res = await memberAPI.getFavoriteApartments()
+    console.table(res.data)
     favoriteApartments.value = res.data
   } catch (e) {
     console.error('위시리스트 로딩 오류', e)
