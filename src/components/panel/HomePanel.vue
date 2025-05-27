@@ -29,8 +29,12 @@
         <div class="section-card">
           <h3 class="section-title">우리집 정보</h3>
           <div class="apt-card">
-            <h4 class="apt-name">{{ memberStore.apartment.apartmentName }}</h4>
-            <p class="apt-addr">{{ memberStore.apartment.address }}</p>
+            <h4 class="apt-name">
+              {{ memberStore.apartment.name || memberStore.apartment.apartmentName }}
+            </h4>
+            <p class="apt-addr">
+              {{ memberStore.apartment.addr || memberStore.apartment.address }}
+            </p>
             <p class="apt-meta">{{ memberStore.apartment.buildYear }}년 준공</p>
           </div>
           <ApartmentDetailChart v-if="apartment" :aptSeq="memberStore.apartment.aptSeq" />
