@@ -210,9 +210,7 @@ const showApartmentOnMap = (apartmentInfo) => {
           m.marker = newMarker
           m.isHighlighted = false
         }
-        
       }
-
     })
 
     // 현재 클릭된 마커는 다시 생성해서 강조
@@ -424,7 +422,7 @@ const showMultipleApartmentsOnMap = (apartments) => {
     window.kakao.maps.event.addListener(marker, 'click', () => {
       console.log('[KakaoMap] 마커 클릭됨:', apt.name, apt.id)
       showApartmentOnMap(apt)
-      emit('showOnMap', apt) 
+      emit('showOnMap', apt)
       emit('closeDealPanel')
     })
 
