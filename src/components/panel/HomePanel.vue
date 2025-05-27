@@ -263,7 +263,7 @@ onMounted(() => {
 }
 
 .tab-btn.active {
-  color: #4facfe;
+  color: #388e3c;
   border-bottom: 3px solid #4caf50;
 }
 
