@@ -29,7 +29,7 @@ export const useMemberStore = defineStore('member', {
     setAccessToken(token) {
       this.accessToken = token
     },
-    
+
     clearMember() {
       this.name = ''
       this.email = ''
