@@ -239,7 +239,6 @@ const showApartmentOnMap = async (apartmentInfo) => {
     // kakaoMap.setCenter(newPosition)
 
     // 단일 아파트용 깔끔한 인포윈도우 생성
-    console.log('aptId:', apartmentInfo.aptSeq, apartmentInfo.name)
     const singleAptInfoContent = `
 <div style="
   padding: 0; 

@@ -414,7 +414,6 @@ const fetchNearbyCommerces = async (keyword, category) => {
       keyword: keyword || '',
       categoryGroupCode: category || '',
     })
-    console.log('상권정보api호출', result.data)
 
     if (result.status === 200) {
       commerces.value = result.data
