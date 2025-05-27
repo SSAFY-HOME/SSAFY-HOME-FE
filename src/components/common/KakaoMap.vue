@@ -6,9 +6,10 @@
 import { ref, onMounted, onUnmounted, defineExpose } from 'vue'
 import { useMemberStore } from '@/stores/user'
 import { apartmentAPI } from '@/api/apartment'
+import { chatAPI } from '@/api/chat'
 
 const memberStore = useMemberStore()
-const emit = defineEmits(['showOnMap', 'showAllOnMap'])
+const emit = defineEmits(['showOnMap', 'showAllOnMap', 'closeDealPanel'])
 
 let currentInfoWindow = null // 현재 열린 인포윈도우 저장
 let previousApartments = [] // 이전 아파트 목록 저장
@@ -187,7 +188,7 @@ const createCommerceMarker = (commerce) => {
  */
 
 // 단일 아파트를 지도에 표시하는 함수
-const showApartmentOnMap = (apartmentInfo) => {
+const showApartmentOnMap = async (apartmentInfo) => {
   if (!kakaoMap) return
   // 단일 아파트용
   if ('buildYear' in apartmentInfo) {
@@ -238,22 +239,136 @@ const showApartmentOnMap = (apartmentInfo) => {
     // kakaoMap.setCenter(newPosition)
 
     // 단일 아파트용 깔끔한 인포윈도우 생성
+    console.log('aptId:', apartmentInfo.aptSeq, apartmentInfo.name)
     const singleAptInfoContent = `
-    <div style="padding: 10px 15px 35px 15px ; font-size: 13px; max-width: 320px; border-radius: 8px;">
-      <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px; color: #2E7D32;">
-        ${apartmentInfo.name}
+<div style="
+  padding: 0; 
+  font-size: 13px; 
+  max-width: 320px; 
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  overflow: hidden;
+  border: 1px solid #E5E7EB;
+">
+  <!-- 헤더 섹션 -->
+  <div style="
+    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+    padding: 16px 18px;
+    border-bottom: 1px solid #E5E7EB;
+  ">
+    <div style="
+      font-weight: 700; 
+      font-size: 17px; 
+      margin-bottom: 6px; 
+      color: #1E293B;
+      line-height: 1.3;
+    ">
+      ${apartmentInfo.name}
+    </div>
+    <div style="
+      color: #64748B; 
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    ">
+      <span style="color: #94A3B8;">📍</span>
+      ${apartmentInfo.addr}
+    </div>
+  </div>
+
+  <!-- 정보 섹션 -->
+  <div style="padding: 16px 18px;">
+    <div style="
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    ">
+      <div style="
+        background: #FEF3E2;
+        padding: 8px 12px;
+        border-radius: 8px;
+        flex: 1;
+        margin-right: 8px;
+        border: 1px solid #FED7AA;
+      ">
+        <div style="color: #9A3412; font-size: 11px; font-weight: 600; margin-bottom: 2px;">평균가</div>
+        <div style="color: #EA580C; font-weight: 700; font-size: 14px;">
+          ${formatPrice(apartmentInfo.avgPrice)}
+        </div>
       </div>
-      <div style="color: #666; margin-bottom: 4px; font-size: 12px;">
-        📍 ${apartmentInfo.addr}
-      </div>
-      <div style="color: #4B8C3A; font-weight: bold; margin-bottom: 4px;">
-        💰 평균가: ${formatPrice(apartmentInfo.avgPrice)}
-      </div>
-      <div style="color: #666; font-size: 12px;">
-        🏗️ ${apartmentInfo.buildYear}년 준공
+      <div style="
+        background: #F0F9FF;
+        padding: 8px 12px;
+        border-radius: 8px;
+        flex: 1;
+        margin-left: 8px;
+        border: 1px solid #BAE6FD;
+      ">
+        <div style="color: #0C4A6E; font-size: 11px; font-weight: 600; margin-bottom: 2px;">준공년도</div>
+        <div style="color: #0284C7; font-weight: 700; font-size: 14px;">
+          ${apartmentInfo.buildYear}년
+        </div>
       </div>
     </div>
-  `
+
+    <!-- AI 요약 버튼 -->
+    <div style="margin-top: 12px;">
+      <button onclick="loadAISummary(this, '${apartmentInfo.aptSeq}', '${apartmentInfo.name}')" style="
+        width: 100%;
+        background: linear-gradient(135deg, #FFFFF 0%, #4caf50 100%);
+        color: black;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+      " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(99, 102, 241, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(99, 102, 241, 0.2)'">
+        <span>🤖</span>
+        AI 분석 보기
+      </button>
+      
+      <!-- AI 요약 내용 (처음엔 숨김) -->
+      <div id="ai-summary-${apartmentInfo.aptSeq}" style="
+        display: none;
+        background: #FAFAFA;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 8px;
+        animation: fadeIn 0.3s ease;
+      ">
+        <div style="
+          color: #374151; 
+          font-size: 11px; 
+          font-weight: 600; 
+          margin-bottom: 6px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        ">
+          <span style="color: #6366F1;">🤖</span>
+          AI 분석 요약
+        </div>
+        <div id="summary-content-${apartmentInfo.aptSeq}" style="
+          color: #4B5563; 
+          font-size: 12px; 
+          line-height: 1.5;
+          white-space: pre-wrap;
+        ">로딩 중...</div>
+      </div>
+    </div>
+  </div>
+</div>
+`
 
     const singleAptInfoWindow = new window.kakao.maps.InfoWindow({
       content: singleAptInfoContent,
@@ -284,6 +399,65 @@ const showApartmentOnMap = (apartmentInfo) => {
   } else {
     // 🔸 상권 정보인 경우 처리
     showCommerceOnMap(apartmentInfo)
+  }
+}
+// CSS 애니메이션 추가 (페이지 로드 시 한 번만 실행)
+if (!document.getElementById('ai-summary-styles')) {
+  const style = document.createElement('style')
+  style.id = 'ai-summary-styles'
+  style.textContent = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `
+  document.head.appendChild(style)
+}
+// AI 요약을 로딩하는 함수
+window.loadAISummary = async (button, aptSeq, aptName) => {
+  button.disabled = true
+  button.innerHTML = `
+    <span style="
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    "></span>
+    분석 중...
+  `
+
+  try {
+    const summary = await chatAPI.getAptSummary(aptSeq, aptName)
+
+    const summaryDiv = document.getElementById(`ai-summary-${aptSeq}`)
+    const contentDiv = document.getElementById(`summary-content-${aptSeq}`)
+
+    contentDiv.textContent = summary
+    summaryDiv.style.display = 'block'
+
+    button.style.display = 'none'
+  } catch (error) {
+    console.error('AI 요약 로딩 오류:', error)
+
+    const summaryDiv = document.getElementById(`ai-summary-${aptSeq}`)
+    const contentDiv = document.getElementById(`summary-content-${aptSeq}`)
+
+    contentDiv.textContent = '분석을 불러오는데 실패했습니다. 다시 시도해주세요.'
+    summaryDiv.style.display = 'block'
+
+    button.disabled = false
+    button.innerHTML = `
+      <span>🤖</span>
+      AI 분석 보기 (다시 시도)
+    `
   }
 }
 

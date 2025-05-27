@@ -257,10 +257,6 @@
                 </div>
                 <div class="activity-meta">
                   <span class="activity-date">{{ formatDate(post.updateDate) }}</span>
-                  <span class="activity-stats">
-                    <span class="icon">❤️</span> {{ post.like }} <span class="icon ml-2">💬</span>
-                    {{ post.comments }}
-                  </span>
                 </div>
               </div>
             </div>
