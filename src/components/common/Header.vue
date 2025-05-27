@@ -35,6 +35,7 @@
             <RouterLink to="/mypage" class="user-menu-link mypage">마이페이지</RouterLink>
           </template>
           <RouterLink to="/notice" class="user-menu-link">공지사항</RouterLink>
+          <div class="search-toggle"></div>
         </div>
         <!-- 로그아웃 모달 -->
         <teleport to="body">
