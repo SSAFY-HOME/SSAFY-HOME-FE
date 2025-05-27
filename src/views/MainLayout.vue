@@ -45,7 +45,11 @@
         @showAllOnMap="handleShowCommercesOnMap"
       />
 
-      <KakaoMap ref="kakaoMapRef" @show-on-map="handleShowOnMap" @closeDealPanel="closeListingPanel"/>
+      <KakaoMap
+        ref="kakaoMapRef"
+        @show-on-map="handleShowOnMap"
+        @closeDealPanel="closeListingPanel"
+      />
     </div>
 
     <!-- 로그아웃 모달 -->
@@ -118,7 +122,6 @@ const activateMenu = (menuName) => {
   }
 
   activeMenu.value = menuName
-  console.log('활성화된 메뉴:', menuName)
 
   // 메뉴에 따른 컴포넌트 선택
   switch (menuName) {
@@ -174,8 +177,6 @@ const selectedApartment = ref(null)
 const handleViewListings = (apartment) => {
   selectedApartment.value = apartment
   isListingPanelVisible.value = true
-
-  console.log(isCommercePanelVisible.value)
 
   // 상권 패널이 열려있으면 닫기
   if (isCommercePanelVisible.value) {
@@ -240,8 +241,6 @@ const closePanel = () => {
 
 // 지도 관련 핸들러
 const handleShowOnMap = async (apartmentInfo) => {
-  console.log('[MainLayout] showOnMap 받음 → ID:', apartmentInfo.id)
-
   // isListingPanelVisible.value = true
 
   highlightedId.value = apartmentInfo.id
@@ -254,7 +253,6 @@ const handleShowAllOnMap = (apartments) => {
 
 // CommercePanel 관련 함수
 const handleViewCommerces = (locationInfo) => {
-  console.log('주변 상권 보기 요청:', locationInfo)
   selectedLocation.value = locationInfo
   isCommercePanelVisible.value = true
 }
