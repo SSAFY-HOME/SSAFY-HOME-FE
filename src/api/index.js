@@ -7,7 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 20000,
 })
 
 // 요청 인터셉터 - accessToken 붙이기
@@ -19,7 +19,7 @@ api.interceptors.request.use(
     }
     return config
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 )
 
 // 응답 인터셉터 - 자동 재발급 포함
@@ -73,7 +73,7 @@ api.interceptors.response.use(
     // 기타 에러 처리
     console.error('API 요청 실패:', error)
     return Promise.reject(error)
-  }
+  },
 )
 
 export default api

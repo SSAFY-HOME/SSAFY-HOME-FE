@@ -47,4 +47,10 @@ export const chatAPI = {
       }
     }
   },
+  async getAptSummary(aptId, aptName) {
+    const res = await api.get('/chat/summary', {
+      params: { aptId, aptName },
+    })
+    return res.data
+  },
 }
