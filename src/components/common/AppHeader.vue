@@ -35,9 +35,6 @@
             <RouterLink to="/mypage" class="user-menu-link mypage">마이페이지</RouterLink>
           </template>
           <RouterLink to="/notice" class="user-menu-link">공지사항</RouterLink>
-          <button class="search-toggle">
-            <img src="@/assets/search-icon-white.png" alt="Search" class="search-input-icon" />
-          </button>
         </div>
       </div>
     </div>
