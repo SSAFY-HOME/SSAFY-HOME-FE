@@ -111,7 +111,6 @@ const handleLogin = async () => {
     // 로그인 결과 처리
     if (result.status === 200) {
       // 로그인 성공 처리
-      console.log('로그인 성공:', result.message)
       // 로컬 스토리지에 토큰 저장
       localStorage.setItem('isAdmin', user.isAdmin)
       localStorage.setItem('accessToken', user.accessToken)

@@ -48,7 +48,7 @@
             :class="{ selected: selectedApartmentId === apartment.id }"
           >
             <div class="like-btn" @click.stop="toggleLike(apartment)">
-              {{ apartment.likedApt ? '❤️' : '🤍' }}
+              {{ isLiked(apartment) ? '❤️' : '🤍' }}
             </div>
             <div>
               <h4 class="apt-name">{{ apartment.name }}</h4>
@@ -125,11 +125,44 @@ const hideListings = () => {
 }
 
 const viewListings = (apt) => {
-  console.log(`${apt.name}의 매물 리스트 보기 클릭됨`, apartment)
   selectedApartment.value = apt
   selectedApartmentId.value = apt.id
   isViewingListings.value = true
   emit('view-listings', apt)
+}
+
+import { apartmentAPI } from '@/api/apartment'
+
+const isLiked = (apartment) => {
+  return favoriteApartments.value.some((fav) => fav.aptSeq === apartment.aptSeq)
+}
+
+const toggleLike = async (apartment) => {
+  // 현재 좋아요 상태 확인
+  const currentlyLiked = favoriteApartments.value.some((fav) => fav.aptSeq === apartment.aptSeq)
+
+  try {
+    if (currentlyLiked) {
+      // 좋아요 취소
+      await apartmentAPI.unlikeApartment(apartment.aptSeq)
+
+      // 즉시 UI에서 제거 (낙관적 업데이트)
+      favoriteApartments.value = favoriteApartments.value.filter(
+        (fav) => fav.aptSeq !== apartment.aptSeq,
+      )
+    } else {
+      // 좋아요 추가
+      await apartmentAPI.likeApartment(apartment.aptSeq)
+
+      // 위시리스트 새로고침
+      await fetchFavoriteApartments()
+    }
+  } catch (error) {
+    console.error('좋아요 처리 실패:', error)
+
+    // 실패 시 위시리스트 다시 불러와서 정확한 상태로 복원
+    await fetchFavoriteApartments()
+  }
 }
 
 // 🔥 외부에서 호출 가능한 메서드들을 expose

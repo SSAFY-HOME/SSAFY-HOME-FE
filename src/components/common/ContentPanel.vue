@@ -81,7 +81,6 @@ const getPanelTitle = (menu) => {
 watch(
   () => props.activeMenu,
   (newValue) => {
-    console.log('[ContentPanel] props.highlightedId 전달됨:', newValue)
     // 메뉴가 변경될 때 수행할 작업
     // 예: 특정 메뉴 선택 시 추가 데이터 로드 등
   },

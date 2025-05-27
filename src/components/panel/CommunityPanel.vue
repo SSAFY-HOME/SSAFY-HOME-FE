@@ -351,8 +351,6 @@ const updatePost = async () => {
     alert('제목, 내용을 모두 입력해주세요.')
     return
   }
-  //  console.log(editingPost.value.communityId)
-
   try {
     // API 요청 데이터 구성
     const result = await communityAPI.updatePost(

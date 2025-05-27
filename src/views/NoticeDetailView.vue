@@ -74,7 +74,6 @@ const fetchNoticeDetail = async () => {
   try {
     // 공지사항 상세 정보 조회
     notice.value = await noticeAPI.getNoticeDetail(id)
-    console.log(notice.value)
   } catch (err) {
     error.value = '공지사항을 불러오는데 실패했습니다.'
     console.error(err)

@@ -77,7 +77,6 @@ export const noticeAPI = {
 
       // API 요청
       const response = await api.post('/notice', noticeData)
-      console.log(response)
 
       // 서버 응답에서 오류 확인
       if (response === undefined || response === null) {

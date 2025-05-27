@@ -372,8 +372,6 @@ const isKakaoUser = computed(() => user.value.isSocial === true || user.value.so
 
 // 🆕 개선된 프로필 이미지 URL 처리
 const profileImage = computed(() => {
-  console.log('프로필 이미지 확인:', user.value.image)
-
   // 이미지가 있고 유효한 URL인 경우
   if (profImage.value && profImage.value.image !== 'null') {
     return profImage.value
@@ -423,7 +421,6 @@ const handleImageError = (event) => {
 
   imageErrorCount.value.set(imgSrc, currentCount + 1)
 
-  console.log('기본 이미지로 교체:', DEFAULT_PROFILE_IMAGE)
   event.target.src = DEFAULT_PROFILE_IMAGE
 }
 
@@ -496,8 +493,6 @@ const fetchUserProfile = async () => {
   try {
     const response = await memberAPI.getProfile()
     if (response && response.data) {
-      console.log('받은 프로필 데이터:', response.data.image)
-
       user.value = {
         ...response.data,
         image: response.data.image || DEFAULT_PROFILE_IMAGE,
@@ -508,7 +503,6 @@ const fetchUserProfile = async () => {
       }
       profImage.value = response.data.image || DEFAULT_PROFILE_IMAGE
       myApartmentInfo.value = response.data.apartment || {}
-      console.log(response.data.apartment)
 
       // 🆕 이미지 URL 로그 추가
     }
@@ -667,7 +661,6 @@ const deleteUser = async () => {
 
 // 프로필 이미지 관련 함수들
 const openImageModal = () => {
-  console.log('모달 열기 호출됨')
   showImageModal.value = true
   previewImage.value = null
   selectedFile.value = null
@@ -706,7 +699,6 @@ const previewProfileImage = (event) => {
 
   const reader = new FileReader()
   reader.onload = (e) => {
-    console.log('이미지 미리보기 로드:', e.target.result)
     previewImage.value = e.target.result
   }
   reader.readAsDataURL(file)
