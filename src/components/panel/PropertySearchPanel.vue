@@ -136,7 +136,7 @@
           :class="{
             // 'selected-apartment': selectedApartmentId === apartment.id,
             // highlighted: props.highlightedId === apartment.id,
-            highlighted: isActive(apartment)
+            highlighted: isActive(apartment),
           }"
         >
           <!-- 좋아요 버튼 (오른쪽 상단에 배치) -->
@@ -298,7 +298,6 @@ const fetchApartments = async (districtId) => {
 // 좋아요 토글 기능
 const toggleLike = async (apartment) => {
   try {
-    console.log(apartment.aptSeq)
     if (apartment.likedApt) {
       // 좋아요 취소
       await apartmentAPI.unlikeApartment(apartment.aptSeq)
@@ -397,7 +396,6 @@ watch(
   () => props.highlightedId,
   async (newId) => {
     if (!newId) return
-    console.log('[PropertySearchPanel] highlightedId 변경 감지:', newId)
     await nextTick()
 
     const exists = apartments.value.some((apt) => apt.id === newId)
@@ -407,7 +405,6 @@ watch(
     }
 
     const el = document.getElementById(`apt-${newId}`)
-    console.log('[PropertySearchPanel] scroll 대상 DOM:', el)
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
@@ -416,13 +413,12 @@ watch(
 
 // 매물 리스트 보기 함수
 const viewListings = (apartment) => {
-  console.log(`${apartment.name}의 매물 리스트 보기 클릭됨`, apartment)
   // 선택된 아파트 ID 저장
   selectedApartmentId.value = apartment.id
   // 부모 컴포넌트로 선택된 아파트 정보 전달
   emit('view-listings', {
     ...apartment,
-    type : 'apartment',
+    type: 'apartment',
     avgPrice: apartment.avgPrice ?? 0,
     buildYear: apartment.buildYear ?? '',
     latitude: parseFloat(apartment.latitude),

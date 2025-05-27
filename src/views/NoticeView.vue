@@ -153,15 +153,11 @@ const fetchNotices = async () => {
     }
 
     const result = await noticeAPI.getNotices(params)
-    console.log('API 응답 결과:', result)
 
     // 응답 데이터 처리
     notices.value = result.content || []
     totalPages.value = result.totalPages || 1
     totalElements.value = result.totalElements || 0
-
-    console.log('화면에 표시할 공지사항:', notices.value)
-    console.log('전체 항목 수:', totalElements.value)
   } catch (error) {
     console.error('공지사항 불러오기 오류:', error)
     notices.value = []
@@ -175,7 +171,6 @@ const checkIsAdmin = () => {
   const adminValue = localStorage.getItem('isAdmin')
   // adminValue가 "true"인 경우에만 관리자로 설정
   isAdmin.value = adminValue === 'true'
-  console.log(isAdmin.value)
   return isAdmin.value
 }
 

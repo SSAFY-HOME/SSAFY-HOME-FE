@@ -372,8 +372,6 @@ const isKakaoUser = computed(() => user.value.isSocial === true || user.value.so
 
 // 🆕 개선된 프로필 이미지 URL 처리
 const profileImage = computed(() => {
-  console.log('프로필 이미지 확인:', user.value.image)
-
   // 이미지가 있고 유효한 URL인 경우
   if (profImage.value && profImage.value.image !== 'null') {
     return profImage.value
@@ -390,18 +388,6 @@ const previewImageUrl = computed(() => {
   }
   return profileImage.value
 })
-
-// 🆕 이미지 URL 유효성 검사
-const isValidImageUrl = (url) => {
-  if (!url || url === 'null' || url.trim() === '') return false
-  if (url === DEFAULT_PROFILE_IMAGE) return true
-
-  // S3 URL 패턴 검사
-  const s3UrlPattern = /^https:\/\/[^\/]+\.s3\.[^\/]+\.amazonaws\.com\/.+/
-  const httpPattern = /^https?:\/\/.+/
-
-  return s3UrlPattern.test(url) || httpPattern.test(url) || url.startsWith('data:image/')
-}
 
 // 🆕 개선된 이미지 에러 핸들러 (무한루프 방지)
 const handleImageError = (event) => {
@@ -423,7 +409,6 @@ const handleImageError = (event) => {
 
   imageErrorCount.value.set(imgSrc, currentCount + 1)
 
-  console.log('기본 이미지로 교체:', DEFAULT_PROFILE_IMAGE)
   event.target.src = DEFAULT_PROFILE_IMAGE
 }
 
@@ -496,8 +481,6 @@ const fetchUserProfile = async () => {
   try {
     const response = await memberAPI.getProfile()
     if (response && response.data) {
-      console.log('받은 프로필 데이터:', response.data.image)
-
       user.value = {
         ...response.data,
         image: response.data.image || DEFAULT_PROFILE_IMAGE,
@@ -508,7 +491,6 @@ const fetchUserProfile = async () => {
       }
       profImage.value = response.data.image || DEFAULT_PROFILE_IMAGE
       myApartmentInfo.value = response.data.apartment || {}
-      console.log(response.data.apartment)
 
       // 🆕 이미지 URL 로그 추가
     }
@@ -667,7 +649,6 @@ const deleteUser = async () => {
 
 // 프로필 이미지 관련 함수들
 const openImageModal = () => {
-  console.log('모달 열기 호출됨')
   showImageModal.value = true
   previewImage.value = null
   selectedFile.value = null
@@ -706,7 +687,6 @@ const previewProfileImage = (event) => {
 
   const reader = new FileReader()
   reader.onload = (e) => {
-    console.log('이미지 미리보기 로드:', e.target.result)
     previewImage.value = e.target.result
   }
   reader.readAsDataURL(file)
@@ -789,36 +769,6 @@ const saveProfileImage = async () => {
       alert('프로필 이미지 업로드에 실패했습니다. 잠시 후 다시 시도해주세요.')
     }
   }
-}
-
-// 프로필 이미지 삭제
-const removeProfileImage = async () => {
-  if (!confirm('프로필 이미지를 삭제하시겠습니까?')) return
-
-  try {
-    await memberAPI.removeProfileImage()
-
-    // 🔥 로컬 상태 업데이트 개선
-    user.value.image = null // image 필드를 null로 설정
-    previewImage.value = null
-    selectedFile.value = null
-
-    const fileInput = document.getElementById('profile-image-upload')
-    if (fileInput) fileInput.value = ''
-
-    alert('프로필 이미지가 삭제되었습니다.')
-  } catch (error) {
-    console.error('이미지 삭제 오류:', error)
-    alert('이미지 삭제 중 오류가 발생했습니다.')
-  }
-}
-
-const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 onMounted(() => {

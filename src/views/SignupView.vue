@@ -194,7 +194,6 @@ const submitForm = async () => {
 
       // memberAPI를 사용하여 회원가입 요청 전송
       const result = await memberAPI.signUp(userData)
-      console.log(result)
       // 응답 결과에 따른 처리
       if (result.status === 200) {
         // 성공 메시지 표시

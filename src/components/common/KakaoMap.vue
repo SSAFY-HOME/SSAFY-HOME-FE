@@ -291,8 +291,6 @@ const showApartmentOnMap = (apartmentInfo) => {
 const showCommerceOnMap = (commerceInfo) => {
   if (!kakaoMap) return
 
-  console.log('상권정보', commerceInfo)
-
   // 기존 인포윈도우 닫기
   if (currentInfoWindow) {
     currentInfoWindow.close()
@@ -420,7 +418,6 @@ const showMultipleApartmentsOnMap = (apartments) => {
     })
 
     window.kakao.maps.event.addListener(marker, 'click', () => {
-      console.log('[KakaoMap] 마커 클릭됨:', apt.name, apt.id)
       showApartmentOnMap(apt)
       emit('showOnMap', apt)
       emit('closeDealPanel')
