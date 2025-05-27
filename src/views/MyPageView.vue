@@ -389,18 +389,6 @@ const previewImageUrl = computed(() => {
   return profileImage.value
 })
 
-// 🆕 이미지 URL 유효성 검사
-const isValidImageUrl = (url) => {
-  if (!url || url === 'null' || url.trim() === '') return false
-  if (url === DEFAULT_PROFILE_IMAGE) return true
-
-  // S3 URL 패턴 검사
-  const s3UrlPattern = /^https:\/\/[^\/]+\.s3\.[^\/]+\.amazonaws\.com\/.+/
-  const httpPattern = /^https?:\/\/.+/
-
-  return s3UrlPattern.test(url) || httpPattern.test(url) || url.startsWith('data:image/')
-}
-
 // 🆕 개선된 이미지 에러 핸들러 (무한루프 방지)
 const handleImageError = (event) => {
   const imgSrc = event.target.src
@@ -781,36 +769,6 @@ const saveProfileImage = async () => {
       alert('프로필 이미지 업로드에 실패했습니다. 잠시 후 다시 시도해주세요.')
     }
   }
-}
-
-// 프로필 이미지 삭제
-const removeProfileImage = async () => {
-  if (!confirm('프로필 이미지를 삭제하시겠습니까?')) return
-
-  try {
-    await memberAPI.removeProfileImage()
-
-    // 🔥 로컬 상태 업데이트 개선
-    user.value.image = null // image 필드를 null로 설정
-    previewImage.value = null
-    selectedFile.value = null
-
-    const fileInput = document.getElementById('profile-image-upload')
-    if (fileInput) fileInput.value = ''
-
-    alert('프로필 이미지가 삭제되었습니다.')
-  } catch (error) {
-    console.error('이미지 삭제 오류:', error)
-    alert('이미지 삭제 중 오류가 발생했습니다.')
-  }
-}
-
-const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 onMounted(() => {
