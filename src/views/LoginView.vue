@@ -112,7 +112,7 @@ const handleLogin = async () => {
     if (result.status === 200) {
       // 로그인 성공 처리
       // 로컬 스토리지에 토큰 저장
-      localStorage.setItem('isAdmin', user.isAdmin)
+      localStorage.setItem('isAdmin', user.admin)
       localStorage.setItem('accessToken', user.accessToken)
       localStorage.setItem('refreshToken', user.refreshToken)
       localStorage.setItem('isSocial', user.social)

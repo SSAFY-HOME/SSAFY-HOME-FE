@@ -33,7 +33,7 @@
             <div class="message-content">
               <div class="message-header">
                 <span class="sender-name">{{
-                  message.senderType === 'USER' ? '나' : 'AI 비서'
+                  message.senderType === 'USER' ? '💬Me' : '🤖AI 부동산 중개사'
                 }}</span>
                 <span class="message-time">{{ formatDate(message.timestamp) }}</span>
               </div>
