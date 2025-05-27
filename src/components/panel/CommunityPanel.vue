@@ -553,7 +553,7 @@ const onUnmounted = () => {
   background-color: white;
   border-radius: 12px;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   padding: 40px 20px;
   display: flex;
   flex-direction: column;

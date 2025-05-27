@@ -1,11 +1,11 @@
 <template>
-  <div v-if="!isLoggedIn" class="login-overlay">
-    <div class="login-container">
-      <img src="@/assets/toLogin-icon.png" alt="login" class="login-icon" />
-      <h2 class="login-title">로그인이 필요합니다</h2>
-      <p class="login-message">맞춤형 부동산 서비스를 이용하려면 로그인하세요</p>
-      <button class="login-button" @click="goToLogin">로그인 하기</button>
+  <div v-if="!isLoggedIn" class="login-required-container">
+    <div class="login-icon">
+      <img src="@/assets/toLogin-icon.png" alt="toLogin Icon" class="toLogin-icon" />
     </div>
+    <h2 class="login-title">로그인이 필요합니다</h2>
+    <p class="login-message">서비스를 이용하려면 로그인해주세요.</p>
+    <button class="login-button" @click="goToLogin">로그인 하기</button>
   </div>
 
   <div v-else class="myhome-wrapper">
@@ -165,49 +165,72 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
-.login-container {
-  background: white;
-  padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+/* 로그인이 필요한 경우 스타일 */
+.login-required-container {
+  background-color: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  max-width: 400px;
-  width: 90%;
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.5s ease;
 }
 
 .login-icon {
-  width: 100px;
   margin-bottom: 20px;
+  color: #888;
+}
+
+.toLogin-icon {
+  height: 200px;
+  width: 200px;
+  transition: transform 0.3s ease;
+}
+
+.login-icon:hover .toLogin-icon {
+  transform: scale(1.05);
 }
 
 .login-title {
-  font-size: 22px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 600;
   color: #333;
+  margin-bottom: 12px;
 }
 
 .login-message {
-  font-size: 14px;
+  font-size: 16px;
   color: #666;
-  margin: 10px 0 20px;
+  margin-bottom: 30px;
 }
 
 .login-button {
-  padding: 12px 24px;
-  background: #4facfe;
+  padding: 14px 34px;
+  background-color: #4caf50;
   color: white;
   border: none;
-  border-radius: 24px;
-  font-weight: 600;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
 .login-button:hover {
-  background: #00c9fe;
+  background-color: #388e3c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.login-button:active {
+  transform: translateY(0);
 }
 
 .myhome-wrapper {
@@ -241,7 +264,7 @@ onMounted(() => {
 
 .tab-btn.active {
   color: #4facfe;
-  border-bottom: 3px solid #4facfe;
+  border-bottom: 3px solid #4caf50;
 }
 
 .tab-container {
