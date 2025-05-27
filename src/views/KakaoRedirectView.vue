@@ -18,7 +18,7 @@ onMounted(async () => {
     const response = await api.get(`oauth?code=${code}`)
     const user = response.data
 
-    // ✅ 사용자 정보 저장 (예: localStorage)
+    // ✅ 사용자 정보 저장
     localStorage.setItem('email', user.email)
     localStorage.setItem('accessToken', user.accessToken)
     localStorage.setItem('isAdmin', user.admin)
