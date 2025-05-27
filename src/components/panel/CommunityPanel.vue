@@ -8,7 +8,7 @@
     <p class="login-message">프로필 정보를 확인하려면 로그인해주세요.</p>
     <button class="login-button" @click="goToLogin">로그인 하기</button>
   </div>
-  <div v-else>
+  <div class="container" v-else>
     <h3 class="section-title">나의 아파트 커뮤니티</h3>
 
     <div class="community-form">
@@ -133,9 +133,20 @@
             <div class="post-date">{{ formatDate(post.postDate) }}</div>
           </div>
 
-          <div class="post-content" @click="viewPostDetail(post)">
-            <h3 class="post-title">{{ post.title }}</h3>
-            <p class="post-text">{{ truncateText(post.content) }}</p>
+          <div class="post-content">
+            <h3 class="post-title" @click="viewPostDetail(post)">{{ post.title }}</h3>
+            <div class="post-text-container">
+              <p class="post-text" :class="{ expanded: post.isExpanded }">
+                {{ post.isExpanded ? post.content : truncateText(post.content) }}
+              </p>
+              <button
+                v-if="needsTruncation(post.content)"
+                class="expand-button"
+                @click.stop="toggleExpand(post)"
+              >
+                {{ post.isExpanded ? '접기' : '더보기' }}
+              </button>
+            </div>
           </div>
 
           <div class="post-footer">
@@ -244,7 +255,11 @@ const fetchPosts = async () => {
 
   try {
     const result = await communityAPI.getPosts()
-    posts.value = result.data
+    // 각 게시글에 isExpanded 속성 추가
+    posts.value = result.data.map((post) => ({
+      ...post,
+      isExpanded: false,
+    }))
   } catch (error) {
     console.error('커뮤니티 글을 불러오는 중 오류가 발생했습니다:', error)
     posts.value = []
@@ -305,7 +320,10 @@ const submitPost = async () => {
     // 성공 시 처리
     if (result.status === 200) {
       // API 응답 데이터를 사용하여 게시글 목록에 추가
-      const newPostObj = result.data
+      const newPostObj = {
+        ...result.data,
+        isExpanded: false,
+      }
 
       // 목록의 맨 앞에 새 게시글 추가
       posts.value.unshift(newPostObj)
@@ -465,6 +483,18 @@ const truncateText = (text, maxLength = 100) => {
   return text.slice(0, maxLength) + '...'
 }
 
+const needsTruncation = (text, maxLength = 100) => {
+  if (!text) return false
+  return text.length > maxLength
+}
+
+const toggleExpand = (post) => {
+  const postIndex = posts.value.findIndex((p) => p.communityId === post.communityId)
+  if (postIndex !== -1) {
+    posts.value[postIndex].isExpanded = !posts.value[postIndex].isExpanded
+  }
+}
+
 const checkLoginStatus = () => {
   const token = localStorage.getItem('accessToken')
   isLoggedIn.value = !!token
@@ -498,6 +528,10 @@ const onUnmounted = () => {
 <style scoped>
 .community-panel {
   padding: 0;
+}
+
+.container {
+  width: 480px;
 }
 
 .section-title {
@@ -806,7 +840,7 @@ const onUnmounted = () => {
   flex-direction: column;
   border-radius: 5px;
   overflow: hidden;
-  height: 200px;
+  min-height: 200px; /* height을 min-height로 변경 */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   background-color: #fff;
   transition:
@@ -876,6 +910,35 @@ const onUnmounted = () => {
   font-size: 14px;
   color: #555;
   line-height: 1.5;
+  white-space: pre-wrap; /* 줄바꿈 유지 */
+  word-wrap: break-word; /* 긴 단어 줄바꿈 */
+  margin: 0;
+  transition: max-height 0.3s ease;
+}
+
+.post-text.expanded {
+  /* 확장된 상태에서는 제한 없음 */
+}
+
+.post-text-container {
+  position: relative;
+}
+
+.expand-button {
+  background: none;
+  border: none;
+  color: #4caf50;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 0;
+  margin-top: 8px;
+  transition: color 0.2s ease;
+}
+
+.expand-button:hover {
+  color: #388e3c;
+  text-decoration: underline;
 }
 
 .post-footer {
