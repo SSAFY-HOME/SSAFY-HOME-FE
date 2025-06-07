@@ -1,35 +1,168 @@
-# SSAFY-HOME-FE
+# ZIPZIP : SSAFYHOME Final Project
 
-This template should help get you started developing with Vue 3 in Vite.
+> **"당신의 완벽한 주거공간을 찾아드립니다"**
 
-## Recommended IDE Setup
+ZIPZIP은 분산된 부동산 정보를 통합하고, 허위매물 탐지와 입지 평가, AI 요약 기술을 기반으로 한 실용적인 부동산 탐색 플랫폼입니다. 실거래가와 등기 데이터, 상권, 학군, 커뮤니티, 뉴스 정보를 통합하고, 사용자에게 맞춤형 주거정보를 제공합니다.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+---
 
-## Customize configuration
+## 🔍 프로젝트 개요
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+* **프로젝트명** : ZIPZIP
+* **참여 인원** : 2명 (김소연, 곽민주)
+* **진행 기간** : 2025.05.03 \~ 2025.05.27
+* **기술 스택**
 
-## Project Setup
+  * **Frontend**: Vue 3, Vite, Pinia, Kakao Map API
+  * **Backend**: Spring Boot, MyBatis, Spring AI, JWT, Redis
+  * **AI**: RAG 기반 챗봇 + 요약 모델
+  * **Database**: MySQL
+  * **Infra**: AWS EC2, S3, Docker, Vercel, Nginx
 
-```sh
-npm install
-```
+* **배포된 웹사이트 URL** : [zipzip](https://ssafy-home-fe.vercel.app/)
+---
 
-### Compile and Hot-Reload for Development
+## 📌 기획 배경 및 문제 인식
 
-```sh
-npm run dev
-```
+### 1. 분산된 정보
 
-### Compile and Minify for Production
+* 실거래가, 등기, 학군, 상권, 뉴스가 각각 다른 플랫폼에 흩어져 있음
+* 사용자 입장에서 종합적인 판단이 어려움
 
-```sh
-npm run build
-```
+### 2. 허위 매물 존재
 
-### Lint with [ESLint](https://eslint.org/)
+* 실거래가만으로는 소유권 이전 여부 확인 불가
+* 법원 등기 시스템에 따로 접속해야 검증 가능
 
-```sh
-npm run lint
-```
+### 3. 맞춤형 정보 부족
+
+* 사용자 조건 기반의 정보 제공 미흡
+* 사용자가 직접 발품 팔며 매물을 선별해야 함
+
+---
+
+## 🚀 핵심 차별화 포인트
+
+### ✅ 등기 정보 기반 허위매물 탐지
+
+* 실거래가 + 등기 비교로 위험도 시각화
+* 위조 매물 여부를 정량화하여 시각적 판단 제공
+
+### ✅ 상권 점수 기반 입지 평가
+
+* 주변 상권(음식점, 학원, 공공기관 등) 기반 상권 점수 산출
+* 단순 위치정보를 넘어서 "살기 좋은 곳" 기준으로 추천 가능
+
+### ✅ AI 뉴스 요약
+
+* 부동산 뉴스를 3줄 이내로 요약
+* 최신 시세/이슈/정책 동향을 빠르게 파악 가능
+
+### ✅ AI 기반 챗봇 기능
+
+* 조건 기반 아파트 추천 (ex. "광주 북구에서 최근 거래가 높은 아파트 추천해줘")
+* 커뮤니티 & 상권 요약 + 실거래가/등기 비교 결과를 종합한 요약 생성
+
+---
+
+## 📁 프로젝트 폴더 구조
+
+### 📦 Backend (Java Spring Boot)
+
+* com.ssafy.project.apartment: 아파트 도메인 전반 (controller, domain, repository, service)
+* com.ssafy.project.chat, community, deal, kakao, news 등: 각각의 도메인 모듈화
+* resources/mappers: MyBatis XML Mapper 파일들
+* resources/application.properties, rag\_data, static.uploads 포함
+
+### 🖼 Frontend (Vue 3)
+
+* components/chart, common, panel: 기능별 UI 컴포넌트 분리
+* views: 페이지 단위 구성 (HomeView, NoticeView 등)
+* router, stores: 라우팅 및 상태 관리 구성
+
+---
+
+## 🧾 요구사항 정의서 (Use Case Diagram)
+
+* 사용자: 로그인, 매물 탐색, 관심 목록, AI 뉴스 요약, AI 부동산 중개사, 커뮤니티 확인, 거래 등록 등
+* 관리자: 공지사항 관리, 사용자 관리
+
+---
+
+## 🧩 ERD (Entity-Relationship Diagram)
+
+* 주요 테이블: apartment, member, deal, registry, community, chat, notice, risk, like 등
+* 관계: 아파트 기준으로 커뮤니티·거래·등기·채팅 정보 연동
+
+---
+
+## 💡 주요 기능 요약
+
+| 기능명          | 설명                                     |
+| ------------ | -------------------------------------- |
+| 실거래 데이터 + 등기 데이터터 비교 | 동일 아파트에 대한 실거래가와 등기 유무를 비교하여 허위매물 탐지   |
+| 지역 상권 점수 시각화 | Kakao Map 기반 상권 정보 분석 후 입지 점수 계산 및 시각화 |
+| 뉴스 요약        | AI 기반 최신 부동산 뉴스 요약 기능 (Spring AI 사용)   |
+| 커뮤니티 분석      | 아파트별 커뮤니티 글 수집 후 요약해 거주자 평판 제공         |
+| AI 아파트 요약    | 거래내역 + 커뮤니티 + 상권 정보를 기반으로 종합 요약 생성     |
+| 챗봇           | 사용자의 질문을 분석해 아파트 추천 및 요약형 정보 제공        |
+
+기능 시연 영상 link : [zipzip](https://www.youtube.com/watch?v=6d4JpQGmMJ0)
+
+---
+
+## 🧠 AI 구현방안 및 프롬프트 전략
+
+* **뉴스 요약**
+
+  * 프롬프트: "다음 내용을 3줄 이내로 요약해줘"
+  * 모델: Spring AI + RAG
+
+* **아파트 요약**
+
+  * 프롬프트: "상권 정보, 커뮤니티 요약, 거래내역을 기반으로 아파트 장단점 정리"
+  * 기능 흐름: 아파트 정보 수집 → 상권/커뮤니티 통합 → 프롬프트 생성 → 요약 결과 전달
+
+* **챗봇 기반 추천 응답**
+
+  * 프롬프트: “광주 북구에서 최근 거래가 많은 아파트 3곳 알려줘” → 거래 데이터 분석 후 정렬 응답
+
+---
+
+## 🛠️ 시스템 아키텍처
+
+* 프론트: Vercel에서 Vue 앱 배포
+* 백엔드: Spring Boot 앱을 Docker로 컨테이너화하여 EC2 배포
+* 데이터베이스: MySQL + Redis (세션, 벡터 저장)
+* 파일 업로드: Amazon S3 + presigned URL 방식
+* API Gateway: Nginx 사용
+
+---
+
+## 📈 성과 및 기대 효과
+
+* **입지 기반 추천 구현** → 실거래가 + 상권 정보 기반으로 신뢰도 높은 추천 제공
+* **AI 요약 기술 실현** → 정보 과잉을 해결하고 빠른 인사이트 제공
+* **허위매물 탐지 기능 구현** → 등기 기반 허위 거래 위험도 분석
+* **분산 정보 통합 플랫폼 완성** → 실거래가, 등기, 학군, 상권, 뉴스 통합 제공
+
+---
+
+## ✨ 향후 발전 방향
+
+* 거래 패턴 기반 AI 추천 고도화
+* 사기 가능성 판단 모델 학습 적용
+* 사용자 활동 기반 개인화 추천 시스템 강화
+
+---
+
+## 📬 Contact
+
+| 이름  | 역할               | GitHub                                         |
+| --- | ---------------- | ---------------------------------------------- |
+| 김소연 | AI/백엔드/프론트엔드/데이터 파이프라인/디자인 | [github.com/soyeon](https://github.com/soyuuuuuni) |
+| 곽민주 | AI/백엔드/프론트엔드/데이터 파이프라인/디자인/배포     | [github.com/minju](https://github.com/MinjuKwak01)   |
+
+---
+
+> ZIPZIP은 부동산 정보를 수집하는 것을 넘어, 사용자가 스스로 검증하고 판단할 수 있도록 돕는 "정보 주도형 탐색 플랫폼"입니다.
